@@ -26,7 +26,7 @@ Converts a graph from COO (Coordinate) format to CSR (Compressed Sparse Row) for
 
 #### Inputs
 - **`edge_index` (Var)**: The indices of the edges in the COO format. It is expected to be a 2D Var where each column represents an edge, with the first row containing source nodes and the second row containing destination nodes.
-- **`edge_weight` (Var)**: The weights of the edges in the COO format. It is a 1D Var where each element represents the weight of the corresponding  edge. if `edge_weight` is empty, weights do not need to be computed
+- **`edge_weight` (Var)**: The weights of the edges in the COO format. It is a 1D Var where each element represents the weight of the corresponding  edge. If `edge_weight` is empty, weights do not need to be computed
 - **`v_num` (int)**: The number of vertices in the graph.
 
 #### Outputs
@@ -36,8 +36,9 @@ Returns a CSR representation of the graph, which includes column indices, row of
 Converts a graph from COO (Coordinate) format to CSC (Compressed Sparse Column) format.
 
 #### Inputs
-- **`edge_index` (Var)**: The indices of the edges in the COO format. Each tuple represents an edge, with the first element being the source node and the second element being the destination node.
-- **`edge_weight` (Var)**: The weights of the edges in the COO format. Each element represents the weight of the corresponding edge.if `edge_weight` is empty, weights do not need to be computed
+- **`edge_index` (Var)**: The indices of the edges in the COO format. It is expected to be a 2D Var where each column represents an edge, with the first row containing source nodes and the second row containing destination nodes.
+
+- **`edge_weight` (Var)**: The weights of the edges in the COO format. It is a 1D Var where each element represents the weight of the corresponding edge.If `edge_weight` is empty, weights do not need to be computed
 - **`v_num` (int)**: The number of vertices in the graph.
 
 #### Outputs
