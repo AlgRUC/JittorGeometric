@@ -8,7 +8,7 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid # 利用Planetoid类可以处理三个数据集，分别为“Cora”、“CiteSeer”和“PubMed”
+from jittor_geometric.datasets import Planetoid
 import jittor_geometric.transforms as T
 from jittor_geometric.nn import GCNConvNts
 import time
@@ -61,7 +61,6 @@ data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
 
-# GDC（Graph Diffusion Convolution，图扩散卷积）是一种图数据的预处理方法，旨在改进图卷积网络（GCN）的性能。
 if args.use_gdc:
     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
                 normalization_out='col',
@@ -81,45 +80,11 @@ jt.flags.lazy_execution = 0
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         False, True)
-# print(max(edge_weight))
-# abs_weight=edge_weight.abs().sum()
-# print(abs_weight)
-
-
-
-# def coo_to_csc(edge_index, edge_weight, v_num):
-#     csc_edge_weight = jt.randn(jt.size(edge_index, 1))
-#     row_indices = jt.zeros((jt.size(edge_index, 1),), dtype='int32')
-#     column_offset = jt.zeros((v_num+1,), dtype='int32')
-#     csc_op = jt.compile_custom_op(header_csc, src_csc, "cootocsc", warp=False)
-#     csc_op(edge_index, edge_weight, row_indices, column_offset, csc_edge_weight, v_num, 'float32').fetch_sync()
-#     csc=CSC(row_indices, column_offset, csc_edge_weight)
-#     return csc
-
-# def coo_to_csr(edge_index, edge_weight, v_num):
-#     csr_edge_weight = jt.randn(jt.size(edge_index, 1))
-#     column_indices = jt.zeros((jt.size(edge_index, 1),), dtype='int32')
-#     row_offset = jt.zeros((v_num+1,), dtype='int32')
-#     csr_op = jt.compile_custom_op(header_csr, src_csr, "cootocsr", warp=False)
-#     csr_op(edge_index, edge_weight, column_indices,row_offset, csr_edge_weight, v_num, 'float32').fetch_sync()
-#     csr=CSR(column_indices, row_offset, csr_edge_weight)
-#     return csr
-
 
 
 with jt.no_grad():
     data.csc = cootocsc.cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr.cootocsr(edge_index, edge_weight, v_num)
-# abs_weight=data.csc.edge_weight.abs().sum()
-# print(abs_weight)
-# print("CSC Edge Weight:", data.csc.edge_weight)
-# print("Row Indices:", data.csc.row_indices)
-# print("Column Offset:", data.csc.column_offset)
-
-# print("CSR Edge Weight:", data.csr.edge_weight)
-# print("Column Indices:", data.csr.column_indices)
-# print("Row Offset:", data.csr.row_offset)
-
 
 class Net(nn.Module):
     def __init__(self):
