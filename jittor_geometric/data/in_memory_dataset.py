@@ -91,17 +91,14 @@ class InMemoryDataset(Dataset):
             start, end = slices[idx].item(), slices[idx + 1].item()
             print(key)
             if isinstance(item, Var):
-                # print(1)
                 s = list(repeat(slice(None), item.ndim))
                 cat_dim = self.data.__cat_dim__(key, item)
                 if cat_dim is None:
                     cat_dim = 0
                 s[cat_dim] = slice(start, end)
             elif start + 1 == end:
-                # print(2)
                 s = slices[start]
             else:
-                # print(3)
                 s = slice(start, end)
             data[key] = item[tuple(s)]
 

@@ -35,10 +35,8 @@ class MessagePassing(Module):
         self.inspector.inspect(self.message)
         self.inspector.inspect(self.aggregate, pop_first=True)
         self.inspector.inspect(self.update, pop_first=True)
-        # print(self.special_args) {'size', 'edge_index', 'index', 'ptr', 'edge_index_j', 'edge_index_i', 'size_i', 'dim_size', 'adj_t', 'size_j'}
         self.__user_args__ = self.inspector.keys(
-            ['message', 'aggregate', 'update']).difference(self.special_args) # difference返回两个集合之间的差集，即存在于第一个集合但不存在于第二个集合的元素
-        # print(self.__user_args__) {'edge_weight', 'x_j'}
+            ['message', 'aggregate', 'update']).difference(self.special_args) 
 
     def __check_input__(self, edge_index, size):
         the_size: List[Optional[int]] = [None, None]
@@ -76,7 +74,6 @@ class MessagePassing(Module):
 
         out = {}
         for arg in args:
-            # print(arg) edge_weight x_j
             if arg[-2:] not in ['_i', '_j']:
                 out[arg] = kwargs.get(arg, Parameter.empty)
             else:
@@ -97,7 +94,6 @@ class MessagePassing(Module):
                 out[arg] = data
 
         if isinstance(edge_index, Var):
-            # print("isinstance") # 每个epoch调用了4次
             out['adj_t'] = None
             out['edge_index'] = edge_index
             out['edge_index_i'] = edge_index[i]
@@ -117,24 +113,13 @@ class MessagePassing(Module):
         size = self.__check_input__(edge_index, size)
 
         if isinstance(edge_index, Var):
-            # print(self.__user_args__) {'x_j', 'edge_weight'}
             coll_dict = self.__collect__(self.__user_args__, edge_index, size,
                                          kwargs)
-            # print(coll_dict)# 返回字典，输出内容在collect函数的out里
-            # print(coll_dict.keys()) dict_keys(['x_j', 'edge_weight', 'adj_t', 'edge_index', 'edge_index_i', 'edge_index_j', 'ptr', 'index', 'size', 'size_i', 'size_j', 'dim_size'])
             msg_kwargs = self.inspector.distribute('message', coll_dict) 
-            # print(msg_kwargs.keys()) dict_keys(['x_j', 'edge_weight'])
-            # print(msg_kwargs.shape) # 到这只剩x_j了
             out = self.message(**msg_kwargs) 
             aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
-            # print(aggr_kwargs.keys()) dict_keys(['index', 'ptr', 'dim_size'])
-            # print(out)
-            # print(out.shape) [13566,16,] [13566,7,]
             out = self.aggregate(out, **aggr_kwargs)
-            # print(out)
-            # print(out.shape) [2708,16,] [2708,7,]
             update_kwargs = self.inspector.distribute('update', coll_dict)
-            # print(update_kwargs.keys()) dict_keys([]) 啥也没做
             return self.update(out, **update_kwargs)
 
     def message(self, x_j: Var) -> Var:
@@ -152,11 +137,8 @@ class MessagePassing(Module):
     def aggregate(self, inputs: Var, index: Var,
                   ptr: Optional[Var] = None,
                   dim_size: Optional[int] = None) -> Var:
-        # return input
         shape = list(inputs.shape)
-        # print(shape) # [13566, 16]  [13566, 7]
         shape[self.node_dim] = dim_size
-        # print(dim_size) 2708
         out = jt.zeros(shape)
 
         return jt.scatter(out, 0, index, src=inputs, reduce=self.aggr)

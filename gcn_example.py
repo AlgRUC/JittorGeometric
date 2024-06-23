@@ -21,37 +21,8 @@ dataset = 'Cora'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
-# add by lusz
-total_forward_time = 0.0
-total_backward_time = 0.0
-# print(type(data))
-# print(dataset[0])  Data(edge_index=[2, 10858], test_mask=[2708], train_mask=[2708], val_mask=[2708], x=[2708, 1433], y=[2708])
 
-# print(data.edge_index)
-# jt.Var([[   0    0    0 ... 2707 2707 2707]
-        # [ 633 1862 2582 ...  165 1473 2706]], dtype=int32) 第一行为source,第二行为dist
-    
-# print(data.x) 
-# jt.Var([[0. 0. 0. ... 0. 0. 0.]
-#         [0. 0. 0. ... 0. 0. 0.]
-#         [0. 0. 0. ... 0. 0. 0.]
-#         ...
-#         [0. 0. 0. ... 0. 0. 0.]
-#         [0. 0. 0. ... 0. 0. 0.]
-#         [0. 0. 0. ... 0. 0. 0.]], dtype=float32)
 
-# print(data.y) jt.Var([3 4 4 ... 3 3 3], dtype=int32)
-
-# print(data.edge_attr)
-
-# print(data.train_mask)
-# print(data.val_mask)
-# print(data.test_mask)
-# jt.Var([ True  True  True ... False False False], dtype=bool)
-# jt.Var([False False False ... False False False], dtype=bool)
-# jt.Var([False False False ...  True  True  True], dtype=bool)
-
-# GDC（Graph Diffusion Convolution，图扩散卷积）是一种图数据的预处理方法，旨在改进图卷积网络（GCN）的性能。
 if args.use_gdc:
     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
                 normalization_out='col',

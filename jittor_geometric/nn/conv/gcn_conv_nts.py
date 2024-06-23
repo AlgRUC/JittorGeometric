@@ -79,7 +79,6 @@ class GCNConvNts(MessagePassingNts):
     def reset_parameters(self):
         glorot(self.weight)
         zeros(self.bias)
-        # self._cached_edge_index = None
         self._cached_adj_t = None
         self._cached_csc=None
 
@@ -94,17 +93,9 @@ class GCNConvNts(MessagePassingNts):
             else:
                 csc = cache
         
-        # print("before nn")
-        # abs_x=x.abs().sum()
-        # print(abs_x)
+
         x = x @ self.weight
-        # print("after nn")
-        # abs_x=x.abs().sum()
-        # print(abs_x)
         out = self.propagate(x=x, csc=csc,csr=csr,size=None)
-        # abs_x=out.abs().sum()
-        # print("after graph")
-        # print(abs_x)
         if self.bias is not None:
             out += self.bias
     
@@ -113,45 +104,8 @@ class GCNConvNts(MessagePassingNts):
     def scatter_to_edge(self, x, csc):
         v_num=jt.size(x,0)
         feature_dim=jt.size(x,1)
-        # print(x.shape)
         # result=jt.zeros((v_num,feature_dim))
-        result=addone(x,1,v_num*feature_dim)
-        # my_op = jt.compile_custom_op(header_add, src_add, "addone", warp=False)
-        # my_op(result,x,2.0,v_num*feature_dim,'float32').fetch_sync() 
-        # edge_num=jt.size(csc.edge_weight,0)
-        # feature_dim=jt.size(x,1)
-        # # print(type(feature_dim))
-        # result = jt.zeros((edge_num,feature_dim))
-        # my_op = jt.compile_custom_op(header_col, src_col, "colassign", warp=False)
-        # for i in range(edge_num):
-        #     # print(i)
-        #     row=int(csc.row_indices[i])
-        #     my_op(result,x,i,row,feature_dim,'float32').fetch_sync() 
-
-        #     # print(2)
-        # # for col in range(len(csc.column_offset) - 1):
-        # #     start = csc.column_offset[col]
-        # #     end = csc.column_offset[col + 1]
-        # #     for i in range(start, end):
-        # #         row = csc.row_indices[i]
-        # #         result[row] = x[col]
-        
-        # return result
-    
-    # def scatter_to_vertex(self,x,csc):
-    #     num_vertices = jt.size(csc.column_offset,0) - 1
-    #     vertex_features = jt.zeros((num_vertices, jt.size(x,1)))
-    #     for col in range(num_vertices):
-    #         start = csc.column_offset[col]
-    #         end = csc.column_offset[col + 1]
-    #         for i in range(start, end):
-    #             vertex_features[col] += x[i] * csc.edge_weight[i]
-    #     # print(jt.size(vertex_features))
-    #     return vertex_features
-        
-    
-    # def edge_forward(self,x_j:Var)->Var:
-    #     return x_j
+        # result=addone(x,1,v_num*feature_dim) test 
 
     def __repr__(self):
         return '{}({}, {})'.format(self.__class__.__name__, self.in_channels,

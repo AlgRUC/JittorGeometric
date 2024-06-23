@@ -86,22 +86,13 @@ class GCNConv(MessagePassing):
             if isinstance(edge_index, Var):
                 cache = self._cached_edge_index
                 if cache is None:
-                    # print(x.size(self.node_dim))
-                    # print(edge_index)
-                    # print(edge_weight)
                     edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight, x.size(self.node_dim),
                         self.improved, self.add_self_loops)
-                    # print(max(edge_weight)) 0.49999
-                    # abs_weight=edge_weight.abs().sum()
-                    # print(abs_weight)
                     if self.cached:
-                        # print("self_cache")
                         self._cached_edge_index = (edge_index, edge_weight)
                 else:
-                    # print("use_cache") 用的这个
-                    edge_index, edge_weight = cache[0], cache[1] # cache edge_index和edge_weight
-        # print(max(edge_weight))0.49999999
+                    edge_index, edge_weight = cache[0], cache[1]
         print("before nn")
         abs_x=x.abs().sum()
         print(abs_x)
@@ -109,8 +100,6 @@ class GCNConv(MessagePassing):
         print("after nn")
         abs_x=x.abs().sum()
         print(abs_x)
-        # print(edge_index.shape) #[2,13566,]
-        # print(edge_weight.shape) #[13566,]
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
                              size=None)
         print("after graph")
@@ -121,8 +110,7 @@ class GCNConv(MessagePassing):
         return out
 
     def message(self, x_j: Var, edge_weight: OptVar) -> Var:
-        # print(x_j.shape) [13566,16,] [13566,7,]
-        return x_j if edge_weight is None else edge_weight.view(-1, 1) * x_j # 将 edge_weight 调整为一列
+        return x_j if edge_weight is None else edge_weight.view(-1, 1) * x_j
 
 
     def __repr__(self):
