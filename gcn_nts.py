@@ -53,6 +53,7 @@ parser.add_argument('--use_gdc', action='store_true',
 args = parser.parse_args()
 
 dataset = 'Cora'
+# dataset = 'Citeseer'
 # dataset='PubMed'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
