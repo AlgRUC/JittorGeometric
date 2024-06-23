@@ -16,10 +16,9 @@ num_nodes (int, optional) – The number of nodes, i.e. max(edge_index) + 1. (de
 **Return**:  
 Var if edge_attr is not passed, else (Var, Optional[Val] or List[Var]])
 
-<strong><span style="color: #4B4B4B;">Already completed, please refer to  jittor_geometric.ops.toundirected 
-<span></strong>
-
-<strong><span style="color: #4B4B4B;">Lusz 2024.6.23
+><strong><span style="color: #4B4B4B;">Already completed, please refer to  `jittor_geometric.ops.toundirected `
+<span></strong><br>
+><strong><span style="color: #4B4B4B;">Lusz 2024.6.23
 <span></strong>
 
 
