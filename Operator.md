@@ -1,3 +1,8 @@
+<!--
+ * @Description: 
+ * @Author: lusz
+ * @Date: 2024-06-22 20:01:47
+-->
 ## JittorGeometric需要的算子，明确输入和输出
 
 #### 1.to_undirected(edge_index: Var, edge_attr: Union[Var,None,List[Var]], num_nodes: Optional[int])→ Union[Var,Tuple[Var,List[Var]]]
@@ -10,6 +15,9 @@ num_nodes (int, optional) – The number of nodes, i.e. max(edge_index) + 1. (de
 
 **Return**:  
 Var if edge_attr is not passed, else (Var, Optional[Val] or List[Var]])
+
+<strong><span style="background-color: yellow;">Already completed, please refer to  jittor_geometric.ops.toundirected <span></strong>
+
 
 #### 2. SparseTensor.random_walk() / random_walk(src: SparseTensor, start: torch.Tensor, walk_length: int) -> torch.Tensor
 Generates the random walks on graph **src**, starting from **start**, yielding a len(start) * (walk_length + 1) tensor.
