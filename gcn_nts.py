@@ -84,8 +84,8 @@ edge_index, edge_weight = gcn_norm(
 
 
 with jt.no_grad():
-    data.csc = cootocsc.cootocsc(edge_index, edge_weight, v_num)
-    data.csr = cootocsr.cootocsr(edge_index, edge_weight, v_num)
+    data.csc = cootocsc(edge_index, edge_weight, v_num)
+    data.csr = cootocsr(edge_index, edge_weight, v_num)
 
 class Net(nn.Module):
     def __init__(self):

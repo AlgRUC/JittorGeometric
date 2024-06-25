@@ -89,7 +89,6 @@ class InMemoryDataset(Dataset):
                 continue
             item, slices = self.data[key], self.slices[key]
             start, end = slices[idx].item(), slices[idx + 1].item()
-            print(key)
             if isinstance(item, Var):
                 s = list(repeat(slice(None), item.ndim))
                 cat_dim = self.data.__cat_dim__(key, item)

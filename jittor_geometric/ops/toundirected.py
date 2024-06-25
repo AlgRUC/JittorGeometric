@@ -9,8 +9,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 module_path = os.path.dirname(__file__)
-src = os.path.join(module_path, "toundirected_op.cc")
-header = os.path.join(module_path, "toundirected_op.h")
+src = os.path.join(module_path, "cpp/toundirected_op.cc")
+header = os.path.join(module_path, "cpp/toundirected_op.h")
 toundirected_op = jt.compile_custom_ops((src, header))
 
 def toUndirected(edge_index, edge_attr,num_nodes):

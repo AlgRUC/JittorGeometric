@@ -12,8 +12,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from jittor_geometric.data import CSR
 module_path = os.path.dirname(__file__)
 # print(module_path)
-src = os.path.join(module_path, "cootocsr_op.cc")
-header = os.path.join(module_path, "cootocsr_op.h")
+src = os.path.join(module_path, "cpp/cootocsr_op.cc")
+header = os.path.join(module_path, "cpp/cootocsr_op.h")
 
 cootocsr_op = jt.compile_custom_ops((src, header))
 

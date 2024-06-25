@@ -8,8 +8,8 @@ import os
 from jittor import nn
 from jittor import Function
 module_path = os.path.dirname(__file__)
-src = os.path.join(module_path, "addone_op.cc")
-header = os.path.join(module_path, "addone_op.h")
+src = os.path.join(module_path, "cpp/addone_op.cc")
+header = os.path.join(module_path, "cpp/addone_op.h")
 addone_op = jt.compile_custom_ops((src, header))
 
 class AddoneFunc(Function):

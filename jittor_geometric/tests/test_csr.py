@@ -10,8 +10,8 @@ current_file_path = os.path.abspath(__file__)
 test_path = os.path.dirname(current_file_path)
 module_path = os.path.dirname(test_path)
 # print(module_path)
-src = os.path.join(module_path, "ops/cootocsr_op.cc")
-header = os.path.join(module_path, "ops/cootocsr_op.h")
+src = os.path.join(module_path, "ops/cpp/cootocsr_op.cc")
+header = os.path.join(module_path, "ops/cpp/cootocsr_op.h")
 # print(header)
 def test_coo_to_csr():
     jt.flags.use_cuda = 0

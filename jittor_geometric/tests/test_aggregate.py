@@ -14,8 +14,8 @@ current_file_path = os.path.abspath(__file__)
 test_path = os.path.dirname(current_file_path)
 module_path = os.path.dirname(test_path)
 # print(module_path)
-src = os.path.join(module_path, "ops/aggregate_op.cc")
-header = os.path.join(module_path, "ops/aggregate_op.h")
+src = os.path.join(module_path, "ops/cpp/aggregate_op.cc")
+header = os.path.join(module_path, "ops/cpp/aggregate_op.h")
 
 aggregate_op = jt.compile_custom_ops((src, header))
 # Run the test
