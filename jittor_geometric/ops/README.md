@@ -4,8 +4,8 @@
  * @Date: 2024-06-22 19:37:27
 -->
 ## Operator Files
-- `xxxx_op.h`: Operator header file
-- `xxxx_op.cc`: Specific implementation of the operator
+- `cpp/xxxx_op.h`: Operator header file
+- `cpp/xxxx_op.cc`: Specific implementation of the operator
 - `xxxx.py`: Python program wrapping the operator
 
 ## Invocation Method
@@ -16,11 +16,9 @@ from jittor_geometric.ops import xxxx
 ### Example
 ```python
 from jittor_geometric.ops import cootocsr
-
-data.csr = cootocsr.cootocsr(edge_index, edge_weight, v_num)
+data.csr = cootocsr(edge_index, edge_weight, v_num)
 ```
 ## Usage of Each Operator
-
 ### 1. `cootocsr`
 Converts a graph from COO (Coordinate) format to CSR (Compressed Sparse Row) format.
 
