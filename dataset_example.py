@@ -3,7 +3,7 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork,WebKB
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork,WebKB, OGBNodePropPredDataset
 import jittor_geometric.transforms as T
 
 jt.flags.use_cuda = 1
@@ -25,6 +25,8 @@ elif dataset in ['chameleon', 'squirrel']:
     dataset = WikipediaNetwork(path, dataset, geom_gcn_preprocess=False)
 elif dataset in ['texas', 'wisconsin', 'cornell']:
     dataset = WebKB(path, dataset)
+elif dataset in ['ogbn-arxiv']:
+    dataset = OGBNodePropPredDataset(name=dataset, root=path)
 
 data = dataset[0]
 print(data)
