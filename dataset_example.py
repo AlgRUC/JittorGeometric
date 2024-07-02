@@ -3,10 +3,10 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork,WebKB, OGBNodePropPredDataset
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork,WebKB, OGBNodePropPredDataset, JODIEDataset
 import jittor_geometric.transforms as T
 
-jt.flags.use_cuda = 1
+jt.flags.use_cuda = 0
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
@@ -27,6 +27,9 @@ elif dataset in ['texas', 'wisconsin', 'cornell']:
     dataset = WebKB(path, dataset)
 elif dataset in ['ogbn-arxiv']:
     dataset = OGBNodePropPredDataset(name=dataset, root=path)
+elif dataset in ['reddit', 'wikipedia', 'mooc', 'lastfm']:
+    dataset = JODIEDataset(path, name=dataset)
+
 
 data = dataset[0]
 print(data)

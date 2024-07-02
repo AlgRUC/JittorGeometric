@@ -10,6 +10,8 @@
 * Amazon
 * Geom-GCN (Wikipedia, WebKB)
 * ogb
+此外，还包括动态图中链接预测任务的以下数据集
+* JODIE (Wikipedia, Reddit, MOOC, LastFM)
 
 # 目前的代码结构
 Project
