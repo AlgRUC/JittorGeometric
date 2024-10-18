@@ -3,7 +3,7 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork,WebKB, OGBNodePropPredDataset, JODIEDataset
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, GeomGCN, OGBNodePropPredDataset, JODIEDataset, LINKXDataset
 import jittor_geometric.transforms as T
 
 jt.flags.use_cuda = 0
@@ -16,15 +16,19 @@ args = parser.parse_args()
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 
-dataset = args.dataset
+dataset = args.dataset.lower()
+
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['cora', 'citeseer', 'pubmed']:
     dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['chameleon', 'squirrel']:
     dataset = WikipediaNetwork(path, dataset, geom_gcn_preprocess=False)
-elif dataset in ['texas', 'wisconsin', 'cornell']:
-    dataset = WebKB(path, dataset)
+elif dataset in ['texas', 'wisconsin', 'cornell', 'actor']:
+    dataset = GeomGCN(path, dataset)
+elif dataset in ['twitch-gamer', 'wiki', 'snap-patents', 'genius', 'pokec',  'penn94', 'reed98', \
+                 'amherst41', 'cornell5', 'johnshopkins55', 'deezer-europe', 'arxiv-year', 'twitch-de']:
+    dataset = LINKXDataset(path, dataset)
 elif dataset in ['ogbn-arxiv']:
     dataset = OGBNodePropPredDataset(name=dataset, root=path)
 elif dataset in ['reddit', 'wikipedia', 'mooc', 'lastfm']:

@@ -55,10 +55,7 @@ class WikipediaNetwork(InMemoryDataset):
     ) -> None:
         self.name = name.lower()
         self.geom_gcn_preprocess = geom_gcn_preprocess
-        assert self.name in ['chameleon', 'crocodile', 'squirrel']
-        if geom_gcn_preprocess and self.name == 'crocodile':
-            raise AttributeError("The dataset 'crocodile' is not available in "
-                                 "case 'geom_gcn_preprocess=True'")
+        assert self.name in ['chameleon', 'squirrel']
         super(WikipediaNetwork, self).__init__(root, transform, pre_transform)
         self.data, self.slices = jt.load(self.processed_paths[0])
 

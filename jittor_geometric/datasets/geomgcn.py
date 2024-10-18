@@ -6,8 +6,9 @@ import jittor as jt
 from jittor_geometric.data import Data, InMemoryDataset, download_url
 from jittor_geometric.utils import coalesce
 
-class WebKB(InMemoryDataset):
-    r"""The WebKB datasets used in the
+
+class GeomGCN(InMemoryDataset):
+    r"""The GeomGCN datasets used in the
     `"Geom-GCN: Geometric Graph Convolutional Networks"
     <https://openreview.net/forum?id=S1e2agrFvS>`_ paper.
     Nodes represent web pages and edges represent hyperlinks between them.
@@ -18,7 +19,7 @@ class WebKB(InMemoryDataset):
     Args:
         root (str): Root directory where the dataset should be saved.
         name (str): The name of the dataset (:obj:`"Cornell"`, :obj:`"Texas"`,
-            :obj:`"Wisconsin"`).
+            :obj:`"Wisconsin", :obj: "Actor").
         transform (callable, optional): A function/transform that takes in an
             :obj:`jittor_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
@@ -33,9 +34,6 @@ class WebKB(InMemoryDataset):
     **STATS:**
 
     .. list-table::
-        :widths: 10 10 10 10 10
-        :header-rows: 1
-
         * - Name
           - #nodes
           - #edges
@@ -56,6 +54,11 @@ class WebKB(InMemoryDataset):
           - 515
           - 1,703
           - 5
+        * - Actor
+        * - 7,600
+          - 30,019
+          - 932
+          - 5
     """
 
     url = 'https://raw.githubusercontent.com/graphdml-uiuc-jlu/geom-gcn/master'
@@ -68,9 +71,9 @@ class WebKB(InMemoryDataset):
         pre_transform: Optional[Callable] = None,
     ) -> None:
         self.name = name.lower()
-        assert self.name in ['cornell', 'texas', 'wisconsin']
+        assert self.name in ['cornell', 'texas', 'wisconsin', 'actor']
 
-        super(WebKB, self).__init__(root, transform, pre_transform)
+        super(GeomGCN, self).__init__(root, transform, pre_transform)
         self.data, self.slices = jt.load(self.processed_paths[0])
 
     @property
@@ -83,8 +86,12 @@ class WebKB(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
+        if self.name == 'actor':
+            tmp_name = 'film'
+        else:
+            tmp_name = self.name
         out = ['out1_node_feature_label.txt', 'out1_graph_edges.txt']
-        out += [f'{self.name}_split_0.6_0.2_{i}.npz' for i in range(10)]
+        out += [f'{tmp_name}_split_0.6_0.2_{i}.npz' for i in range(10)]
         return out
 
     @property
@@ -98,14 +105,32 @@ class WebKB(InMemoryDataset):
             download_url(f'{self.url}/splits/{f}', self.raw_dir)
 
     def process(self) -> None:
-        with open(self.raw_paths[0]) as f:
-            lines = f.read().split('\n')[1:-1]
-            xs = [[float(value) for value in line.split('\t')[1].split(',')]
-                  for line in lines]
-            x = jt.array(xs, dtype=jt.float32)
+        if self.name != 'actor':
+            with open(self.raw_paths[0]) as f:
+                lines = f.read().split('\n')[1:-1]
+                xs = [[float(value) for value in line.split('\t')[1].split(',')]
+                    for line in lines]
+                x = jt.array(xs, dtype=jt.float32)
 
-            ys = [int(line.split('\t')[2]) for line in lines]
-            y = jt.array(ys, dtype=jt.int32)
+                ys = [int(line.split('\t')[2]) for line in lines]
+                y = jt.array(ys, dtype=jt.int32)
+        else:
+            with open(self.raw_paths[0]) as f:
+                node_data = [x.split('\t') for x in f.read().split('\n')[1:-1]]
+
+                rows, cols = [], []
+                for n_id, line, _ in node_data:
+                    indices = [int(x) for x in line.split(',')]
+                    rows += [int(n_id)] * len(indices)
+                    cols += indices
+                row, col = jt.array(rows), jt.array(cols)
+
+                x = jt.zeros(int(row.max()) + 1, int(col.max()) + 1)
+                x[row, col] = 1.
+
+                y = jt.empty(len(node_data), dtype=jt.int32)
+                for n_id, _, label in node_data:
+                    y[int(n_id)] = int(label)
 
         with open(self.raw_paths[1]) as f:
             lines = f.read().split('\n')[1:-1]
