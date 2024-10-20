@@ -30,35 +30,6 @@ class GeomGCN(InMemoryDataset):
             being saved to disk. (default: :obj:`None`)
         force_reload (bool, optional): Whether to re-process the dataset.
             (default: :obj:`False`)
-
-    **STATS:**
-
-    .. list-table::
-        * - Name
-          - #nodes
-          - #edges
-          - #features
-          - #classes
-        * - Cornell
-          - 183
-          - 298
-          - 1,703
-          - 5
-        * - Texas
-          - 183
-          - 325
-          - 1,703
-          - 5
-        * - Wisconsin
-          - 251
-          - 515
-          - 1,703
-          - 5
-        * - Actor
-        * - 7,600
-          - 30,019
-          - 932
-          - 5
     """
 
     url = 'https://raw.githubusercontent.com/graphdml-uiuc-jlu/geom-gcn/master'

@@ -6,6 +6,7 @@ from .geomgcn import GeomGCN
 from .ogb import OGBNodePropPredDataset
 from .jodie import JODIEDataset
 from .linkx import LINKXDataset
+from .hetero import HeteroDataset
 
 __all__ = [
     'Planetoid',
@@ -14,6 +15,7 @@ __all__ = [
     'GeomGCN',
     'LINKXDataset',
     'OGBNodePropPredDataset',
+    'HeteroDataset',
     'JODIEDataset'
 ]
 

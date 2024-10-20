@@ -3,7 +3,9 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, GeomGCN, OGBNodePropPredDataset, JODIEDataset, LINKXDataset
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, GeomGCN, \
+                                      OGBNodePropPredDataset, JODIEDataset, LINKXDataset, \
+                                      HeteroDataset  
 import jittor_geometric.transforms as T
 
 jt.flags.use_cuda = 0
@@ -29,8 +31,10 @@ elif dataset in ['texas', 'wisconsin', 'cornell', 'actor']:
 elif dataset in ['twitch-gamer', 'wiki', 'snap-patents', 'genius', 'pokec',  'penn94', 'reed98', \
                  'amherst41', 'cornell5', 'johnshopkins55', 'deezer-europe', 'arxiv-year', 'twitch-de']:
     dataset = LINKXDataset(path, dataset)
-elif dataset in ['ogbn-arxiv']:
+elif dataset in ['ogbn-arxiv']: 
     dataset = OGBNodePropPredDataset(name=dataset, root=path)
+elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
+    dataset = HeteroDataset(path, dataset)
 elif dataset in ['reddit', 'wikipedia', 'mooc', 'lastfm']:
     dataset = JODIEDataset(path, name=dataset)
 
