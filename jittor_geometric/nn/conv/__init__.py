@@ -5,6 +5,7 @@ from .sg_conv import SGConv
 from .gcn2_conv import GCN2Conv
 from .message_passiong_nts import MessagePassingNts
 from .gcn_conv_nts import GCNConvNts
+from .transformer_conv import TransformerConv
 
 __all__ = [
     'MessagePassing',
@@ -14,6 +15,7 @@ __all__ = [
     'GCN2Conv',
     'MessagePassingNts',
     'GCNConvNts',
+    'TransformerConv',
 ]
 
 classes = __all__

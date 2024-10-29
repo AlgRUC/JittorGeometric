@@ -42,7 +42,7 @@ class MessagePassing(Module):
         the_size: List[Optional[int]] = [None, None]
 
         if isinstance(edge_index, Var):
-            assert edge_index.dtype == Var.int32
+            assert edge_index.dtype == Var.int64
             assert edge_index.ndim == 2
             assert edge_index.size(0) == 2
             if size is not None:

@@ -24,3 +24,4 @@ dist/
 !doc/source/*
 core
 __data__
+data/

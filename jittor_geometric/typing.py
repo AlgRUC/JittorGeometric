@@ -9,3 +9,9 @@ OptPairVar = Tuple[Var, Optional[Var]]
 PairOptVar = Tuple[Optional[Var], Optional[Var]]
 Size = Optional[Tuple[int, int]]
 NoneType = Optional[Var]
+
+EdgeType = Tuple[str, str, str]
+NodeType = str
+SparseVar = Optional[Var]
+jt_lib = object
+jt_scatter = object
