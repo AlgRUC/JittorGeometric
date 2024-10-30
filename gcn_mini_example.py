@@ -9,6 +9,9 @@ from jittor_geometric.nn import GCNConv, ChebConv, SGConv, GCN2Conv
 # add by lusz
 import time
 
+from jittor_geometric.jitgeo_loader import RandomNodeLoader
+from jittor_geometric.jitgeo_loader import NeighborLoader
+
 jt.flags.use_cuda = 1
 
 parser = argparse.ArgumentParser()
@@ -19,8 +22,10 @@ args = parser.parse_args()
 dataset = 'Cora'
 # dataset='PubMed'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
+print(path)
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
+
 
 
 if args.use_gdc:
@@ -32,18 +37,16 @@ if args.use_gdc:
     data = gdc(data)
 
 
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
+        self.conv1 = GCNConv(dataset.num_features, 16, cached=False,
                              normalize=not args.use_gdc)
-        self.conv2 = GCNConv(16, dataset.num_classes, cached=True,
+        self.conv2 = GCNConv(16, dataset.num_classes, cached=False,
                              normalize=not args.use_gdc)
 
-    def execute(self):
+    def execute(self, data):
         x, edge_index, edge_weight = data.x, data.edge_index, data.edge_attr
-        # print(edge_weight)
         x = nn.relu(self.conv1(x, edge_index, edge_weight)) # 传入feature,图拓扑
         x = nn.dropout(x)
         x = self.conv2(x, edge_index, edge_weight)
@@ -51,27 +54,43 @@ class Net(nn.Module):
 
 
 model, data = Net(), data
+
+source_node = jt.Var([1,3,5,7,9,11,13,15,17,19])
+dataloader = NeighborLoader(dataset, source_node, [3, 5], batch_size = 3)
+#dataloader = RandomNodeLoader(dataset, num_parts=2, fixed=False)
+
 optimizer = nn.Adam([
     dict(params=model.conv1.parameters(), weight_decay=5e-4),
     dict(params=model.conv2.parameters(), weight_decay=0)
 ], lr=0.01)  # Only perform weight-decay on first convolution.
 
+for i in dataloader:
+    print('**********')
+    print(i.node_map)
+    print(i.central_nodes)
+    print(i.edge_index)
+    print(i.x)
+    print(i.y)
+    
+
+exit()
 
 def train():
     global total_forward_time, total_backward_time
-    model.train()
-    pred = model()[data.train_mask]
-    label = data.y[data.train_mask]
-    loss = nn.nll_loss(pred, label)
-    jt.sync_all(True)
-    # backward
+    for i in dataloader:
+        model.train()
+        pred = model(i)[i.train_mask]
+        label = i.y[i.train_mask]
+        loss = nn.nll_loss(pred, label)
+        jt.sync_all(True)
+        # backward
 
-    optimizer.step(loss)
+        optimizer.step(loss)
 
 
 def test():
     model.eval()
-    logits, accs = model(), []
+    logits, accs = model(data), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
         tmp = []
@@ -97,10 +116,10 @@ for epoch in range(1, 11):
     log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
     print(log.format(epoch, train_acc, best_val_acc, test_acc))
 
-jt.sync_all(True)
-end = time.time()
-# print(end - start)
-print("epoch_time"+str(end-start))
-print("total_forward_time"+str(total_forward_time))
-print("total_backward_time"+str(total_backward_time))
+# jt.sync_all(True)
+# end = time.time()
+# # print(end - start)
+# print("epoch_time"+str(end-start))
+# print("total_forward_time"+str(total_forward_time))
+# print("total_backward_time"+str(total_backward_time))
 

@@ -12,7 +12,6 @@ from ..inits import glorot, zeros
 
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
-
     fill_value = 2. if improved else 1.
 
     if isinstance(edge_index, Var):
