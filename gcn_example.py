@@ -88,7 +88,7 @@ def test():
 train()
 best_val_acc = test_acc = 0
 start = time.time()
-for epoch in range(1, 11):
+for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
     if val_acc > best_val_acc:
