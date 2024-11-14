@@ -3,7 +3,7 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid # 利用Planetoid类可以处理三个数据集，分别为“Cora”、“CiteSeer”和“PubMed”
+from jittor_geometric.datasets import Planetoid
 import jittor_geometric.transforms as T
 from jittor_geometric.nn import GCNConv, ChebConv, SGConv, GCN2Conv
 # add by lusz
@@ -17,7 +17,6 @@ parser.add_argument('--use_gdc', action='store_true',
 args = parser.parse_args()
 
 dataset = 'Cora'
-# dataset='PubMed'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
@@ -43,8 +42,7 @@ class Net(nn.Module):
 
     def execute(self):
         x, edge_index, edge_weight = data.x, data.edge_index, data.edge_attr
-        # print(edge_weight)
-        x = nn.relu(self.conv1(x, edge_index, edge_weight)) # 传入feature,图拓扑
+        x = nn.relu(self.conv1(x, edge_index, edge_weight))
         x = nn.dropout(x)
         x = self.conv2(x, edge_index, edge_weight)
         return nn.log_softmax(x, dim=1)
@@ -54,7 +52,7 @@ model, data = Net(), data
 optimizer = nn.Adam([
     dict(params=model.conv1.parameters(), weight_decay=5e-4),
     dict(params=model.conv2.parameters(), weight_decay=0)
-], lr=0.01)  # Only perform weight-decay on first convolution.
+], lr=0.01)
 
 
 def train():
@@ -64,8 +62,6 @@ def train():
     label = data.y[data.train_mask]
     loss = nn.nll_loss(pred, label)
     jt.sync_all(True)
-    # backward
-
     optimizer.step(loss)
 
 
@@ -99,8 +95,4 @@ for epoch in range(1, 201):
 
 jt.sync_all(True)
 end = time.time()
-# print(end - start)
 print("epoch_time"+str(end-start))
-print("total_forward_time"+str(total_forward_time))
-print("total_backward_time"+str(total_backward_time))
-
