@@ -9,24 +9,40 @@ from jittor_geometric.data import InMemoryDataset, download_url
 import jittor as jt
 
 class JODIEDataset(InMemoryDataset):
-    r"""The temporal graph datasets from the `"JODIE: Predicting Dynamic Embedding
-    Trajectory in Temporal Interaction Networks"
-    <https://cs.stanford.edu/~srijan/pubs/jodie-kdd2019.pdf>`_ paper.
+    r"""The temporal graph datasets from the paper 
+    "JODIE: Predicting Dynamic Embedding Trajectory in Temporal Interaction Networks"
+    <https://cs.stanford.edu/~srijan/pubs/jodie-kdd2019.pdf>.
+
+    Dataset Details:
+    
+    - **Reddit Post Dataset**: This dataset consists of interactions between users and subreddits. 
+      We selected the 1,000 most active subreddits and the 10,000 most active users, resulting in 
+      over 672,447 interactions. Each post's text is represented as a feature vector using LIWC categories.
+    - **Wikipedia Edits**: This dataset represents edits made by users on Wikipedia pages. 
+      We selected the 1,000 most edited pages and users with at least 5 edits, totaling 8,227 users 
+      and 157,474 interactions. Each edit is converted into a LIWC-feature vector.
+    - **LastFM Song Listens**: This dataset records user-song interactions, with 1,000 users and 
+      the 1,000 most listened-to songs, resulting in 1,293,103 interactions. Unlike other datasets, 
+      interactions do not have features.
+    - **MOOC Student Drop-Out**: This dataset captures student interactions (e.g., viewing videos, 
+      submitting answers) on a MOOC online course. There are 7,047 users interacting with 98 items 
+      (videos, answers, etc.), generating over 411,749 interactions, including 4,066 drop-out events.
 
     Args:
         root (str): Root directory where the dataset should be saved.
-        name (str): The name of the dataset (:obj:`"Reddit"`,
-            :obj:`"Wikipedia"`, :obj:`"MOOC"`, and :obj:`"LastFM"`).
-        transform (callable, optional): A function/transform that takes in an
-            :obj:`torch_geometric.data.Data` object and returns a transformed
-            version. The data object will be transformed before every access.
-            (default: :obj:`None`)
-        pre_transform (callable, optional): A function/transform that takes in
-            an :obj:`torch_geometric.data.Data` object and returns a
-            transformed version. The data object will be transformed before
-            being saved to disk. (default: :obj:`None`)
-
+        name (str): The name of the dataset, options include:
+            - :obj:`"Reddit"`
+            - :obj:`"Wikipedia"`
+            - :obj:`"LastFM"`
+            - :obj:`"MOOC"`
+        transform (callable, optional): A function/transform that takes in a 
+            :obj:`Data` object and returns a transformed version. The data object 
+            will be transformed on each access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in a 
+            :obj:`Data` object and returns a transformed version. The data object 
+            will be transformed before being saved to disk. (default: :obj:`None`)
     """
+    
     url = 'http://snap.stanford.edu/jodie/{}.csv'
     names = ['reddit', 'wikipedia', 'mooc', 'lastfm']
 
@@ -42,7 +58,6 @@ class JODIEDataset(InMemoryDataset):
         
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = jt.load(self.processed_paths[0])
-        # print('self.processed_paths[0]',self.processed_paths[0])
 
     @property
     def raw_dir(self) -> str:

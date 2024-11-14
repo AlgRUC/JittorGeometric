@@ -9,18 +9,19 @@ from jittor_geometric.utils import coalesce
 
 class GeomGCN(InMemoryDataset):
     r"""The GeomGCN datasets used in the
-    `"Geom-GCN: Geometric Graph Convolutional Networks"
+    "Geom-GCN: Geometric Graph Convolutional Networks"
     <https://openreview.net/forum?id=S1e2agrFvS>`_ paper.
+
     Nodes represent web pages and edges represent hyperlinks between them.
     Node features are the bag-of-words representation of web pages.
-    The task is to classify the nodes into one of the five categories, student,
+    The task is to classify the nodes into one of the five categories: student,
     project, course, staff, and faculty.
 
     Args:
         root (str): Root directory where the dataset should be saved.
-        name (str): The name of the dataset (:obj:`"Cornell"`, :obj:`"Texas"`,
-            :obj:`"Wisconsin", :obj: "Actor").
-        transform (callable, optional): A function/transform that takes in an
+        name (str): The name of the dataset (options: :obj:`"Cornell"`, :obj:`"Texas"`,
+            :obj:`"Wisconsin"`, :obj:`"Actor"`).
+        transform (callable, optional): A function/transform that takes in a
             :obj:`jittor_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
             (default: :obj:`None`)
@@ -28,9 +29,8 @@ class GeomGCN(InMemoryDataset):
             an :obj:`jittor_geometric.data.Data` object and returns a
             transformed version. The data object will be transformed before
             being saved to disk. (default: :obj:`None`)
-        force_reload (bool, optional): Whether to re-process the dataset.
-            (default: :obj:`False`)
     """
+
 
     url = 'https://raw.githubusercontent.com/graphdml-uiuc-jlu/geom-gcn/master'
 

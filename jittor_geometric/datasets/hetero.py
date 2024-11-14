@@ -6,9 +6,37 @@ from typing import Callable, Optional
 
 
 class HeteroDataset(InMemoryDataset):
-    r"""Heterophilic dataset from the 'A critical look at the evaluation of GNNs under 
+    r"""Heterophilic dataset from the paper 'A critical look at the evaluation of GNNs under 
     heterophily: Are we really making progress?'
     <https://arxiv.org/abs/2302.11640>.
+
+    Dataset Details:
+
+    - **Roman Empire**: A graph from the Wikipedia article on the Roman Empire. Nodes represent words, 
+      connected based on their order or syntactic dependencies, with the task to classify words by syntactic roles.
+    - **Amazon Ratings**: Based on Amazon co-purchasing data, where nodes are products connected if frequently
+      bought together. The task is to predict the product's average rating.
+    - **Minesweeper**: A synthetic graph based on Minesweeper. Nodes represent grid cells with edges to neighbors.
+      The task is to predict which cells contain mines.
+    - **Tolokers**: Represents workers from the Toloka platform, with edges indicating shared tasks. The goal 
+      is to predict if a worker was banned.
+    - **Questions**: Built from Yandex Q data, with nodes representing users who answered each other's questions 
+      on the topic of medicine. The task is to predict if a user remained active.
+
+    Args:
+        root (str): Root directory where the dataset should be saved.
+        name (str): The name of the dataset to load. Options include:
+            - `"roman-empire"`
+            - `"amazon-ratings"`
+            - `"minesweeper"`
+            - `"tolokers"`
+            - `"questions"`
+        transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
+            and returns a transformed version. The data object will be transformed on every access.
+            (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
+            and returns a transformed version. The data object will be transformed before being saved to disk.
+            (default: :obj:`None`)
     """
 
     url = ('https://github.com/yandex-research/heterophilous-graphs/raw/'

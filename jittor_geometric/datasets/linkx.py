@@ -11,6 +11,72 @@ from scipy.io import loadmat
 from typing import Callable, List, Optional
 
 
+github_url = ('https://github.com/CUAI/Non-Homophily-Large-Scale/'
+                  'raw/master/data')
+gdrive_url = 'https://drive.google.com/uc?confirm=t&'
+
+facebook_datasets = [
+    'penn94', 'reed98', 'amherst41', 'cornell5', 'johnshopkins55'
+]
+
+datasets = {
+    'penn94': {
+        'Penn94.mat': f'{github_url}/facebook100/Penn94.mat'
+    },
+    'reed98': {
+        'Reed98.mat': f'{github_url}/facebook100/Reed98.mat'
+    },
+    'amherst41': {
+        'Amherst41.mat': f'{github_url}/facebook100/Amherst41.mat',
+    },
+    'cornell5': {
+        'Cornell5.mat': f'{github_url}/facebook100/Cornell5.mat'
+    },
+    'johnshopkins55': {
+        'Johns%20Hopkins55.mat': f'{github_url}/facebook100/Johns%20Hopkins55.mat'
+    },
+    'genius': {
+        'genius.mat': f'{github_url}/genius.mat'
+    },
+    'snap-patents': {
+        'snap-patents.mat': f'{github_url}/snap-patents.mat'
+    },
+    'twitch-de': {
+        'musae_DE_edges.csv': f'{github_url}/twitch/DE/musae_DE_edges.csv',
+        'musae_DE_features.json': f'{github_url}/twitch/DE/musae_DE_features.json',
+        'musae_DE_target.csv': f'{github_url}/twitch/DE/musae_DE_target.csv'
+    },
+    'deezer-europe': {
+        'deezer-europe.mat': f'{github_url}/deezer-europe.mat'
+    },
+    'wiki':{
+        'wiki_edges2M.npy': '',
+        'wiki_features2M.npy': '',
+        'wiki_views2M.npy': '',
+    },
+    'twitch-gamer': {
+        'twitch-gamer_feat.csv':
+        f'{gdrive_url}id=1fA9VIIEI8N0L27MSQfcBzJgRQLvSbrvR',
+        'twitch-gamer_edges.csv':
+        f'{gdrive_url}id=1XLETC6dG3lVl7kDmytEJ52hvDMVdxnZ0',
+    },
+    'pokec': {
+        'pokec.mat': f'{github_url}/pokec.mat'
+    },
+    'arxiv-year': {},
+}
+
+splits = {
+    'penn94': f'{github_url}/splits/fb100-Penn94-splits.npy',
+    'genius': f'{github_url}/splits/genius-splits.npy',
+    'twitch-gamers': f'{github_url}/splits/twitch-gamers-splits.npy',
+    'snap-patents': f'{github_url}/splits/snap-patents-splits.npy',
+    'pokec': f'{github_url}/splits/pokec-splits.npy', 
+    'twitch-de': f'{github_url}/splits/twitch-e-DE-splits.npy',
+    'deezer-europe': f'{github_url}/splits/deezer-europe-splits.npy',
+}
+
+
 def even_quantile_labels(vals, nclasses, verbose=True):
     label = -1 * np.ones(vals.shape[0], dtype=np.int64)
     interval_lst = []
@@ -94,84 +160,44 @@ def load_twitch(lang, root):
 
 
 class LINKXDataset(InMemoryDataset):
-    r"""A variety of non-homophilous graph datasets from the `"Large Scale
-    Learning on Non-Homophilous Graphs: New Benchmarks and Strong Simple
-    Methods" <https://arxiv.org/abs/2110.14446>`_ paper.
+    r"""A variety of non-homophilous graph datasets from the paper 
+    "Large Scale Learning on Non-Homophilous Graphs: New Benchmarks and Strong Simple Methods"
+    <https://arxiv.org/abs/2110.14446>.
+
+    Dataset Details:
+    
+    - **Penn94**: A friendship network of university students from the Facebook 100 dataset. Nodes represent students, 
+      with labels indicating gender. Node features include major, dorm, year, and high school.
+    - **Pokec**: A friendship network from a Slovak online social network. Nodes represent users, connected by directed friendship relations. 
+      Node features include profile information like region, registration time, and age, with labels based on gender.
+    - **arXiv-year**: Based on the ogbn-arXiv network, with nodes representing papers and edges representing citations. 
+      The classification task is set to predict the year a paper was posted, using word2vec features derived from the title and abstract.
+    - **snap-patents**: A citation network of U.S. utility patents, where nodes represent patents and edges denote citations. 
+      The classification task is to predict the year a patent was granted, with node features derived from patent metadata.
+    - **genius**: A social network from genius.com, where nodes are users connected by mutual follows. The task is to predict 
+      whether a user account is marked as "gone," based on usage features like expertise score and contribution counts.
+    - **twitch-gamers**: A network of Twitch accounts with edges between mutual followers. Node features include account statistics 
+      like views, creation date, and account status. The binary classification task is to predict whether a channel has explicit content.
+    - **wiki**: A graph of Wikipedia articles, with nodes representing pages and edges representing links between them. 
+      Node features are GloVe embeddings from the title and abstract. Labels represent total page views, categorized into quintiles.
+
+    Args:
+        root (str): Root directory where the dataset should be saved.
+        name (str): The name of the dataset to load. Options include:
+            - :obj:`"penn94"`
+            - :obj:`"pokec"`
+            - :obj:`"arxiv-year"`
+            - :obj:`"snap-patents"`
+            - :obj:`"genius"`
+            - :obj:`"twitch-gamers"`
+            - :obj:`"wiki"`
+        transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
+            and returns a transformed version. The data object will be transformed on each access. 
+            (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
+            and returns a transformed version. The data object will be transformed before being saved to disk.
+            (default: :obj:`None`)
     """
-
-    github_url = ('https://github.com/CUAI/Non-Homophily-Large-Scale/'
-                  'raw/master/data')
-    gdrive_url = 'https://drive.google.com/uc?confirm=t&'
-
-    facebook_datasets = [
-        'penn94', 'reed98', 'amherst41', 'cornell5', 'johnshopkins55'
-    ]
-
-    datasets = {
-        'penn94': {
-            'Penn94.mat': f'{github_url}/facebook100/Penn94.mat'
-        },
-        'reed98': {
-            'Reed98.mat': f'{github_url}/facebook100/Reed98.mat'
-        },
-        'amherst41': {
-            'Amherst41.mat': f'{github_url}/facebook100/Amherst41.mat',
-        },
-        'cornell5': {
-            'Cornell5.mat': f'{github_url}/facebook100/Cornell5.mat'
-        },
-        'johnshopkins55': {
-            'Johns%20Hopkins55.mat': f'{github_url}/facebook100/Johns%20Hopkins55.mat'
-        },
-        'genius': {
-            'genius.mat': f'{github_url}/genius.mat'
-        },
-        'snap-patents': {
-            'snap-patents.mat': f'{github_url}/snap-patents.mat'
-        },
-        'twitch-de': {
-            'musae_DE_edges.csv': f'{github_url}/twitch/DE/musae_DE_edges.csv',
-            'musae_DE_features.json': f'{github_url}/twitch/DE/musae_DE_features.json',
-            'musae_DE_target.csv': f'{github_url}/twitch/DE/musae_DE_target.csv'
-        },
-        'deezer-europe': {
-            'deezer-europe.mat': f'{github_url}/deezer-europe.mat'
-        },
-        # TODO: fix wiki
-        #'wiki': {
-        #    'wiki_views2M.pt':
-        #    f'{gdrive_url}id=1p5DlVHrnFgYm3VsNIzahSsvCD424AyvP',
-        #    'wiki_edges2M.pt':
-        #    f'{gdrive_url}id=14X7FlkjrlUgmnsYtPwdh-gGuFla4yb5u',
-        #    'wiki_features2M.pt':
-        #    f'{gdrive_url}id=1ySNspxbK-snNoAZM7oxiWGvOnTRdSyEK'
-        #},
-        'wiki':{
-            'wiki_edges2M.npy': '',
-            'wiki_features2M.npy': '',
-            'wiki_views2M.npy': '',
-        },
-        'twitch-gamer': {
-            'twitch-gamer_feat.csv':
-            f'{gdrive_url}id=1fA9VIIEI8N0L27MSQfcBzJgRQLvSbrvR',
-            'twitch-gamer_edges.csv':
-            f'{gdrive_url}id=1XLETC6dG3lVl7kDmytEJ52hvDMVdxnZ0',
-        },
-        'pokec': {
-            'pokec.mat': f'{github_url}/pokec.mat'
-        },
-        'arxiv-year': {},
-    }
-
-    splits = {
-        'penn94': f'{github_url}/splits/fb100-Penn94-splits.npy',
-        'genius': f'{github_url}/splits/genius-splits.npy',
-        'twitch-gamers': f'{github_url}/splits/twitch-gamers-splits.npy',
-        'snap-patents': f'{github_url}/splits/snap-patents-splits.npy',
-        'pokec': f'{github_url}/splits/pokec-splits.npy', 
-        'twitch-de': f'{github_url}/splits/twitch-e-DE-splits.npy',
-        'deezer-europe': f'{github_url}/splits/deezer-europe-splits.npy',
-    }
 
     def __init__(self, root: str, name: str,
                  transform: Optional[Callable] = None,
@@ -277,7 +303,7 @@ class LINKXDataset(InMemoryDataset):
         metadata = jt.Var(mat['local_info'].astype('int64'))
 
         xs = []
-        y = metadata[:, 1] - 1  # gender label, -1 means unlabeled
+        y = metadata[:, 1] - 1 
         x = jt.concat([metadata[:, :1], metadata[:, 2:]], dim=-1)
         for i in range(x.size(1)):
             _, out = x[:, i].unique(return_inverse=True)

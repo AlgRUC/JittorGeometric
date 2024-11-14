@@ -8,15 +8,36 @@ from jittor_geometric.data import InMemoryDataset, download_url, decide_download
 
 
 class OGBNodePropPredDataset(InMemoryDataset):
-    def __init__(self, name, root='dataset', transform=None, pre_transform=None, meta_dict=None):
-        '''
-            - name (str): name of the dataset
-            - root (str): root directory to store the dataset folder
-            - transform, pre_transform (optional): transform/pre-transform graph objects
-            - meta_dict: dictionary that stores all the meta-information about data. Default is None,
-                         but when something is passed, it uses its information. Useful for debugging for external contributors.
-        ''' 
+    r"""The Open Graph Benchmark (OGB) Node Property Prediction Datasets, provided by the OGB team. 
+    These datasets are designed to benchmark large-scale node property prediction tasks on real-world graphs.
+    
+    Dataset Details:
+    
+    - **ogbn-arxiv**: A citation network where nodes represent arXiv papers and directed edges indicate citation relationships.
+      The task is to predict the subject area of each paper based on word2vec features derived from the title and abstract.
+    - **ogbn-products**: An Amazon product co-purchasing network where nodes represent products and edges indicate frequently 
+      co-purchased products. The task is to classify each product based on its category, with node features based on product descriptions.
+    - **ogbn-paper100M**: A large-scale citation network where nodes represent research papers and edges indicate citation links.
+      The node features are derived from word embeddings of the paper abstracts. The task is to predict the subject area of each paper.
 
+    These datasets are provided by the Open Graph Benchmark (OGB) team, which aims to provide diverse and large-scale graph datasets 
+    for machine learning research. More information on these datasets can be found on the OGB website: https://ogb.stanford.edu/.
+
+    Args:
+        name (str): The name of the dataset to load. Options include:
+            - :obj:`"ogbn-arxiv"`
+            - :obj:`"ogbn-products"`
+            - :obj:`"ogbn-paper100M"`
+        root (str): Root directory where the dataset folder will be stored.
+        transform (callable, optional): A function/transform that takes in a graph object and returns a transformed version.
+            The graph object will be transformed on each access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in a graph object and returns a transformed version.
+            The graph object will be transformed before being saved to disk. (default: :obj:`None`)
+        meta_dict (dict, optional): A dictionary containing meta-information about the dataset.
+            When provided, it overrides default meta-information, useful for debugging or contributions from external users.
+    """
+
+    def __init__(self, name, root='dataset', transform=None, pre_transform=None, meta_dict=None):
         self.name = name  # original name, e.g., ogbn-proteins
 
         if meta_dict is None:

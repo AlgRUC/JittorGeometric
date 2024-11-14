@@ -7,50 +7,22 @@ from jittor_geometric.data import InMemoryDataset, download_url
 
 
 class Amazon(InMemoryDataset):
-    r"""The Amazon Computers and Amazon Photo networks from the
-    `"Pitfalls of Graph Neural Network Evaluation"
-    <https://arxiv.org/abs/1811.05868>`_ paper.
-    Nodes represent goods and edges represent that two goods are frequently
-    bought together.
-    Given product reviews as bag-of-words node features, the task is to
-    map goods to their respective product category.
+    r"""The Amazon Computers and Amazon Photo datasets from the paper 
+    "Pitfalls of Graph Neural Network Evaluation" 
+    <https://arxiv.org/abs/1811.05868>`_.
+    In these datasets, nodes represent products, and edges indicate that two products are frequently bought together.
+    Given product reviews represented as bag-of-words node features, the task is to classify products into their respective categories.
 
     Args:
         root (str): Root directory where the dataset should be saved.
-        name (str): The name of the dataset (:obj:`"Computers"`,
-            :obj:`"Photo"`).
-        transform (callable, optional): A function/transform that takes in an
-            :obj:`torch_geometric.data.Data` object and returns a transformed
-            version. The data object will be transformed before every access.
+        name (str): The name of the dataset, either :obj:`"Computers"` or :obj:`"Photo"`.
+        transform (callable, optional): A function/transform that takes in a 
+            :obj:`torch_geometric.data.Data` object and returns a transformed version.
+            The data object will be transformed on each access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in a 
+            :obj:`torch_geometric.data.Data` object and returns a transformed version.
+            The data object will be transformed before being saved to disk. 
             (default: :obj:`None`)
-        pre_transform (callable, optional): A function/transform that takes in
-            an :obj:`torch_geometric.data.Data` object and returns a
-            transformed version. The data object will be transformed before
-            being saved to disk. (default: :obj:`None`)
-        force_reload (bool, optional): Whether to re-process the dataset.
-            (default: :obj:`False`)
-
-    **STATS:**
-
-    .. list-table::
-        :widths: 10 10 10 10 10
-        :header-rows: 1
-
-        * - Name
-          - #nodes
-          - #edges
-          - #features
-          - #classes
-        * - Computers
-          - 13,752
-          - 491,722
-          - 767
-          - 10
-        * - Photo
-          - 7,650
-          - 238,162
-          - 745
-          - 8
     """
 
     url = 'https://github.com/shchur/gnn-benchmark/raw/master/data/npz/'
