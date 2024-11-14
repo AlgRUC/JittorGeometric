@@ -1,7 +1,5 @@
 # Jittor Geometric
 
-[**Documentation**](docs/build/html/index.html)
-
 ## Introduction
 Jittor Geometric is a graph machine learning library based on the Jittor framework. As a Chinese-developed library, it is tailored for research and applications in Graph Neural Networks (GNNs), aiming to provide an efficient and flexible GNN implementation for researchers and engineers working with graph-structured data.
 
