@@ -7,44 +7,17 @@ from typing import Optional, Tuple
 from jittor_geometric.typing import Adj, OptVar
 
 import jittor as jt
-from jittor import Var
-from jittor_geometric.nn.conv import MessagePassingNts
+from jittor import Var,nn,Module
 from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 
 from ..inits import glorot, zeros
-# add by lusz
 from jittor_geometric.data import CSC,CSR
-from jittor_geometric.ops import addone
+from jittor_geometric.ops import SpmmCsr
 import time
-def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
-             add_self_loops=True, dtype=None):
-
-    fill_value = 2. if improved else 1.
-
-    if isinstance(edge_index, Var):
-        num_nodes = maybe_num_nodes(edge_index, num_nodes)
-
-        if edge_weight is None:
-            edge_weight = jt.ones((edge_index.size(1), ))
-
-        if add_self_loops:
-            edge_index, tmp_edge_weight = add_remaining_self_loops(
-                edge_index, edge_weight, fill_value, num_nodes)
-            assert tmp_edge_weight is not None
-            edge_weight = tmp_edge_weight
-
-        row, col = edge_index[0], edge_index[1]
-        shape = list(edge_weight.shape)
-        shape[0] = num_nodes
-        deg = jt.zeros(shape)
-        deg = jt.scatter(deg, 0, col, src=edge_weight, reduce='add')
-        deg_inv_sqrt = deg.pow(-0.5)
-        deg_inv_sqrt.masked_fill(deg_inv_sqrt == float('inf'), 0)
-        return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
 
 
-class GCNConvNts(MessagePassingNts):
+class GCNConvSpmm(Module):
     r"""The graph convolutional operator from the `"Semi-supervised
     Classification with Graph Convolutional Networks"
     <https://arxiv.org/abs/1609.02907>`_ paper
@@ -59,7 +32,7 @@ class GCNConvNts(MessagePassingNts):
                  bias: bool = True, **kwargs):
 
         kwargs.setdefault('aggr', 'add')
-        super(GCNConvNts, self).__init__(**kwargs)
+        super(GCNConvSpmm, self).__init__(**kwargs)
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -87,21 +60,18 @@ class GCNConvNts(MessagePassingNts):
         self._cached_adj_t = None
         self._cached_csc=None
 
-    def execute(self, x: Var, csc: OptVar, csr: OptVar) -> Var:
+    def execute(self, x: Var, csr: OptVar) -> Var:
         x = x @ self.weight
-        out = self.propagate(x=x, csc=csc,csr=csr)
+        out = self.propagate(x=x,csr=csr)
         if self.bias is not None:
             out += self.bias
     
         return out
 
-    def propagate(self,x, csc: CSC, csr:CSR):
-        out = self.aggregate_with_weight(x,csc,csr)  
+    def propagate(self,x, csr:CSR):
+        out = SpmmCsr(x,csr)  
         return out
     
-    def scatter_to_edge(self, x, csc):
-        v_num=jt.size(x,0)
-        feature_dim=jt.size(x,1)
 
     def __repr__(self):
         return '{}({}, {})'.format(self.__class__.__name__, self.in_channels,

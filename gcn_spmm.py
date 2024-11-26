@@ -1,22 +1,17 @@
-'''
-Author: lusz
-Date: 2024-06-16 15:42:52
-Description: 
-'''
+
 import os.path as osp
 import argparse
-
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset,Reddit
 import jittor_geometric.transforms as T
-from jittor_geometric.nn import GCNConvNts
+from jittor_geometric.nn import GCNConvSpmm
 import time
 from jittor import Var
 from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
-from jittor_geometric.data import CSC,CSR
-from jittor_geometric.ops import cootocsr,cootocsc
+from jittor_geometric.data import CSR
+from jittor_geometric.ops import cootocsr
 # 生成edge_weight(待优化)
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
@@ -53,10 +48,20 @@ parser.add_argument('--use_gdc', action='store_true',
 parser.add_argument('--dataset', help='graph dataset')
 args = parser.parse_args()
 dataset=args.dataset
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
-dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
+if dataset in ['computers', 'photo']:
+    dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
+elif dataset in ['cora', 'citeseer', 'pubmed']:
+    dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+elif dataset in ['chameleon', 'squirrel']:
+    dataset = WikipediaNetwork(path, dataset, geom_gcn_preprocess=False)
+elif dataset in ['ogbn-arxiv','ogbn-products','ogbn-papers100M']:
+    dataset = OGBNodePropPredDataset(name=dataset, root=path)
+elif dataset in ['reddit']:
+    path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'Reddit')
+    dataset=Reddit(path)
+print(dataset)
 data = dataset[0]
-# add by lusz
 total_forward_time = 0.0
 total_backward_time = 0.0
 
@@ -67,11 +72,10 @@ if args.use_gdc:
                 sparsification_kwargs=dict(method='topk', k=128,
                                            dim=0), exact=True)
     data = gdc(data)
-
 v_num = data.x.shape[0]
 
+
 edge_index, edge_weight=data.edge_index,data.edge_attr
-jt.flags.use_cuda = 0
 jt.flags.lazy_execution = 0
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
@@ -79,22 +83,21 @@ edge_index, edge_weight = gcn_norm(
 
 
 with jt.no_grad():
-    data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConvNts(dataset.num_features, 16, cached=True,
+        self.conv1 = GCNConvSpmm(dataset.num_features, 256, cached=True,
                              normalize=not args.use_gdc)
-        self.conv2 = GCNConvNts(16, dataset.num_classes, cached=True,
+        self.conv2 = GCNConvSpmm(256, dataset.num_classes, cached=True,
                              normalize=not args.use_gdc)
 
     def execute(self):
-        x, csc,csr =data.x , data.csc, data.csr
-        x = nn.relu(self.conv1(x, csc, csr))
+        x, csr =data.x ,data.csr
+        x = nn.relu(self.conv1(x, csr))
         x = nn.dropout(x)
-        x = self.conv2(x,csc,csr)
+        x = self.conv2(x,csr)
         return nn.log_softmax(x, dim=1)
 
 
@@ -119,16 +122,11 @@ def test():
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
-        tmp = []
-        for i in range(mask.shape[0]):
-            if mask[i] == True:
-                tmp.append(logits[i])
-        logits_ = jt.stack(tmp)
+        logits_=logits[mask]
         pred, _ = jt.argmax(logits_, dim=1)
         acc = pred.equal(y_).sum().item() / mask.sum().item()
         accs.append(acc)
     return accs
-
 
 
 train()

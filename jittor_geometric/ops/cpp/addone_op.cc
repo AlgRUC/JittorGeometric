@@ -17,7 +17,6 @@ outputVar(outputVar_), inputVar(inputVar_), weight(weight_), feat_size(feat_size
 }
 
 void AddoneOp::jit_prepare(JK& jk) {
-    //std::cout<<myType<<std::endl;
      add_jit_define(jk, "T", myType);
 }
 

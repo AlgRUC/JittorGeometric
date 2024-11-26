@@ -12,7 +12,6 @@ from jittor import Function
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.data import CSC
 module_path = os.path.dirname(__file__)
-# print(module_path)
 src = os.path.join(module_path, "cpp/cootocsc_op.cc")
 header = os.path.join(module_path, "cpp/cootocsc_op.h")
 

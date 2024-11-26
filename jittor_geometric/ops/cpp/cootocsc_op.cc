@@ -28,22 +28,23 @@ void CootocscOp::jit_run() {
     auto* __restrict__ col_off = column_offset->ptr<int>();
 
     int edge_size = edge_index->shape[1];
-    // Initialize column_offset
-    #pragma omp parallel for num_threads(max_threads)
+    // #pragma omp parallel for num_threads(max_threads) schedule(guided)
     for (int i = 0; i < edge_size; i++) {
         __sync_fetch_and_add(&col_off[e_x[i + edge_size] + 1], 1);
     }
+    
     for (int i = 0; i < v_num; ++i) {
         col_off[i + 1] += col_off[i];
     }
 
     int* vertex_index = (int*) calloc(v_num, sizeof(int));
-    #pragma omp parallel for num_threads(max_threads) schedule(guided)
+    // #pragma omp parallel for num_threads(max_threads) schedule(guided)
     for (int i = 0; i < edge_size; i++) {
         int src = e_x[i];
         int dst = e_x[i + edge_size];
         int index = __sync_fetch_and_add((int *)&vertex_index[dst], 1);
-        index += col_off[dst];
+        __sync_fetch_and_add((int *)&index, col_off[dst]);
+        // index += col_off[dst];
         r_i[index] = src;
         e_wr[index] = e_w[i];
     }

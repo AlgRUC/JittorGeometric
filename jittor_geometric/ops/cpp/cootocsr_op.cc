@@ -1,10 +1,7 @@
 /*
- * @Author: lusz 578752274@qq.com
- * @Date: 2024-06-20 21:41:00
- * @LastEditors: lusz 578752274@qq.com
- * @LastEditTime: 2024-06-20 22:16:54
- * @FilePath: /JittorGNN/jittor_geometric/ops/cootocsr.cc
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @Description: 
+ * @Author: lusz
+ * @Date: 2024-06-21 20:20:26
  */
 #include "var.h"
 #include "cootocsr_op.h"
@@ -19,7 +16,6 @@ edge_index(edge_index_), coo_edge_weight(coo_edge_weight_),column_indices(column
 }
 
 void CootocsrOp::jit_prepare(JK& jk) {
-    //std::cout<<myType<<std::endl;
      add_jit_define(jk, "T", dtype);
 }
 
@@ -34,21 +30,23 @@ void CootocsrOp::jit_run() {
 
     int edge_size = edge_index->shape[1];
     // Initialize row_offset
-    #pragma omp parallel for num_threads(max_threads)
+    // #pragma omp parallel for num_threads(max_threads) schedule(guided)
     for (int i = 0; i < edge_size; i++) {
         __sync_fetch_and_add(&row_off[e_x[i] + 1], 1);
     }
+    
     for (int i = 0; i < v_num; i++) {
         row_off[i + 1] += row_off[i];
     }
 
     int* vertex_index = (int*) calloc(v_num, sizeof(int));
-    #pragma omp parallel for num_threads(max_threads) schedule(guided)
+    // #pragma omp parallel for num_threads(max_threads) schedule(guided)
     for (int i = 0; i < edge_size; i++)  {
         int src = e_x[i];
         int dst = e_x[i + edge_size];
         int index = __sync_fetch_and_add((int *)&vertex_index[src], 1);
-        index += row_off[src];
+        __sync_fetch_and_add((int *)&index, row_off[src]);
+        // index += row_off[src];
         col_indices[index] = dst;
         e_wr[index] = e_w[i];
     }

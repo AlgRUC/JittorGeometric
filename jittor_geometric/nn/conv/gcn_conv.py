@@ -6,13 +6,12 @@ from jittor import Var
 from jittor_geometric.nn.conv import MessagePassing
 from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
-
+import time
 from ..inits import glorot, zeros
-
 
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
-    
+
     fill_value = 2. if improved else 1.
 
     if isinstance(edge_index, Var):
@@ -93,18 +92,8 @@ class GCNConv(MessagePassing):
                         self._cached_edge_index = (edge_index, edge_weight)
                 else:
                     edge_index, edge_weight = cache[0], cache[1]
-        print("before nn")
-        abs_x=x.abs().sum()
-        print(abs_x)
         x = x @ self.weight
-        print("after nn")
-        abs_x=x.abs().sum()
-        print(abs_x)
-        out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
-                             size=None)
-        print("after graph")
-        abs_x=out.abs().sum()
-        print(abs_x)
+        out = self.propagate(edge_index, x=x, edge_weight=edge_weight, size=None)
         if self.bias is not None:
             out += self.bias
         return out

@@ -15,6 +15,7 @@ from jittor_geometric.ops import xxxx
 
 ### Example
 ```python
+# python api
 from jittor_geometric.ops import cootocsr
 data.csr = cootocsr(edge_index, edge_weight, v_num)
 ```

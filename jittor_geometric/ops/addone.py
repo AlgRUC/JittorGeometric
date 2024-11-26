@@ -22,9 +22,6 @@ class AddoneFunc(Function):
         return outputVar
 
     def grad(self, grad_output):
-        # print('25:')
-        # print(grad_output)
-        # print(grad_output.shape)
         return grad_output, None, None
     
 

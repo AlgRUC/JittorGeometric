@@ -10,7 +10,7 @@
 namespace jittor {
 
 struct AddoneOp : Op {
-    Var* output; //必须要一个output,暂时没找到解决办法
+    Var* output;
     Var* outputVar;
     Var* inputVar;
     float64 weight;

@@ -11,7 +11,6 @@ from jittor import Function
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.data import CSR
 module_path = os.path.dirname(__file__)
-# print(module_path)
 src = os.path.join(module_path, "cpp/cootocsr_op.cc")
 header = os.path.join(module_path, "cpp/cootocsr_op.h")
 

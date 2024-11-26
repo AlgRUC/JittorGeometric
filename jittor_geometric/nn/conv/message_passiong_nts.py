@@ -25,9 +25,8 @@ class MessagePassingNts(Module):
         super(MessagePassingNts, self).__init__()
 
     # graph operations
-    def propagate(self,x, csc: CSC, csr:CSR,size: Size = None):
-        out = self.aggregate_with_weight(x,csc,csr)  
-        return out
+    def propagate(self,x):
+        return 
 
     def aggregate_with_weight(self,x,csc,csr)->Var:
         """
@@ -36,7 +35,7 @@ class MessagePassingNts(Module):
         output=aggregateWithWeight(x,csc,csr)
         return output
 
-    def scatter_to_edge(self,x,csc)->Var:
+    def scatter_to_edge(self,x)->Var:
         """
         ScatterToEdge is an edge message generating operation t
         hat scatters the source and destination representations 
@@ -44,7 +43,7 @@ class MessagePassingNts(Module):
         """
         return
     
-    def edge_forward(self,x_j:Var)->Var:
+    def edge_forward(self,x:Var)->Var:
         """
         EdgeForward is a parameterized function defined on each 
         edge to generate an output message by combining the edge 
@@ -59,7 +58,7 @@ class MessagePassingNts(Module):
         """
         return
     
-    def vertex_forward(self,x_j:Var)->Var:
+    def vertex_forward(self,x:Var)->Var:
         """
         VertexForward is a parameterized function defined on each vertex 
         to generate new vertex representation by applying zero or several 
