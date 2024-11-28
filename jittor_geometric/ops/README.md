@@ -196,7 +196,7 @@ output = spmmcoo(x, edge_index, edge_weight)
 
 # Outputs
 # output: Result of SpMM
-
+```
 ### 8. `spmmcsr`
 Performs Sparse Matrix Multiplication (SpMM) using the CSR (Compressed Sparse Row) representation of the graph. This function supports both the forward and backward pass.
 
