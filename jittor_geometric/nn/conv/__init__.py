@@ -12,6 +12,7 @@ from .message_passiong_nts import MessagePassingNts
 from .gcn_conv_nts import GCNConvNts
 from .gat_conv import GATConv
 from .gcn_conv_spmm import GCNConvSpmm
+from .egnn_conv import EGNNConv
 __all__ = [
     'MessagePassing',
     'GCNConv',
@@ -21,7 +22,8 @@ __all__ = [
     'MessagePassingNts',
     'GCNConvNts',
     'GATConv',
-    'GCNConvSpmm'
+    'GCNConvSpmm',
+    'EGNNConv',
 ]
 
 classes = __all__

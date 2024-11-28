@@ -21,6 +21,10 @@ def glorot(var):
         stdv = math.sqrt(6.0 / (var.size(-2) + var.size(-1)))
         init.uniform_(var, -stdv, stdv)
 
+def xavier_normal(var):
+    if var is not None:
+        stdv = math.sqrt(2.0 / (var.size(-2) + var.size(-1)))
+        init.gauss_(var, mean=0.0, std=stdv)
 
 def zeros(var):
     if var is not None:
