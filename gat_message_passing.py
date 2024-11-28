@@ -50,17 +50,13 @@ jt.flags.use_cuda = 0
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
+parser.add_argument('--dataset', help='graph dataset')
 args = parser.parse_args()
+dataset=args.dataset
 
-dataset = 'Cora'
-# dataset = 'Citeseer'
-# dataset='PubMed'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
-# add by lusz
-total_forward_time = 0.0
-total_backward_time = 0.0
 
 if args.use_gdc:
     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
@@ -72,18 +68,13 @@ if args.use_gdc:
 
 v_num = data.x.shape[0]
 e_num = data.edge_index.shape[1]
-# print(e_num)
-# print(v_num)
 edge_index, edge_weight=data.edge_index,data.edge_attr
-# print(edge_index)
-# print(edge_weight)
 jt.flags.use_cuda = 0
 jt.flags.lazy_execution = 0
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         False, True)
 
-# edge_weight=jt.zeros(e_num)
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
@@ -98,7 +89,6 @@ class Net(nn.Module):
 
     def execute(self):
         x, csc =data.x , data.csc
-        # x = nn.relu(self.conv1(x, csc))
         x = nn.relu(self.conv1(x, csc))
         x = nn.dropout(x)
         x = nn.relu(self.conv2(x,csc))
@@ -109,37 +99,22 @@ model, data = Net(), data
 optimizer = nn.Adam([
     dict(params=model.conv1.parameters(), weight_decay=1e-4),
     dict(params=model.conv2.parameters(), weight_decay=1e-4)
-], lr=5e-3)  # Only perform weight-decay on first convolution. 0.01 1e-4origin 
+], lr=5e-3)
 
 
 def train():
-    global total_forward_time, total_backward_time
     model.train()
 
     pred = model()[data.train_mask]
     label = data.y[data.train_mask]
     loss = nn.nll_loss(pred, label)
-    # print("loss:")
-    # print(loss)
-    # print(loss)
-    # print(data.csc.edge_weight)
-    # backward
-    start_backward = time.time()
     optimizer.step(loss)
-    end_backward = time.time()
-    backward_time = end_backward - start_backward
-    total_backward_time += backward_time
 
 def test():
     model.eval()
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
-        # tmp = []
-        # for i in range(mask.shape[0]):
-        #     if mask[i] == True:
-        #         tmp.append(logits[i])
-        # logits_ = jt.stack(tmp)
         logits_=logits[mask]
         pred, _ = jt.argmax(logits_, dim=1)
         acc = pred.equal(y_).sum().item() / mask.sum().item()
