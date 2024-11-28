@@ -17,7 +17,7 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 from jittor_geometric.data import CSC,CSR
 from jittor_geometric.ops import cootocsr,cootocsc
-# 生成edge_weight(待优化)
+
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
 

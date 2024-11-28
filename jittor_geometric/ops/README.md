@@ -133,7 +133,6 @@ output = scatterToEdge(x, csc, flow)
 # output: Edge-level features of shape (e_num, dim)
 ```
 ### 6. `edgesoftmax`
-### 12. `EdgeSoftmax`
 
 Applies a softmax normalization to edge features based on the neighbors of each vertex, using the CSC (Compressed Sparse Column) format.
 
@@ -214,21 +213,15 @@ Performs Sparse Matrix Multiplication (SpMM) using the CSR (Compressed Sparse Ro
 During backpropagation, the gradient of the input `x` is computed using the CSR representation and the gradient of the output.
 
 #### Example
+```python
 from jittor_geometric.ops import spmmcsr
-
-# Example inputs
 x = jt.Var([[1.0, 2.0], [3.0, 4.0]])  # Vertex embeddings of shape (2, 2)
 csr = CSR(
     column_indices=jt.Var([0, 1]),
     edge_weight=jt.Var([0.5, 0.8]),
     row_offset=jt.Var([0, 1, 2])
 )
-
-# Sparse matrix multiplication
 output = spmmcsr(x, csr)
-
-# Outputs
-# output: Result of SpMM
 ```
 ### 9. `toundirected`
 Converts a directed graph into an undirected graph by adding reverse edges.
