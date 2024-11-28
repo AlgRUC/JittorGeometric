@@ -125,19 +125,11 @@ def test():
 
 train()
 best_val_acc = test_acc = 0
-# start = time.time()
 for epoch in range(1, 201):
     train()
-    # jt.sync_all()
-    # jt.display_memory_info()
     train_acc, val_acc, tmp_test_acc = test()
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc
     log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
     print(log.format(epoch, train_acc, best_val_acc, test_acc))
-
-# jt.sync_all()
-# end = time.time()
-# # print(end - start)
-# print("epoch_time"+str(end-start))
