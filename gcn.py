@@ -52,8 +52,7 @@ if args.use_gdc:
     data = gdc(data)
 v_num = data.x.shape[0]
 edge_index, edge_weight=data.edge_index,data.edge_attr
-jt.flags.use_cuda = 1
-jt.flags.lazy_execution = 0
+
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         False, True)
