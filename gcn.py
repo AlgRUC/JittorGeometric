@@ -8,57 +8,41 @@ import argparse
 
 import jittor as jt
 from jittor import nn
-from jittor_geometric.datasets import Planetoid
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset,Reddit
 import jittor_geometric.transforms as T
-from jittor_geometric.nn import GCNConvNts
+from jittor_geometric.nn import GCNConv
 import time
 from jittor import Var
 from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 from jittor_geometric.data import CSC,CSR
 from jittor_geometric.ops import cootocsr,cootocsc
-# 生成edge_weight(待优化)
-def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
-             add_self_loops=True, dtype=None):
-
-    fill_value = 2. if improved else 1.
-
-    if isinstance(edge_index, Var):
-        num_nodes = maybe_num_nodes(edge_index, num_nodes)
-
-        if edge_weight is None:
-            edge_weight = jt.ones((edge_index.size(1), ))
-
-        if add_self_loops:
-            edge_index, tmp_edge_weight = add_remaining_self_loops(
-                edge_index, edge_weight, fill_value, num_nodes)
-            assert tmp_edge_weight is not None
-            edge_weight = tmp_edge_weight
-
-        row, col = edge_index[0], edge_index[1]
-        shape = list(edge_weight.shape)
-        shape[0] = num_nodes
-        deg = jt.zeros(shape)
-        deg = jt.scatter(deg, 0, col, src=edge_weight, reduce='add')
-        deg_inv_sqrt = deg.pow(-0.5)
-        deg_inv_sqrt.masked_fill(deg_inv_sqrt == float('inf'), 0)
-        return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
-
+from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
 jt.flags.use_cuda = 1
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 parser.add_argument('--dataset', help='graph dataset')
+parser.add_argument('--spmm', default=True,help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
-dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+# path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
+path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
+if dataset in ['computers', 'photo']:
+    dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
+elif dataset in ['cora', 'citeseer', 'pubmed']:
+    dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+elif dataset in ['chameleon', 'squirrel']:
+    dataset = WikipediaNetwork(path, dataset, geom_gcn_preprocess=False)
+elif dataset in ['ogbn-arxiv','ogbn-products','ogbn-papers100M']:
+    dataset = OGBNodePropPredDataset(name=dataset, root=path)
+elif dataset in ['reddit']:
+    path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'Reddit')
+    dataset=Reddit(path)
 data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
-
 if args.use_gdc:
     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
                 normalization_out='col',
@@ -66,16 +50,13 @@ if args.use_gdc:
                 sparsification_kwargs=dict(method='topk', k=128,
                                            dim=0), exact=True)
     data = gdc(data)
-
 v_num = data.x.shape[0]
-
 edge_index, edge_weight=data.edge_index,data.edge_attr
-jt.flags.use_cuda = 0
+jt.flags.use_cuda = 1
 jt.flags.lazy_execution = 0
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         False, True)
-
 
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
@@ -84,9 +65,9 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConvNts(dataset.num_features, 16, cached=True,
-                             normalize=not args.use_gdc)
-        self.conv2 = GCNConvNts(16, dataset.num_classes, cached=True,
+        self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
+                             normalize=not args.use_gdc,)
+        self.conv2 = GCNConv(16, dataset.num_classes, cached=True,
                              normalize=not args.use_gdc)
 
     def execute(self):
@@ -107,7 +88,6 @@ optimizer = nn.Adam([
 def train():
     global total_forward_time, total_backward_time
     model.train()
-
     pred = model()[data.train_mask]
     label = data.y[data.train_mask]
     loss = nn.nll_loss(pred, label)

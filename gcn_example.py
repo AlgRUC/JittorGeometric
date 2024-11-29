@@ -1,3 +1,8 @@
+'''
+Description: 
+Author: lusz
+Date: 2024-11-14 19:28:16
+'''
 import os.path as osp
 import argparse
 
@@ -6,7 +11,6 @@ from jittor import nn
 from jittor_geometric.datasets import Planetoid
 import jittor_geometric.transforms as T
 from jittor_geometric.nn import GCNConv, ChebConv, SGConv, GCN2Conv
-# add by lusz
 import time
 
 jt.flags.use_cuda = 1

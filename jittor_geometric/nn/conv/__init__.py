@@ -9,7 +9,6 @@ from .cheb_conv import ChebConv
 from .sg_conv import SGConv
 from .gcn2_conv import GCN2Conv
 from .message_passiong_nts import MessagePassingNts
-from .gcn_conv_nts import GCNConvNts
 from .gat_conv import GATConv
 from .gcn_conv_spmm import GCNConvSpmm
 from .egnn_conv import EGNNConv
@@ -20,7 +19,6 @@ __all__ = [
     'SGConv',
     'GCN2Conv',
     'MessagePassingNts',
-    'GCNConvNts',
     'GATConv',
     'GCNConvSpmm',
     'EGNNConv',

@@ -6,7 +6,6 @@ from jittor import nn
 from jittor_geometric.datasets import Planetoid # 利用Planetoid类可以处理三个数据集，分别为“Cora”、“CiteSeer”和“PubMed”
 import jittor_geometric.transforms as T
 from jittor_geometric.nn import GCNConv, ChebConv, SGConv, GCN2Conv
-# add by lusz
 import time
 
 from jittor_geometric.jitgeo_loader import RandomNodeLoader

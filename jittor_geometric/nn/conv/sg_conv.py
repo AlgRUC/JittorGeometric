@@ -1,3 +1,8 @@
+'''
+Description: 
+Author: lusz
+Date: 2024-11-14 19:41:32
+'''
 from typing import Optional
 from jittor_geometric.typing import Adj, OptVar
 
