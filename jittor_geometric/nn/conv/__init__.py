@@ -10,7 +10,6 @@ from .sg_conv import SGConv
 from .gcn2_conv import GCN2Conv
 from .message_passiong_nts import MessagePassingNts
 from .gat_conv import GATConv
-from .gcn_conv_spmm import GCNConvSpmm
 from .egnn_conv import EGNNConv
 __all__ = [
     'MessagePassing',
@@ -20,7 +19,6 @@ __all__ = [
     'GCN2Conv',
     'MessagePassingNts',
     'GATConv',
-    'GCNConvSpmm',
     'EGNNConv',
 ]
 

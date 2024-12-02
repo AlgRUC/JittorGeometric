@@ -64,10 +64,10 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
-                             normalize=not args.use_gdc,)
-        self.conv2 = GCNConv(16, dataset.num_classes, cached=True,
-                             normalize=not args.use_gdc)
+        self.conv1 = GCNConv(dataset.num_features, 256, cached=True,
+                             normalize=not args.use_gdc,spmm=0)
+        self.conv2 = GCNConv(256, dataset.num_classes, cached=True,
+                             normalize=not args.use_gdc,spmm=0)
 
     def execute(self):
         x, csc,csr =data.x , data.csc, data.csr
@@ -97,11 +97,7 @@ def test():
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
-        tmp = []
-        for i in range(mask.shape[0]):
-            if mask[i] == True:
-                tmp.append(logits[i])
-        logits_ = jt.stack(tmp)
+        logits_=logits[mask]
         pred, _ = jt.argmax(logits_, dim=1)
         acc = pred.equal(y_).sum().item() / mask.sum().item()
         accs.append(acc)
