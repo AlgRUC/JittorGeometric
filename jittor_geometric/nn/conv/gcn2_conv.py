@@ -6,13 +6,14 @@ from math import log
 import jittor as jt
 from jittor import Var
 from jittor_geometric.nn.conv import MessagePassing
-from jittor_geometric.nn.conv.gcn_conv import gcn_norm
+from jittor_geometric.data import CSC, CSR
+from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 
 from ..inits import glorot
 
 
 def addmm(input_, mat1, mat2, *, beta=1, alpha=1, out=None):
-    return beta*input_ + alpha*(mat1 @ mat2)
+    return beta * input_ + alpha * (mat1 @ mat2)
 
 
 class GCN2Conv(MessagePassing):
@@ -38,75 +39,52 @@ class GCN2Conv(MessagePassing):
     edge weights via the optional :obj:`edge_weight` Var.
     """
 
-    _cached_edge_index: Optional[Tuple[Var, Var]]
-
-    def __init__(self, channels: int, alpha: float, theta: float = None,
-                 layer: int = None, shared_weights: bool = True,
-                 cached: bool = False, add_self_loops: bool = True,
-                 normalize: bool = True, **kwargs):
-
+    def __init__(self, in_channels: int, out_channels: int, cached: bool = False, add_self_loops: bool = True, 
+                 spmm: bool=False, **kwargs):
         kwargs.setdefault('aggr', 'add')
         super(GCN2Conv, self).__init__(**kwargs)
 
-        self.channels = channels
-        self.alpha = alpha
-        self.beta = 1.
-        if theta is not None or layer is not None:
-            assert theta is not None and layer is not None
-            self.beta = log(theta / layer + 1)
         self.cached = cached
-        self.normalize = normalize
-        self.add_self_loops = add_self_loops
-
         self._cached_edge_index = None
 
-        self.weight1 = jt.random((channels, channels))
+        self.weight1 = jt.random((in_channels, out_channels))
+        self.weight2 = jt.random((in_channels, out_channels))
 
-        if shared_weights:
-            self.weight2 = None
-        else:
-            self.weight2 = jt.random((channels, channels))
-
+        self.spmm = spmm
         self.reset_parameters()
 
     def reset_parameters(self):
         glorot(self.weight1)
         glorot(self.weight2)
-        self._cached_edge_index = None
+        
 
-    def execute(self, x: Var, x_0: Var, edge_index: Adj,
-                edge_weight: OptVar = None) -> Var:
-        """"""
+    def execute(self, x: Var, x_0: Var, csc: OptVar, csr: OptVar, alpha: float, beta: float) -> Var:        
+        if self.spmm and jt.flags.use_cuda==1:
+            out = self.propagate_spmm(x=x, csr=csr)
+        else:
+            out = self.propagate_msg(x=x, csc=csc, csr=csr)
 
-        if self.normalize:
-            if isinstance(edge_index, Var):
-                cache = self._cached_edge_index
-                if cache is None:
-                    edge_index, edge_weight = gcn_norm(  # yapf: disable
-                        edge_index, edge_weight, x.size(self.node_dim), False,
-                        self.add_self_loops, dtype=x.dtype)
-                    if self.cached:
-                        self._cached_edge_index = (edge_index, edge_weight)
-                else:
-                    edge_index, edge_weight = cache[0], cache[1]
-        # propagate_type: (x: Var, edge_weight: OptVar)
-        x = self.propagate(edge_index, x=x, edge_weight=edge_weight, size=None)
-        x.multiply(1 - self.alpha)
-        x_0 = self.alpha * x_0[:x.size(0)]
+        x.multiply(1 - alpha)
+        x_0 = alpha * x_0[:x.size(0)]
         if self.weight2 is None:
             out = x.add(x_0)
-            out = addmm(out, out, self.weight1, beta=1. - self.beta,
-                        alpha=self.beta)
+            out = addmm(out, out, self.weight1, beta=1. - beta,
+                        alpha=beta)
         else:
-            out = addmm(x, x, self.weight1, beta=1. - self.beta,
-                        alpha=self.beta)
-            out += addmm(x_0, x_0, self.weight2, beta=1. - self.beta,
-                         alpha=self.beta)
+            out = addmm(x, x, self.weight1, beta=1. - beta,
+                        alpha=beta)
+            out += addmm(x_0, x_0, self.weight2, beta=1. - beta,
+                         alpha=beta)
+
         return out
 
-    def message(self, x_j: Var, edge_weight: Var) -> Var:
-        # return edge_weight.view(-1, 1) * x_jd
-        return x_j if edge_weight is None else edge_weight.view(-1, 1) * x_j
+    def propagate_msg(self, x, csc: CSC, csr: CSR):
+        out = aggregateWithWeight(x, csc, csr)  
+        return out
+    
+    def propagate_spmm(self, x, csr: CSR):
+        out = SpmmCsr(x, csr)
+        return out
 
     def __repr__(self):
         return '{}({}, alpha={}, beta={})'.format(self.__class__.__name__,

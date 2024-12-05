@@ -11,8 +11,10 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 
 from ..inits import glorot, zeros
-from jittor_geometric.data import CSC,CSR
-from jittor_geometric.ops import SpmmCsr,aggregateWithWeight
+from jittor_geometric.data import CSC, CSR
+from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
+
+
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
     fill_value = 2. if improved else 1.
@@ -34,6 +36,7 @@ def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
         deg_inv_sqrt.masked_fill(deg_inv_sqrt == float('inf'), 0)
         return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
     
+    
 class GCNConv(Module):
     r"""The graph convolutional operator from the `"Semi-supervised
     Classification with Graph Convolutional Networks"
@@ -43,17 +46,11 @@ class GCNConv(Module):
     _cached_edge_index: Optional[Tuple[Var, Var]]
     _cached_csc: Optional[CSC]
     def __init__(self, in_channels: int, out_channels: int,
-                 improved: bool = False, cached: bool = False,
-                 add_self_loops: bool = True, normalize: bool = True,
-                 bias: bool = True, spmm:bool =True,**kwargs):
+                 bias: bool = True, spmm:bool=True,**kwargs):
         kwargs.setdefault('aggr', 'add')
         super(GCNConv, self).__init__(**kwargs)
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.improved = improved
-        self.cached = cached
-        self.add_self_loops = add_self_loops
-        self.normalize = normalize
         self._cached_edge_index = None
         self._cached_adj_t = None
         self.weight = jt.random((in_channels, out_channels))
@@ -73,7 +70,7 @@ class GCNConv(Module):
     def execute(self, x: Var, csc: OptVar, csr: OptVar) -> Var:
         x = x @ self.weight
         if self.spmm and jt.flags.use_cuda==1:
-            out=self.propagate_spmm(x=x,csr=csr)
+            out = self.propagate_spmm(x=x, csr=csr)
         else:
             out = self.propagate_msg(x=x, csc=csc,csr=csr)
         if self.bias is not None:
@@ -82,11 +79,11 @@ class GCNConv(Module):
 
     # propagate by message passing
     def propagate_msg(self,x, csc: CSC, csr:CSR):
-        out=aggregateWithWeight(x,csc,csr)  
+        out = aggregateWithWeight(x,csc,csr)  
         return out
     
     # propagate by spmm
-    def propagate_spmm(self,x,csr:CSR):
+    def propagate_spmm(self, x, csr:CSR):
         out = SpmmCsr(x,csr)  
         return out
     
