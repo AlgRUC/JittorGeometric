@@ -93,7 +93,6 @@ class Data(object):
         self.pos = pos
         self.normal = normal
         self.face = face
-        # add by lusz
         self.csr = CSR(column_indices, row_offset, csr_edge_weight)
         self.csc = CSC(row_indices, column_offset, csc_edge_weight)
         for key, item in kwargs.items():
