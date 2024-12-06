@@ -12,6 +12,8 @@ from jittor_geometric.data import InMemoryDataset, download_url
 import jittor as jt
 import numpy as np
 from jittor_geometric.utils import coalesce
+
+
 class Reddit(InMemoryDataset):
     r"""The Reddit dataset from the `"Inductive Representation Learning on
     Large Graphs" <https://arxiv.org/abs/1706.02216>`_ paper, containing
