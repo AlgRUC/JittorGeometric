@@ -85,7 +85,7 @@ def test():
     model.eval()
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        y_ = data.y[mask]
+        y_ = data.y[mask] 
         logits_=logits[mask]
         pred, _ = jt.argmax(logits_, dim=1)
         acc = pred.equal(y_).sum().item() / mask.sum().item()
