@@ -8,6 +8,9 @@ import argparse
 
 import jittor as jt
 from jittor import nn
+import sys,os
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset, HeteroDataset, Reddit
 import jittor_geometric.transforms as T
 from jittor_geometric.nn import GCNConv

@@ -12,8 +12,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 module_path = os.path.dirname(__file__)
 src = os.path.join(module_path, "cpp/spmmcoo_op.cc")
 header = os.path.join(module_path, "cpp/spmmcoo_op.h")
-print(src)
-print(header)
 spmmcoo_op = jt.compile_custom_ops((src, header))
 # Run the test
 jt.flags.use_cuda=1
