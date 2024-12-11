@@ -76,10 +76,7 @@ def train():
     global total_forward_time, total_backward_time
     model.train()
     pred = model()[data.train_mask]
-    if args.dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
-        label = data.y[data.train_mask[0]]
-    else:
-        label = data.y[data.train_mask]
+    label = data.y[data.train_mask]
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
@@ -87,10 +84,7 @@ def test():
     model.eval()
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        if args.dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
-            y_=data.y[mask[0]]
-        else:
-            y_ = data.y[mask] 
+        y_ = data.y[mask] 
         logits_=logits[mask]
         pred, _ = jt.argmax(logits_, dim=1)
         acc = pred.equal(y_).sum().item() / mask.sum().item()
