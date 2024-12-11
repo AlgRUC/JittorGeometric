@@ -57,9 +57,7 @@ class Reddit(InMemoryDataset):
         pre_transform: Optional[Callable] = None
     ) -> None:
         super().__init__(root, transform, pre_transform)
-        print(self.processed_paths[0])
         self.data,self.slices= jt.load(self.processed_paths[0])
-        print(self.data)
 
     @property
     def raw_file_names(self) -> List[str]:

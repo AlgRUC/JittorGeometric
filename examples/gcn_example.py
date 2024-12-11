@@ -39,8 +39,7 @@ elif dataset in ['ogbn-arxiv','ogbn-products','ogbn-papers100M']:
 elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
     dataset = HeteroDataset(path, dataset)
 elif dataset in ['reddit']:
-    path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'Reddit')
-    dataset = Reddit(path)
+    dataset = Reddit(os.path.join(path, 'Reddit'))
 
 data = dataset[0]
 total_forward_time = 0.0

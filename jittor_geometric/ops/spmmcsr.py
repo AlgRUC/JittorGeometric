@@ -24,14 +24,12 @@ class SpmmCsrFunc(Function):
         self.v_num=v_num
         self.feature_dim=feature_dim
         output=jt.zeros(v_num,feature_dim)
-        dtype=x.dtype
-        self.dtype=dtype
-        spmmcsr_op.spmmcsr(output,x,csr.column_indices,csr.edge_weight,csr.row_offset,v_num,v_num,dtype).fetch_sync()
+        spmmcsr_op.spmmcsr(output,x,csr.column_indices,csr.edge_weight,csr.row_offset,v_num,v_num).fetch_sync()
         return output
 
     def grad(self, grad_output):
         output_grad=jt.zeros(self.v_num,self.feature_dim)
-        spmmcsr_op.spmmcsr(output_grad,grad_output,self.csr.column_indices,self.csr.edge_weight,self.csr.row_offset,self.v_num,self.v_num,self.dtype).fetch_sync()
+        spmmcsr_op.spmmcsr(output_grad,grad_output,self.csr.column_indices,self.csr.edge_weight,self.csr.row_offset,self.v_num,self.v_num).fetch_sync()
         return output_grad,None
     
 

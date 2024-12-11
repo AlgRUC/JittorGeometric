@@ -37,7 +37,6 @@ def train():
     pred = model()[data.train_mask]
     label = data.y[data.train_mask]
     loss = nn.nll_loss(pred, label)
-    # print(loss)
     optimizer.step(loss)
 
 

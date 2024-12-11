@@ -31,7 +31,6 @@ def cootocsc(edge_index,edge_weight,v_num):
     csc_edge_weight=jt.zeros(e_num)
     row_indices = jt.zeros((e_num,), dtype='int32')
     column_offset = jt.zeros((v_num+1,), dtype='int32')
-    dtype=edge_weight.dtype
-    cootocsc_op.cootocsc(edge_index, edge_weight, row_indices, column_offset, csc_edge_weight, v_num, dtype).fetch_sync()
+    cootocsc_op.cootocsc(edge_index, edge_weight, row_indices, column_offset, csc_edge_weight, v_num).fetch_sync()
     csc=CSC(row_indices,column_offset,csc_edge_weight)
     return csc

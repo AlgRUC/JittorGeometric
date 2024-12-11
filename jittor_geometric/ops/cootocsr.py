@@ -30,7 +30,6 @@ def cootocsr(edge_index,edge_weight,v_num):
     csr_edge_weight=jt.zeros(e_num)
     column_indices = jt.zeros((e_num,), dtype='int32')
     row_offset = jt.zeros((v_num+1,), dtype='int32')
-    dtype=edge_weight.dtype
-    cootocsr_op.cootocsr(edge_index, edge_weight, column_indices, row_offset, csr_edge_weight, v_num, dtype).fetch_sync()
+    cootocsr_op.cootocsr(edge_index, edge_weight, column_indices, row_offset, csr_edge_weight, v_num).fetch_sync()
     csr=CSR(column_indices,row_offset,csr_edge_weight)
     return csr

@@ -26,7 +26,7 @@ def test_coo_to_csr():
 
     # Create and compile the custom op
     cootocsr_op = jt.compile_custom_ops((src, header))
-    cootocsr_op.cootocsr(edge_index, edge_weight, column_indices, row_offset, csr_edge_weight, v_num, 'float32').fetch_sync()
+    cootocsr_op.cootocsr(edge_index, edge_weight, column_indices, row_offset, csr_edge_weight, v_num).fetch_sync()
     
     print("CSR Edge Weight:", csr_edge_weight)
     print("Column Indices:", column_indices)

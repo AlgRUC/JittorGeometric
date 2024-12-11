@@ -19,7 +19,7 @@ struct SpmmcsrOp : Op {
     Var* output;
     int A_row;
     int A_col;
-    SpmmcsrOp(Var* outputVar_, Var* x_, Var* col_indices_,Var* value_,Var* row_offset_,int A_row,int A_col,NanoString dtype_=ns_float32);
+    SpmmcsrOp(Var* outputVar_, Var* x_, Var* col_indices_,Var* value_,Var* row_offset_,int A_row,int A_col);
     const char* name() const override { return "spmmcsr"; }
     DECLARE_jit_run;
 };

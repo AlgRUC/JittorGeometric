@@ -18,11 +18,10 @@ struct CootocsrOp : Op {
     Var* edge_index;
     Var* coo_edge_weight;// COO
 
-    NanoString dtype;
     Var* output;
     int v_num;
 
-    CootocsrOp(Var* edge_index_,Var* coo_edge_weight_,Var* column_indices_,Var* row_offset_,Var* csr_edge_weight_,int v_num_,NanoString dtype_=ns_float32);
+    CootocsrOp(Var* edge_index_,Var* coo_edge_weight_,Var* column_indices_,Var* row_offset_,Var* csr_edge_weight_,int v_num_);
     const char* name() const override { return "cootocsr"; }
     DECLARE_jit_run;
 };
