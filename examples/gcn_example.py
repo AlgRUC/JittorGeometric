@@ -58,8 +58,8 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.5):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=16,spmm=0)
-        self.conv2 = GCNConv(in_channels=16, out_channels=dataset.num_classes,spmm=0)
+        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=1)
+        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=1)
         self.dropout = dropout
 
     def execute(self):
@@ -77,7 +77,10 @@ def train():
     global total_forward_time, total_backward_time
     model.train()
     pred = model()[data.train_mask]
-    label = data.y[data.train_mask]
+    if args.dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
+        label = data.y[data.train_mask[0]]
+    else:
+        label = data.y[data.train_mask]
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
@@ -85,7 +88,10 @@ def test():
     model.eval()
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        y_ = data.y[mask] 
+        if args.dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
+            y_=data.y[mask[0]]
+        else:
+            y_ = data.y[mask] 
         logits_=logits[mask]
         pred, _ = jt.argmax(logits_, dim=1)
         acc = pred.equal(y_).sum().item() / mask.sum().item()
@@ -107,4 +113,4 @@ for epoch in range(1, 201):
 
 jt.sync_all()
 end = time.time()
-print("epoch_time"+str(end-start))
+print("Training_time"+str(end-start))

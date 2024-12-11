@@ -25,9 +25,8 @@ class AggregateFunc(Function):
             edge_weight=csc.edge_weight
         indices=csc.row_indices
         offset=csc.column_offset
-        dtype=edge_weight.dtype
         output=x
-        aggregate_op.aggregate(output,x,indices,offset,edge_weight,True,dtype).fetch_sync()
+        aggregate_op.aggregate(output,x,indices,offset,edge_weight,True).fetch_sync()
         return output
 
     def grad(self, grad_output):
@@ -37,9 +36,8 @@ class AggregateFunc(Function):
             edge_weight=self.weight
         indices=self.csr.column_indices
         offset=self.csr.row_offset
-        dtype=edge_weight.dtype
         output_grad=grad_output
-        aggregate_op.aggregate(output_grad,grad_output,indices,offset,edge_weight,False,dtype).fetch_sync()
+        aggregate_op.aggregate(output_grad,grad_output,indices,offset,edge_weight,False).fetch_sync()
         return output_grad,None,None
     
 '''

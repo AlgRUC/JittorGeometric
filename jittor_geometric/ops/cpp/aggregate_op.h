@@ -17,9 +17,8 @@ struct AggregateOp : Op {
     Var* offset;
     Var* weight;
     bool forward;
-    NanoString dtype;
     Var* output;
-    AggregateOp(Var* outputVar, Var* x_,Var* indices_,Var* offset_,Var* weight_,bool forward_,NanoString dtype_=ns_float32);
+    AggregateOp(Var* outputVar, Var* x_,Var* indices_,Var* offset_,Var* weight_,bool forward_);
     const char* name() const override { return "aggregate"; }
     DECLARE_jit_run;
 };
