@@ -57,8 +57,8 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.5):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=1)
-        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=1)
+        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=0)
+        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=0)
         self.dropout = dropout
 
     def execute(self):
