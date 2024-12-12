@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 parser.add_argument('--dataset', help='graph dataset')
-parser.add_argument('--spmm', default=True,help='whether using spmm')
+parser.add_argument('--spmm', default=False,help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
@@ -57,8 +57,8 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.5):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=0)
-        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=0)
+        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=args.spmm)
+        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=args.spmm)
         self.dropout = dropout
 
     def execute(self):
