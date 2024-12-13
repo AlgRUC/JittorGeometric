@@ -32,15 +32,13 @@ class SpmmCooFunc(Function):
         self.v_num=v_num
         self.feature_dim=feature_dim
         output=jt.zeros(v_num,feature_dim)
-        dtype=x.dtype
-        self.dtype=dtype
-        spmmcoo_op.spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num,dtype).fetch_sync()
+        spmmcoo_op.spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num).fetch_sync()
         print(output)
         return output
 
     def grad(self, grad_output):
         output_grad=jt.zeros(self.v_num,self.feature_dim)
-        spmmcoo_op.spmmcoo(output_grad,grad_output,self.row_indices,self.col_indices,self.edge_weight,self.v_num,self.v_num,self.dtype).fetch_sync()
+        spmmcoo_op.spmmcoo(output_grad,grad_output,self.row_indices,self.col_indices,self.edge_weight,self.v_num,self.v_num).fetch_sync()
         return output_grad,None,None
     
 

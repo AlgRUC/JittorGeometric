@@ -17,11 +17,10 @@ struct SpmmcooOp : Op {
     Var* row_indices;
     Var* col_indices;
     Var* value;
-    NanoString dtype;
     Var* output;
     int A_row;
     int A_col;
-    SpmmcooOp(Var* outputVar_, Var* x_, Var* row_indices_,Var* col_indices_,Var* value_,int A_row,int A_col,NanoString dtype_=ns_float32);
+    SpmmcooOp(Var* outputVar_, Var* x_, Var* row_indices_,Var* col_indices_,Var* value_,int A_row,int A_col);
     const char* name() const override { return "spmmcoo"; }
     DECLARE_jit_run;
 };
