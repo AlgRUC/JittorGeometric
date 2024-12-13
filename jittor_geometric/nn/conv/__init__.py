@@ -11,6 +11,10 @@ from .gcn2_conv import GCN2Conv
 from .message_passiong_nts import MessagePassingNts
 from .gat_conv import GATConv
 from .egnn_conv import EGNNConv
+from .appnp_conv import APPNP
+from .gpr_conv import GPRGNN
+from .bernnet_conv import BernNet
+from .chebnet2_conv import ChebNetII
 __all__ = [
     'MessagePassing',
     'GCNConv',
@@ -20,6 +24,10 @@ __all__ = [
     'MessagePassingNts',
     'GATConv',
     'EGNNConv',
+    'APPNP',
+    'GPRGNN',
+    'BernNet',
+    'ChebNetII',
 ]
 
 classes = __all__
