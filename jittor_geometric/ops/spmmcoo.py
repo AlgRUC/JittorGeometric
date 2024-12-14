@@ -10,9 +10,10 @@ from jittor import nn
 from jittor import Function
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 module_path = os.path.dirname(__file__)
-src = os.path.join(module_path, "cpp/spmmcoo_op.cc")
-header = os.path.join(module_path, "cpp/spmmcoo_op.h")
-spmmcoo_op = jt.compile_custom_ops((src, header))
+# src = os.path.join(module_path, "cpp/spmmcoo_op.cc")
+# header = os.path.join(module_path, "cpp/spmmcoo_op.h")
+# spmmcoo_op = jt.compile_custom_ops((src, header)) 
+from jittor.compile_extern import cusparse_ops # latest jittor
 # Run the test
 jt.flags.use_cuda=1
 class SpmmCooFunc(Function):
@@ -32,13 +33,13 @@ class SpmmCooFunc(Function):
         self.v_num=v_num
         self.feature_dim=feature_dim
         output=jt.zeros(v_num,feature_dim)
-        spmmcoo_op.spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num).fetch_sync()
+        cusparse_ops.cusparse_spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num).fetch_sync()
         print(output)
         return output
 
     def grad(self, grad_output):
         output_grad=jt.zeros(self.v_num,self.feature_dim)
-        spmmcoo_op.spmmcoo(output_grad,grad_output,self.row_indices,self.col_indices,self.edge_weight,self.v_num,self.v_num).fetch_sync()
+        cusparse_ops.cusparse_spmmcoo(output_grad,grad_output,self.row_indices,self.col_indices,self.edge_weight,self.v_num,self.v_num).fetch_sync()
         return output_grad,None,None
     
 

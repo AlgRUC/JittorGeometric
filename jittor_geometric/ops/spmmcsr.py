@@ -14,7 +14,7 @@ module_path = os.path.dirname(__file__)
 # src = os.path.join(module_path, "cpp/spmmcsr_op.cc")
 # header = os.path.join(module_path, "cpp/spmmcsr_op.h")
 # spmmcsr_op = jt.compile_custom_ops((src, header))
-from jittor.compile_extern import cusparse_ops
+# latest jittor
 # Run the test
 jt.flags.use_cuda=1
 class SpmmCsrFunc(Function):
