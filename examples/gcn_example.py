@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 parser.add_argument('--dataset', help='graph dataset')
-parser.add_argument('--spmm', default=False,help='whether using spmm')
+parser.add_argument('--spmm', default=True,help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
