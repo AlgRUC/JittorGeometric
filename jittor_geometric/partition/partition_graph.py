@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from jittor_geometric.data import GraphChunk,CSR
 from jittor import Var
 from jittor_geometric.partition.chunk_manager import ChunkManager
-from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, WebKB, OGBNodePropPredDataset, Reddit
+from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset, HeteroDataset, Reddit
 import jittor_geometric.transforms as T
 from pymetis import part_graph
 import numpy as np
@@ -36,20 +36,20 @@ def edge_index_to_adj_list(edge_index, num_nodes):
             adj_list[src].append(dst)
     return adj_list
 
-
+dataset=args.dataset
 # Load dataset
-if dataset_name in ['computers', 'photo']:
-    dataset = Amazon(path, dataset_name, transform=T.NormalizeFeatures())
-elif dataset_name in ['cora', 'citeseer', 'pubmed']:
-    dataset = Planetoid(path, dataset_name, transform=T.NormalizeFeatures())
-elif dataset_name in ['chameleon', 'squirrel']:
-    dataset = WikipediaNetwork(path, dataset_name, geom_gcn_preprocess=False)
-elif dataset_name in ['ogbn-arxiv', 'ogbn-products']:
-    dataset = OGBNodePropPredDataset(name=dataset_name, root=path)
-elif dataset_name == 'reddit':
-    dataset = Reddit(path)
-else:
-    raise ValueError(f"Dataset {dataset_name} is not recognized or supported.")
+if dataset in ['computers', 'photo']:
+    dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
+elif dataset in ['cora', 'citeseer', 'pubmed']:
+    dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+elif dataset in ['chameleon', 'squirrel']:
+    dataset = WikipediaNetwork(path, dataset, geom_gcn_preprocess=False)
+elif dataset in ['ogbn-arxiv','ogbn-products','ogbn-papers100M']:
+    dataset = OGBNodePropPredDataset(name=dataset, root=path)
+elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
+    dataset = HeteroDataset(path, dataset)
+elif dataset in ['reddit']:
+    dataset = Reddit(os.path.join(path, 'Reddit'))
 data = dataset[0]
 edge_index = data.edge_index.numpy()
 num_nodes = data.x.shape[0]
