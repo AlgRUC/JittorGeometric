@@ -16,7 +16,7 @@ jt.flags.use_cuda = 0 #jt.has_cuda
 
 # Load the dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
-dataset = JODIEDataset(path, name='wikipedia') # wikipedia, mooc, reddit, lastfm
+dataset = JODIEDataset(path, name='mooc') # wikipedia, mooc, reddit, lastfm
 data = dataset[0]
 
 min_dst_idx, max_dst_idx = int(data.dst.min()), int(data.dst.max())
@@ -86,7 +86,7 @@ optimizer = jt.nn.Adam(
 criterion = jt.nn.BCEWithLogitsLoss()
 
 # Helper vector to map global node indices to local ones.
-assoc = jt.empty(data.num_nodes, dtype=jt.int64)
+assoc = jt.empty(data.num_nodes, dtype=jt.int32)
 
 
 def train():
@@ -141,7 +141,7 @@ def test(loader):
     aps, aucs = [], []
     for batch in loader:
         src, pos_dst, t, msg = batch['src'], batch['dst'], batch['t'], batch['msg']
-        neg_dst = jt.randint(min_dst_idx, max_dst_idx + 1, (src.shape[0],), dtype=jt.int64)
+        neg_dst = jt.randint(min_dst_idx, max_dst_idx + 1, (src.shape[0],), dtype=jt.int32)
 
         n_id = jt.concat([src, pos_dst, neg_dst]).unique()
         n_id, edge_index, e_id = neighbor_loader(n_id)

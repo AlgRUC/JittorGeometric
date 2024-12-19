@@ -15,6 +15,8 @@ from .appnp_conv import APPNP
 from .gpr_conv import GPRGNN
 from .bernnet_conv import BernNet
 from .chebnet2_conv import ChebNetII
+from .transformer_conv import TransformerConv
+
 __all__ = [
     'MessagePassing',
     'GCNConv',
@@ -28,6 +30,7 @@ __all__ = [
     'GPRGNN',
     'BernNet',
     'ChebNetII',
+    'TransformerConv',
 ]
 
 classes = __all__
