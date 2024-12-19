@@ -1,9 +1,11 @@
 import os.path as osp
+import sys
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 import jittor as jt
 from sklearn.metrics import average_precision_score, roc_auc_score
 from jittor.nn import Linear
-from jittor_geometric.datasets import JODIEDataset
-from jittor_geometric.loader import TemporalDataLoader
+from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
 from jittor_geometric.nn import TGNMemory, TransformerConv
 from jittor_geometric.nn.models.tgn import (
     IdentityMessage,
@@ -12,11 +14,11 @@ from jittor_geometric.nn.models.tgn import (
 )
 from tqdm import *
 
-jt.flags.use_cuda = 0 #jt.has_cuda
+jt.flags.use_cuda = 1 #jt.has_cuda
 
 # Load the dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
-dataset = JODIEDataset(path, name='mooc') # wikipedia, mooc, reddit, lastfm
+dataset = JODIEDataset(path, name='wikipedia') # wikipedia, mooc, reddit, lastfm
 data = dataset[0]
 
 min_dst_idx, max_dst_idx = int(data.dst.min()), int(data.dst.max())
