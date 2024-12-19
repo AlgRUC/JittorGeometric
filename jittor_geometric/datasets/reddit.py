@@ -84,19 +84,14 @@ class Reddit(InMemoryDataset):
         adj = sp.load_npz(osp.join(self.raw_dir, 'reddit_graph.npz'))
         row = jt.array(adj.row).to(jt.int32)
         col = jt.array(adj.col).to(jt.int32)
-        row = jt.unsqueeze(row, dim=1)  # 将 row 变为形状 [114615892, 1]
-        col = jt.unsqueeze(col, dim=1)  # 将 col 变为形状 [114615892, 1]
-        # print(row.shape)
-        # print(col.shape)
+        row = jt.unsqueeze(row, dim=1)
+        col = jt.unsqueeze(col, dim=1) 
 
         arr=[]
         arr.append(row)
         arr.append(col)
         arr2 = jt.concat(arr, dim=1).transpose()
-        # print(arr2.shape)
-        # print(type(arr2))
         edge_index,_ = coalesce(arr2, num_nodes=x.size(0))
-        # print(type(edge_index))
         data = Data(x=x, edge_index=edge_index, y=y)
         data.train_mask = split == 1
         data.val_mask = split == 2
