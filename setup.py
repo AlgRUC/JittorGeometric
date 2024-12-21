@@ -1,6 +1,21 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
-
+module = Extension('cpp',
+                   sources=['jittor_geometric/ops/cpp/addone_op.cc',
+                            'jittor_geometric/ops/cpp/aggregate_op.cc',
+                            'jittor_geometric/ops/cpp/cootocsc_op.cc',
+                            'jittor_geometric/ops/cpp/cootocsr_op.cc',
+                            'jittor_geometric/ops/cpp/edgesoftmax_op.cc',
+                            'jittor_geometric/ops/cpp/edgesoftmaxbackward_op.cc',
+                            'jittor_geometric/ops/cpp/edgetovertex_op.cc',
+                            'jittor_geometric/ops/cpp/scattertoedge_op.cc',
+                            'jittor_geometric/ops/cpp/spmmcoo_op.cc',
+                            'jittor_geometric/ops/cpp/spmmcsr_op.cc',
+                            'jittor_geometric/ops/cpp/toundirected_op.cc',
+                            ],
+                   include_dirs=['jittor_geometric/ops/cpp'],
+                   language='c++',
+                   )
 
 setup(
     name='jittor_geometric',
@@ -25,4 +40,5 @@ setup(
     #
     ],
     # python_requires='',
+    ext_modules=[module],
 )
