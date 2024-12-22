@@ -26,7 +26,7 @@ parser.add_argument('--dataset', default="cora", help='graph dataset')
 parser.add_argument('--alpha', type=float, default=0.2, help='alpha for PPR')
 parser.add_argument('--K', type=int, default=10, help='number of coe')
 parser.add_argument('--Init', type=str, default="PPR", help='Init of coe')
-parser.add_argument('--spmm', default=True,help='whether using spmm')
+parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')

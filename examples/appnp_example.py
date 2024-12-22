@@ -25,7 +25,7 @@ parser.add_argument('--use_gdc', action='store_true',
 parser.add_argument('--dataset', default="cora", help='graph dataset')
 parser.add_argument('--alpha', type=float, default=0.1, help='alpha for PPR')
 parser.add_argument('--K', type=int, default=10, help='number of coe')
-parser.add_argument('--spmm', default=False,help='whether using spmm')
+parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
@@ -68,9 +68,9 @@ class Net(nn.Module):
 
     def execute(self):
         x, csc, csr = data.x, data.csc, data.csr
-        x = nn.dropout(x, self.dropout)
+        x = nn.dropout(x, self.dropout, is_train=self.training)
         x = nn.relu(self.lin1(x))
-        x = nn.dropout(x, self.dropout)
+        x = nn.dropout(x, self.dropout, is_train=self.training)
         x = self.lin2(x)
         x = self.prop(x, csc, csr)
         

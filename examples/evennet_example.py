@@ -13,17 +13,19 @@ root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset, HeteroDataset, Reddit
 import jittor_geometric.transforms as T
-from jittor_geometric.utils import get_laplacian, add_self_loops
-from jittor_geometric.nn import BernNet
+from jittor_geometric.nn import EvenNet
 import time
 from jittor_geometric.ops import cootocsr,cootocsc
+from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 parser.add_argument('--dataset', default="cora", help='graph dataset')
-parser.add_argument('--K', type=int, default=5, help='number of coe')
+parser.add_argument('--alpha', type=float, default=0.2, help='alpha for PPR')
+parser.add_argument('--K', type=int, default=10, help='number of coe')
+parser.add_argument('--Init', type=str, default="PPR", help='Init of coe')
 parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
@@ -47,18 +49,12 @@ total_forward_time = 0.0
 total_backward_time = 0.0
 v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
-
-#L=I-D^(-0.5)AD^(-0.5)
-edge_index1, edge_weight1 = get_laplacian(edge_index, edge_weight, normalization='sym', dtype=data.x.dtype, num_nodes=v_num)
-#2I-L
-edge_index2, edge_weight2 = add_self_loops(edge_index1, -edge_weight1, fill_value=2., num_nodes=v_num)
-
+edge_index, edge_weight = gcn_norm(
+                        edge_index, edge_weight,v_num,
+                        improved=False, add_self_loops=True)
 with jt.no_grad():
-    data.csc1 = cootocsc(edge_index1, edge_weight1, v_num)
-    data.csr1 = cootocsr(edge_index1, edge_weight1, v_num)
-
-    data.csc2 = cootocsc(edge_index2, edge_weight2, v_num)
-    data.csr2 = cootocsr(edge_index2, edge_weight2, v_num)
+    data.csc = cootocsc(edge_index, edge_weight, v_num)
+    data.csr = cootocsr(edge_index, edge_weight, v_num)
 
 
 class Net(nn.Module):
@@ -68,19 +64,16 @@ class Net(nn.Module):
         self.lin1 = nn.Linear(dataset.num_features, hidden)
         self.lin2 = nn.Linear(hidden, dataset.num_classes)
         
-        self.prop = BernNet(args.K)
+        self.prop = EvenNet(args.K, args.alpha, args.Init)
         self.dropout = dropout
 
     def execute(self):
-        x = data.x
-        csc1, csr1 = data.csc1, data.csr1
-        csc2, csr2 = data.csc2, data.csr2
-
-        x = nn.dropout(x, self.dropout, is_train=self.training)
+        x, csc, csr = data.x, data.csc, data.csr
+        x = nn.dropout(x, self.dropout)
         x = nn.relu(self.lin1(x))
-        x = nn.dropout(x, self.dropout, is_train=self.training)
+        x = nn.dropout(x, self.dropout)
         x = self.lin2(x)
-        x = self.prop(x, csc1, csr1, csc2, csr2)
+        x = self.prop(x, csc, csr)
         
         return nn.log_softmax(x, dim=1)
 
