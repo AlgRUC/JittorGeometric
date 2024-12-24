@@ -24,7 +24,7 @@ class TemporalData(object):
             idx = jittor.Var(idx)
         elif isinstance(idx, slice):
             pass
-        elif isinstance(idx, jittor.Var) and (idx.dtype == jittor.long
+        elif isinstance(idx, jittor.Var) and (idx.dtype == jittor.int32
                                                 or idx.dtype == jittor.bool):
             pass
         else:
@@ -101,6 +101,9 @@ class TemporalData(object):
         test_idx = int((self.t <= test_time).sum()) + 1
 
         return self[:val_idx], self[val_idx:test_idx], self[test_idx:]
+    
+    def train_val_test_split_w_mask(self):
+        return self[jittor.Var(self.train_mask)], self[jittor.Var(self.val_mask)], self[jittor.Var(self.test_mask)]
 
     def seq_batches(self, batch_size):
         for start in range(0, self.num_events, batch_size):
