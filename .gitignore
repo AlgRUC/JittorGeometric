@@ -25,3 +25,6 @@ dist/
 core
 __data__
 data/
+*.log
+examples/dyrep_example.py
+examples/jodie_example.py
