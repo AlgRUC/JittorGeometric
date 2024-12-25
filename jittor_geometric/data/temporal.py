@@ -74,6 +74,12 @@ class TemporalData(object):
             return self.src.shape[0]
         return self.src.size(0)
 
+    @property
+    def num_edges(self):
+        if isinstance(self.src,np.ndarray):
+            return self.src.shape[0]
+        return self.src.size(0)
+
     def __apply__(self, item, func):
         if jittor.is_Var(item):
             return func(item)

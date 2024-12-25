@@ -1,4 +1,3 @@
-
 import jittor as jt
 from jittor import nn
 import numpy as np
@@ -265,7 +264,8 @@ def test(loader):
     model.eval()
     res_list = {}
     ap_list, auc_list, mrr_list = [], [], []
-    for _, batch_data in enumerate(loader):
+    loader_tqdm = tqdm(loader, ncols=120)
+    for _, batch_data in enumerate(loader_tqdm):
         src, dst, t, neg_dst = batch_data.src, batch_data.dst, batch_data.t, batch_data.neg_dst
         load_time_e = time.perf_counter()
         src_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=src, node_interact_times=t,num_neighbors=num_neighbors)
@@ -342,14 +342,17 @@ dropout = 0.1
 criterion = jt.nn.BCEWithLogitsLoss()
 dataset_name = 'wikipedia'
 path='./data/'
-if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink', 'wikipedia',]:
-    dataset = TGBSeqDataset(root=path, name='GoogleLocal')
+if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink', 'wikipedia']:
+    dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
     val_idx=np.nonzero(dataset.val_mask)[0]
     test_idx=np.nonzero(dataset.test_mask)[0]
-    edge_ids=np.arange(dataset.num_edges)
-    temporal_data = TemporalData(src=jt.Var(dataset.src_node_ids.astype(np.int32)), dst=jt.Var(dataset.dst_node_ids.astype(np.int32)), t=jt.Var(dataset.time), train_mask=(train_idx.astype(np.int32)), val_mask=(val_idx.astype(np.int32)), test_mask=(test_idx.astype(np.int32)), test_ns=jt.Var(dataset.test_ns.astype(np.int32)), edge_ids=(edge_ids.astype(np.int32)))
-    train_data, val_data, test_data = temporal_data.train_val_test_split_w_mask()
+    edge_ids=np.arange(dataset.num_edges)+1
+    if dataset.test_ns is not None:
+        data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), test_ns=jt.array(dataset.test_ns.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
+    else:
+        data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
+    train_data, val_data, test_data = data.train_val_test_split_w_mask()
     train_loader = TemporalDataLoader(train_data, batch_size=200, num_neg_sample=1)
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
@@ -357,27 +360,27 @@ elif dataset_name in [ 'reddit', 'mooc', 'lastfm']:
     dataset = JODIEDataset(path, name=dataset_name) # wikipedia, mooc, reddit, lastfm
     data = dataset[0]
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
-    data.num_edges = data.num_events
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
 # Define the neighbor loader
 train_neighbor_sampler = get_neighbor_sampler(train_data, 'recent',seed=0)
-full_neighbor_sampler = get_neighbor_sampler(temporal_data, 'recent',seed=1)
+full_neighbor_sampler = get_neighbor_sampler(data, 'recent',seed=1)
 
-node_raw_features = np.zeros((dataset.num_nodes+1, node_feat_dims))
+node_raw_features = np.zeros((data.num_nodes+1, node_feat_dims))
 if isinstance(dataset, JODIEDataset):
     edge_raw_features = data.msg
 else:
-    edge_raw_features = dataset.edge_feat
+    if dataset.edge_feat is not None:
+        edge_raw_features = jt.array(dataset.edge_feat)
 
 if edge_raw_features is not None:
     if edge_raw_features.shape[0] != data.num_edges:
         edge_raw_features = np.concatenate((np.zeros((1, edge_raw_features.shape[1])), edge_raw_features), axis=0)
     edge_feat_dims = edge_raw_features.shape[1]
 else:
-    edge_raw_features = np.zeros((dataset.num_edges+1, edge_feat_dims))
+    edge_raw_features = np.zeros((data.num_edges+1, edge_feat_dims))
 dynamic_backbone = GraphMixer(node_raw_features, edge_raw_features, train_neighbor_sampler,time_feat_dim=time_feat_dim, num_tokens=num_neighbors, num_layers=num_layers, dropout=dropout)
 link_predictor = MergeLayer(input_dim1=node_raw_features.shape[1], input_dim2=node_raw_features.shape[1],hidden_dim=node_raw_features.shape[1], output_dim=1)
 model = nn.Sequential(dynamic_backbone, link_predictor)
