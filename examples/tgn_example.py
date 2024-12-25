@@ -1,9 +1,11 @@
 import os.path as osp
+import sys
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 import jittor as jt
 from sklearn.metrics import average_precision_score, roc_auc_score
 from jittor.nn import Linear
-from jittor_geometric.datasets import JODIEDataset
-from jittor_geometric.loader import TemporalDataLoader
+from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
 from jittor_geometric.nn import TGNMemory, TransformerConv
 from jittor_geometric.nn.models.tgn import (
     IdentityMessage,
@@ -12,11 +14,11 @@ from jittor_geometric.nn.models.tgn import (
 )
 from tqdm import *
 
-jt.flags.use_cuda = 0 #jt.has_cuda
+jt.flags.use_cuda = 1 #jt.has_cuda
 
 # Load the dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
-dataset = JODIEDataset(path, name='mooc') # wikipedia, mooc, reddit, lastfm
+dataset = JODIEDataset(path, name='wikipedia') # wikipedia, mooc, reddit, lastfm
 data = dataset[0]
 
 min_dst_idx, max_dst_idx = int(data.dst.min()), int(data.dst.max())
@@ -99,7 +101,7 @@ def train():
 
     total_loss = 0
     for batch in tqdm(train_loader):
-        # optimizer.zero_grad()
+        optimizer.zero_grad()
         n_id, edge_index, e_id = neighbor_loader(batch.n_id)
         assoc[n_id] = jt.arange(n_id.size(0))
         
@@ -122,9 +124,6 @@ def train():
 
         # Backpropagation and optimization.
         optimizer.step(loss)
-        # print('time.lin.w: ',memory.time_enc.lin.weight[0])
-        # print('time.lin.w.grad: ',memory.time_enc.lin.weight.opt_grad(optimizer)[0])
-        # print('loss: ',loss)
         memory.detach()
         total_loss += float(loss) * batch.num_events
 
@@ -165,7 +164,7 @@ def test(loader):
     return float(jt.Var(aps).mean()), float(jt.Var(aucs).mean())
 
 
-for epoch in range(1, 2):
+for epoch in range(1, 51):
     loss = train()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
     val_ap, val_auc = test(val_loader)

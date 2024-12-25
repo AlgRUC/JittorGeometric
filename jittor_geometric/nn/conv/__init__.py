@@ -13,6 +13,7 @@ from .gat_conv import GATConv
 from .egnn_conv import EGNNConv
 from .appnp_conv import APPNP
 from .gpr_conv import GPRGNN
+from .even_conv import EvenNet
 from .bernnet_conv import BernNet
 from .chebnet2_conv import ChebNetII
 from .transformer_conv import TransformerConv
@@ -28,6 +29,7 @@ __all__ = [
     'EGNNConv',
     'APPNP',
     'GPRGNN',
+    'EvenNet',
     'BernNet',
     'ChebNetII',
     'TransformerConv',

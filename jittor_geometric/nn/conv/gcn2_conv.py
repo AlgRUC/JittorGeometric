@@ -12,10 +12,6 @@ from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 from ..inits import glorot
 
 
-def addmm(input_, mat1, mat2, *, beta=1, alpha=1, out=None):
-    return beta * input_ + alpha * (mat1 @ mat2)
-
-
 class GCN2Conv(MessagePassing):
     r"""The graph convolutional operator with initial residual connections and
     identity mapping (GCNII) from the `"Simple and Deep Graph Convolutional
@@ -59,23 +55,13 @@ class GCN2Conv(MessagePassing):
         
 
     def execute(self, x: Var, x_0: Var, csc: OptVar, csr: OptVar, alpha: float, beta: float) -> Var:        
+        
+        support = (1-beta) * (1-alpha) * x + beta * jt.matmul(x, self.weight1)
+        initial = (1-beta) * (alpha) * x_0 + beta * jt.matmul(x_0, self.weight2)
         if self.spmm and jt.flags.use_cuda==1:
-            out = self.propagate_spmm(x=x, csr=csr)
+            out = self.propagate_spmm(x=support, csr=csr) + initial
         else:
-            out = self.propagate_msg(x=x, csc=csc, csr=csr)
-
-        x.multiply(1 - alpha)
-        x_0 = alpha * x_0[:x.size(0)]
-        if self.weight2 is None:
-            out = x.add(x_0)
-            out = addmm(out, out, self.weight1, beta=1. - beta,
-                        alpha=beta)
-        else:
-            out = addmm(x, x, self.weight1, beta=1. - beta,
-                        alpha=beta)
-            out += addmm(x_0, x_0, self.weight2, beta=1. - beta,
-                         alpha=beta)
-
+            out = self.propagate_msg(x=support, csc=csc, csr=csr) + initial
         return out
 
     def propagate_msg(self, x, csc: CSC, csr: CSR):
