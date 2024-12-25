@@ -6,10 +6,10 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.loader import TemporalDataLoader
 from jittor_geometric.data import TemporalData
-from jittor_geometric.nn.models.graphmixer import GraphMixer
+from jittor_geometric.nn.models.dygformer import DyGFormer
 import time
 from jittor_geometric.datasets import JODIEDataset
-from jittor_geometric.evaluate import MRR_Evaluator
+from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.sampler.TemporalSampler import get_neighbor_sampler
 from jittor_geometric.nn.models.modules import MergeLayer
 def test(loader):
@@ -20,12 +20,10 @@ def test(loader):
     loader_tqdm = tqdm(loader, ncols=120)
     for _, batch_data in enumerate(loader_tqdm):
         src, dst, t, neg_dst = batch_data.src, batch_data.dst, batch_data.t, batch_data.neg_dst
-        load_time_e = time.perf_counter()
-        src_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=src, node_interact_times=t,num_neighbors=num_neighbors)
-        dst_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=dst, node_interact_times=t,num_neighbors=num_neighbors)
-        neg_dst_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=neg_dst, node_interact_times=t,num_neighbors=num_neighbors)
+        src_node_embeddings, dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src, dst, t)
+        neg_src_node_embeddings, neg_dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src,neg_dst,t)
         pos_score = jt.sigmoid(model[1](src_node_embeddings, dst_node_embeddings)).cpu().numpy()
-        neg_score = jt.sigmoid(model[1](src_node_embeddings, neg_dst_node_embeddings)).cpu().numpy()
+        neg_score = jt.sigmoid(model[1](neg_src_node_embeddings, neg_dst_node_embeddings)).cpu().numpy()
         num_neg = neg_score.shape[0]//pos_score.shape[0]
         if num_neg == 1: # ap
             y_true = np.concatenate([np.ones_like(pos_score), np.zeros_like(neg_score)])
@@ -56,11 +54,10 @@ def train():
         for batch_idx, batch_data in enumerate(train_idx_data_loader_tqdm):
             src, dst, t, neg_dst = batch_data.src, batch_data.dst, batch_data.t, batch_data.neg_dst
             load_time_e = time.perf_counter()
-            src_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=src, node_interact_times=t,num_neighbors=num_neighbors)
-            dst_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=dst, node_interact_times=t,num_neighbors=num_neighbors)
-            neg_dst_node_embeddings = model[0].compute_node_temporal_embeddings(node_ids=neg_dst, node_interact_times=t,num_neighbors=num_neighbors)
+            src_node_embeddings, dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src, dst, t)
+            neg_src_node_embeddings, neg_dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src,neg_dst,t)
             pos_score = model[1](src_node_embeddings, dst_node_embeddings)
-            neg_score = model[1](src_node_embeddings, neg_dst_node_embeddings)
+            neg_score = model[1](neg_src_node_embeddings, neg_dst_node_embeddings)
             loss=criterion(pos_score, jt.ones_like(pos_score))
             loss+=criterion(neg_score, jt.zeros_like(neg_score))
             optimizer.zero_grad()
@@ -84,18 +81,20 @@ def train():
 
 node_feat_dims = 172
 edge_feat_dims = 172
-hidden_dims = 100
+hidden_dims = 172
 num_layers = 2
 jt.flags.use_cuda = 1 #jt.has_cuda
 num_epochs = 100
 time_feat_dim = 100
 num_neighbors = 30
 dropout = 0.1
+bipartite = False
+
 
 criterion = jt.nn.BCEWithLogitsLoss()
 dataset_name = 'wikipedia'
-path='/data/lu_yi/tgb-seq/'
-if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink', 'wikipedia']:
+path='./data/'
+if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
     val_idx=np.nonzero(dataset.val_mask)[0]
@@ -109,7 +108,7 @@ if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube
     train_loader = TemporalDataLoader(train_data, batch_size=200, num_neg_sample=1)
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
-elif dataset_name in [ 'reddit', 'mooc', 'lastfm']:
+elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']:
     dataset = JODIEDataset(path, name=dataset_name) # wikipedia, mooc, reddit, lastfm
     data = dataset[0]
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
@@ -134,7 +133,7 @@ if edge_raw_features is not None:
     edge_feat_dims = edge_raw_features.shape[1]
 else:
     edge_raw_features = np.zeros((data.num_edges+1, edge_feat_dims))
-dynamic_backbone = GraphMixer(node_raw_features, edge_raw_features, train_neighbor_sampler,time_feat_dim=time_feat_dim, num_tokens=num_neighbors, num_layers=num_layers, dropout=dropout)
+dynamic_backbone = DyGFormer(node_raw_features, edge_raw_features, train_neighbor_sampler,time_feat_dim=time_feat_dim, channel_embedding_dim=hidden_dims, patch_size=1, num_layers=num_layers, num_heads=2, dropout=dropout, max_input_sequence_length=32, bipartite=bipartite)
 link_predictor = MergeLayer(input_dim1=node_raw_features.shape[1], input_dim2=node_raw_features.shape[1],hidden_dim=node_raw_features.shape[1], output_dim=1)
 model = nn.Sequential(dynamic_backbone, link_predictor)
 

@@ -46,7 +46,7 @@ class TGBSeqDataset(InMemoryDataset):
     """
 
     names = ['ML-20M', 'Taobao', 'Yelp', 'GoogleLocal',
-             'Flickr', 'YouTube', 'Patent', 'WikiLink']
+             'Flickr', 'YouTube', 'Patent', 'WikiLink', 'wikipedia']
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class TGBSeqDataset(InMemoryDataset):
             if not os.path.exists(self.edgelist_path):
                 raise FileNotFoundError(f'Local dataset file {self.edgelist_path} not found')
             if not os.path.exists(self.test_ns_path):
-                raise Warning(f'Local test negative samples file {self.test_ns_path} not found. We will generate it when testing.')
+                print(f'Warning: Local test negative samples file {self.test_ns_path} not found. We will generate it when testing.')
         else:
             os.makedirs(self.file_dir)
             self._download()
