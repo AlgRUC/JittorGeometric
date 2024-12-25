@@ -4,7 +4,9 @@ root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 import jittor as jt
 from sklearn.metrics import average_precision_score, roc_auc_score
+from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor.nn import Linear
+from jittor_geometric.data import TemporalData
 from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
 from jittor_geometric.nn import TGNMemory, TransformerConv
 from jittor_geometric.nn.models.tgn import (
@@ -13,23 +15,41 @@ from jittor_geometric.nn.models.tgn import (
     LastNeighborLoader,
 )
 from tqdm import *
+import numpy as np
 
 jt.flags.use_cuda = 1 #jt.has_cuda
 
-# Load the dataset
-path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
-dataset = JODIEDataset(path, name='wikipedia') # wikipedia, mooc, reddit, lastfm
-data = dataset[0]
+dataset_name = 'GoogleLocal'# wikipedia, mooc, reddit, lastfm
+if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
+    # Load the dataset
+    path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
+    dataset = JODIEDataset(path, name=dataset_name) 
+    data = dataset[0]
 
-min_dst_idx, max_dst_idx = int(data.dst.min()), int(data.dst.max())
+    min_dst_idx, max_dst_idx = int(data.dst.min()), int(data.dst.max())
 
-# Split the dataset into train/val/test
-train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
+    # Split the dataset into train/val/test
+    train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
+    # Create TemporalDataLoader objects
+    train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
+    val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
+    test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
-# Create TemporalDataLoader objects
-train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
-val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
-test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
+elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
+    path='/data/lu_yi/tgb-seq/'
+    dataset = TGBSeqDataset(root=path, name=dataset_name)
+    train_idx=np.nonzero(dataset.train_mask)[0]
+    val_idx=np.nonzero(dataset.val_mask)[0]
+    test_idx=np.nonzero(dataset.test_mask)[0]
+    edge_ids=np.arange(dataset.num_edges)+1
+    if dataset.test_ns is not None:
+        data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), msg=jt.array(dataset.edge_feat), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), test_ns=jt.array(dataset.test_ns.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
+    else:
+        data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), msg=jt.array(dataset.edge_feat), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
+    train_data, val_data, test_data = data.train_val_test_split_w_mask()
+    train_loader = TemporalDataLoader(train_data, batch_size=200, num_neg_sample=1)
+    val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
+    test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 
 # Define the neighbor loader
 neighbor_loader = LastNeighborLoader(data.num_nodes, size=10)
