@@ -4,11 +4,10 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import average_precision_score, roc_auc_score
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
-from jittor_geometric.loader import TemporalDataLoader
 from jittor_geometric.data import TemporalData
 from jittor_geometric.nn.models.dygformer import DyGFormer
 import time
-from jittor_geometric.datasets import JODIEDataset
+from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.sampler.TemporalSampler import get_neighbor_sampler
 from jittor_geometric.nn.models.modules import MergeLayer
