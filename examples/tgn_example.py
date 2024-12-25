@@ -101,7 +101,7 @@ def train():
 
     total_loss = 0
     for batch in tqdm(train_loader):
-        # optimizer.zero_grad()
+        optimizer.zero_grad()
         n_id, edge_index, e_id = neighbor_loader(batch.n_id)
         assoc[n_id] = jt.arange(n_id.size(0))
         
@@ -124,9 +124,6 @@ def train():
 
         # Backpropagation and optimization.
         optimizer.step(loss)
-        # print('time.lin.w: ',memory.time_enc.lin.weight[0])
-        # print('time.lin.w.grad: ',memory.time_enc.lin.weight.opt_grad(optimizer)[0])
-        # print('loss: ',loss)
         memory.detach()
         total_loss += float(loss) * batch.num_events
 
@@ -167,7 +164,7 @@ def test(loader):
     return float(jt.Var(aps).mean()), float(jt.Var(aucs).mean())
 
 
-for epoch in range(1, 2):
+for epoch in range(1, 51):
     loss = train()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
     val_ap, val_auc = test(val_loader)
