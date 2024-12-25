@@ -27,6 +27,8 @@ class TemporalData(object):
         elif isinstance(idx, jittor.Var) and (idx.dtype == jittor.int32
                                                 or idx.dtype == jittor.bool):
             pass
+        elif isinstance(idx, np.ndarray):
+            pass
         else:
             raise IndexError(
                 f'Only strings, integers, slices (`:`), list, tuples, and '
@@ -68,6 +70,8 @@ class TemporalData(object):
 
     @property
     def num_events(self):
+        if isinstance(self.src,np.ndarray):
+            return self.src.shape[0]
         return self.src.size(0)
 
     def __apply__(self, item, func):
@@ -103,7 +107,7 @@ class TemporalData(object):
         return self[:val_idx], self[val_idx:test_idx], self[test_idx:]
     
     def train_val_test_split_w_mask(self):
-        return self[jittor.Var(self.train_mask)], self[jittor.Var(self.val_mask)], self[jittor.Var(self.test_mask)]
+        return self[(self.train_mask)], self[(self.val_mask)], self[(self.test_mask)]
 
     def seq_batches(self, batch_size):
         for start in range(0, self.num_events, batch_size):

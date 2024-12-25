@@ -22,8 +22,8 @@ class GraphMixer(Module):
         """
         super(GraphMixer, self).__init__()
 
-        self.node_raw_features = jt.Var(node_raw_features.astype(np.float32))
-        self.edge_raw_features = jt.Var(edge_raw_features.astype(np.float32))
+        self.node_raw_features = jt.Var(node_raw_features)
+        self.edge_raw_features = jt.Var(edge_raw_features)
 
         self.node_feat_dim = self.node_raw_features.shape[1]
         self.edge_feat_dim = self.edge_raw_features.shape[1]
@@ -48,7 +48,10 @@ class GraphMixer(Module):
 
         self.output_layer = nn.Linear(in_features=self.num_channels + self.node_feat_dim, out_features=self.node_feat_dim, bias=True)
 
-    def compute_node_temporal_embeddings(self, node_ids: np.ndarray, node_interact_times: np.ndarray, neighbor_node_ids: np.ndarray, neighbor_edge_ids: np.ndarray, neighbor_times: np.ndarray, num_neighbors: int = 20, time_gap: int = 2000, ):
+        self.neighbor_sampler = neighbor_sampler
+
+    def compute_node_temporal_embeddings(self, node_ids: np.ndarray, node_interact_times: np.ndarray,
+                                         num_neighbors: int = 20, time_gap: int = 2000):
         """
         given node ids node_ids, and the corresponding time node_interact_times, return the temporal embeddings of nodes in node_ids
         :param node_ids: ndarray, shape (batch_size, ), node ids
@@ -57,50 +60,60 @@ class GraphMixer(Module):
         :param time_gap: int, time gap for neighbors to compute node features
         :return:
         """
-        # Var, shape (batch_size, num_neighbors, edge_feat_dim)
+        # link encoder
+        # get temporal neighbors, including neighbor ids, edge ids and time information
+        # neighbor_node_ids, ndarray, shape (batch_size, num_neighbors)
+        # neighbor_edge_ids, ndarray, shape (batch_size, num_neighbors)
+        # neighbor_times, ndarray, shape (batch_size, num_neighbors)
+        neighbor_node_ids, neighbor_edge_ids, neighbor_times = \
+            self.neighbor_sampler.get_historical_neighbors(node_ids=node_ids,
+                                                           node_interact_times=node_interact_times,
+                                                           num_neighbors=num_neighbors)
+
+        # Tensor, shape (batch_size, num_neighbors, edge_feat_dim)
         nodes_edge_raw_features = self.edge_raw_features[jt.Var(neighbor_edge_ids)]
-        # Var, shape (batch_size, num_neighbors, time_feat_dim)
+        # Tensor, shape (batch_size, num_neighbors, time_feat_dim)
         nodes_neighbor_time_features = self.time_encoder(timestamps=jt.Var(node_interact_times[:, np.newaxis] - neighbor_times).float())
 
         # ndarray, set the time features to all zeros for the padded timestamp
         nodes_neighbor_time_features[jt.Var(neighbor_node_ids == 0)] = 0.0
 
-        # Var, shape (batch_size, num_neighbors, edge_feat_dim + time_feat_dim)
+        # Tensor, shape (batch_size, num_neighbors, edge_feat_dim + time_feat_dim)
         combined_features = jt.cat([nodes_edge_raw_features, nodes_neighbor_time_features], dim=-1)
-        # Var, shape (batch_size, num_neighbors, num_channels)
+        # Tensor, shape (batch_size, num_neighbors, num_channels)
         combined_features = self.projection_layer(combined_features)
 
         for mlp_mixer in self.mlp_mixers:
-            # Var, shape (batch_size, num_neighbors, num_channels)
+            # Tensor, shape (batch_size, num_neighbors, num_channels)
             combined_features = mlp_mixer(input_tensor=combined_features)
 
-        # Var, shape (batch_size, num_channels)
+        # Tensor, shape (batch_size, num_channels)
         combined_features = jt.mean(combined_features, dim=1)
 
         # node encoder
         # get temporal neighbors of nodes, including neighbor ids
         # time_gap_neighbor_node_ids, ndarray, shape (batch_size, time_gap)
-        time_gap_neighbor_node_ids=neighbor_node_ids
+        time_gap_neighbor_node_ids, _, _ = self.neighbor_sampler.get_historical_neighbors(node_ids=node_ids,node_interact_times=node_interact_times,num_neighbors=time_gap)
 
-        # Var, shape (batch_size, time_gap, node_feat_dim)
+        # Tensor, shape (batch_size, time_gap, node_feat_dim)
         nodes_time_gap_neighbor_node_raw_features = self.node_raw_features[jt.Var(time_gap_neighbor_node_ids)]
 
-        # Var, shape (batch_size, time_gap)
+        # Tensor, shape (batch_size, time_gap)
         valid_time_gap_neighbor_node_ids_mask = jt.Var((time_gap_neighbor_node_ids > 0).astype(np.float32))
         # note that if a node has no valid neighbor (whose valid_time_gap_neighbor_node_ids_mask are all zero), directly set the mask to -np.inf will make the
         # scores after softmax be nan. Therefore, we choose a very large negative number (-1e10) instead of -np.inf to tackle this case
-        # Var, shape (batch_size, time_gap)
+        # Tensor, shape (batch_size, time_gap)
         valid_time_gap_neighbor_node_ids_mask[valid_time_gap_neighbor_node_ids_mask == 0] = -1e10
-        # Var, shape (batch_size, time_gap)
-        scores = nn.softmax(valid_time_gap_neighbor_node_ids_mask, dim=1)
+        # Tensor, shape (batch_size, time_gap)
+        scores = valid_time_gap_neighbor_node_ids_mask.softmax(dim=1)
 
-        # Var, shape (batch_size, node_feat_dim), average over the time_gap neighbors
+        # Tensor, shape (batch_size, node_feat_dim), average over the time_gap neighbors
         nodes_time_gap_neighbor_node_agg_features = jt.mean(nodes_time_gap_neighbor_node_raw_features * scores.unsqueeze(dim=-1), dim=1)
 
-        # Var, shape (batch_size, node_feat_dim), add features of nodes in node_ids
+        # Tensor, shape (batch_size, node_feat_dim), add features of nodes in node_ids
         output_node_features = nodes_time_gap_neighbor_node_agg_features + self.node_raw_features[jt.Var(node_ids)]
 
-        # Var, shape (batch_size, node_feat_dim)
+        # Tensor, shape (batch_size, node_feat_dim)
         node_embeddings = self.output_layer(jt.cat([combined_features, output_node_features], dim=1))
 
         return node_embeddings
