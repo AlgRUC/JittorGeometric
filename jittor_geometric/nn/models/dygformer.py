@@ -25,10 +25,10 @@ class DyGFormer(nn.Module):
         """
         super(DyGFormer, self).__init__()
 
-        self.node_raw_features = jt.array(
-            node_raw_features.astype(np.float32))
-        self.edge_raw_features = jt.array(
-            edge_raw_features.astype(np.float32))
+        self.node_raw_features = jt.nn.Parameter(
+            jt.Var(node_raw_features), requires_grad=False)
+        self.edge_raw_features = jt.nn.Parameter(
+            jt.Var(edge_raw_features), requires_grad=False)
 
         self.neighbor_sampler = neighbor_sampler
         self.node_feat_dim = self.node_raw_features.shape[1]
@@ -48,12 +48,10 @@ class DyGFormer(nn.Module):
         self.neighbor_co_occurrence_encoder = NeighborCooccurrenceEncoder(
             neighbor_co_occurrence_feat_dim=self.neighbor_co_occurrence_feat_dim, bipartite=self.bipartite_graph)
 
-        self.projection_layer = dict({
-            'node': nn.Linear(in_features=self.patch_size * self.node_feat_dim, out_features=self.channel_embedding_dim, bias=True),
-            'edge': nn.Linear(in_features=self.patch_size * self.edge_feat_dim, out_features=self.channel_embedding_dim, bias=True),
-            'time': nn.Linear(in_features=self.patch_size * self.time_feat_dim, out_features=self.channel_embedding_dim, bias=True),
-            'neighbor_co_occurrence': nn.Linear(in_features=self.patch_size * self.neighbor_co_occurrence_feat_dim, out_features=self.channel_embedding_dim, bias=True)
-        })
+        self.projection_layer_node = nn.Linear(in_features=self.patch_size * self.node_feat_dim, out_features=self.channel_embedding_dim, bias=True)
+        self.projection_layer_edge = nn.Linear(in_features=self.patch_size * self.edge_feat_dim, out_features=self.channel_embedding_dim, bias=True)
+        self.projection_layer_time = nn.Linear(in_features=self.patch_size * self.time_feat_dim, out_features=self.channel_embedding_dim, bias=True)
+        self.projection_layer_neighbor_co_occurrence = nn.Linear(in_features=self.patch_size * self.neighbor_co_occurrence_feat_dim, out_features=self.channel_embedding_dim, bias=True)
 
         self.num_channels = 4
 
@@ -183,23 +181,23 @@ class DyGFormer(nn.Module):
 
         # align the patch encoding dimension
         # Var, shape (batch_size, src_num_patches, channel_embedding_dim)
-        src_patches_nodes_neighbor_node_raw_features = self.projection_layer['node'](
+        src_patches_nodes_neighbor_node_raw_features = self.projection_layer_node(
             src_patches_nodes_neighbor_node_raw_features)
-        src_patches_nodes_edge_raw_features = self.projection_layer['edge'](
+        src_patches_nodes_edge_raw_features = self.projection_layer_edge(
             src_patches_nodes_edge_raw_features)
-        src_patches_nodes_neighbor_time_features = self.projection_layer['time'](
+        src_patches_nodes_neighbor_time_features = self.projection_layer_time(
             src_patches_nodes_neighbor_time_features)
-        src_patches_nodes_neighbor_co_occurrence_features = self.projection_layer['neighbor_co_occurrence'](
+        src_patches_nodes_neighbor_co_occurrence_features = self.projection_layer_neighbor_co_occurrence(
             src_patches_nodes_neighbor_co_occurrence_features)
 
         # Var, shape (batch_size, dst_num_patches, channel_embedding_dim)
-        dst_patches_nodes_neighbor_node_raw_features = self.projection_layer['node'](
+        dst_patches_nodes_neighbor_node_raw_features = self.projection_layer_node(
             dst_patches_nodes_neighbor_node_raw_features)
-        dst_patches_nodes_edge_raw_features = self.projection_layer['edge'](
+        dst_patches_nodes_edge_raw_features = self.projection_layer_edge(
             dst_patches_nodes_edge_raw_features)
-        dst_patches_nodes_neighbor_time_features = self.projection_layer['time'](
+        dst_patches_nodes_neighbor_time_features = self.projection_layer_time(
             dst_patches_nodes_neighbor_time_features)
-        dst_patches_nodes_neighbor_co_occurrence_features = self.projection_layer['neighbor_co_occurrence'](
+        dst_patches_nodes_neighbor_co_occurrence_features = self.projection_layer_neighbor_co_occurrence(
             dst_patches_nodes_neighbor_co_occurrence_features)
 
         batch_size = len(src_patches_nodes_neighbor_node_raw_features)
@@ -460,8 +458,7 @@ class NeighborCooccurrenceEncoder(nn.Module):
                 src_unique_keys, src_inverse_indices, src_counts = np.unique(
                     src_padded_node_neighbor_ids, return_inverse=True, return_counts=True)
                 # Var, shape (src_max_seq_length, )
-                src_padded_node_neighbor_counts_in_src = jt.array(
-                    src_counts[src_inverse_indices]).float()
+                src_padded_node_neighbor_counts_in_src = src_counts[src_inverse_indices]
                 # dictionary, store the mapping relation from unique neighbor id to its appearances for the source node
                 src_mapping_dict = dict(zip(src_unique_keys, src_counts))
 
@@ -472,15 +469,14 @@ class NeighborCooccurrenceEncoder(nn.Module):
                 dst_unique_keys, dst_inverse_indices, dst_counts = np.unique(
                     dst_padded_node_neighbor_ids, return_inverse=True, return_counts=True)
                 # Var, shape (dst_max_seq_length, )
-                dst_padded_node_neighbor_counts_in_dst = jt.array(
-                    dst_counts[dst_inverse_indices]).float()
+                dst_padded_node_neighbor_counts_in_dst = dst_counts[dst_inverse_indices]
                 # dictionary, store the mapping relation from unique neighbor id to its appearances for the destination node
                 dst_mapping_dict = dict(zip(dst_unique_keys, dst_counts))
 
                 # we need to use copy() to avoid the modification of src_padded_node_neighbor_ids
                 # Var, shape (src_max_seq_length, )
                 func = np.vectorize(lambda neighbor_id: dst_mapping_dict.get(neighbor_id, 0.0))
-                src_padded_node_neighbor_counts_in_dst = jt.array(func(src_padded_node_neighbor_ids).astype(np.float32))
+                src_padded_node_neighbor_counts_in_dst = func(src_padded_node_neighbor_ids)
                 # src_padded_node_neighbor_counts_in_dst = jt.array(src_padded_node_neighbor_ids.copy(
                 # )).apply_(lambda neighbor_id: dst_mapping_dict.get(neighbor_id, 0.0)).float()
                 # Var, shape (src_max_seq_length, 2)
@@ -490,29 +486,27 @@ class NeighborCooccurrenceEncoder(nn.Module):
                 # we need to use copy() to avoid the modification of dst_padded_node_neighbor_ids
                 # Var, shape (dst_max_seq_length, )
                 func = np.vectorize(lambda neighbor_id: src_mapping_dict.get(neighbor_id, 0.0))
-                dst_padded_node_neighbor_counts_in_src = jt.array(func(dst_padded_node_neighbor_ids).astype(np.float32))
+                dst_padded_node_neighbor_counts_in_src = func(dst_padded_node_neighbor_ids)
                 # dst_padded_node_neighbor_counts_in_src = jt.array(dst_padded_node_neighbor_ids.copy(
                 # )).apply_(lambda neighbor_id: src_mapping_dict.get(neighbor_id, 0.0)).float()
                 # Var, shape (dst_max_seq_length, 2)
-                dst_padded_nodes_appearances.append(jt.stack(
-                    [dst_padded_node_neighbor_counts_in_src, dst_padded_node_neighbor_counts_in_dst], dim=1))
+                dst_padded_nodes_appearances.append(np.stack(
+                    [dst_padded_node_neighbor_counts_in_src, dst_padded_node_neighbor_counts_in_dst], axis=1))
 
             # Var, shape (batch_size, src_max_seq_length, 2)
-            src_padded_nodes_appearances = jt.stack(
-                src_padded_nodes_appearances, dim=0)
+            src_padded_nodes_appearances = np.stack(
+                src_padded_nodes_appearances, axis=0)
             # Var, shape (batch_size, dst_max_seq_length, 2)
-            dst_padded_nodes_appearances = jt.stack(
-                dst_padded_nodes_appearances, dim=0)
+            dst_padded_nodes_appearances = np.stack(
+                dst_padded_nodes_appearances, axis=0)
 
             # set the appearances of the padded node (with zero index) to zeros
             # Var, shape (batch_size, src_max_seq_length, 2)
-            src_padded_nodes_appearances[jt.array(
-                src_padded_nodes_neighbor_ids == 0)] = 0.0
+            src_padded_nodes_appearances[src_padded_nodes_neighbor_ids == 0] = 0.0
             # Var, shape (batch_size, dst_max_seq_length, 2)
-            dst_padded_nodes_appearances[jt.array(
-                dst_padded_nodes_neighbor_ids == 0)] = 0.0
+            dst_padded_nodes_appearances[dst_padded_nodes_neighbor_ids == 0] = 0.0
 
-        return src_padded_nodes_appearances, dst_padded_nodes_appearances
+        return jt.array(src_padded_nodes_appearances), jt.array(dst_padded_nodes_appearances)
 
     def execute(self, src_padded_nodes_neighbor_ids: np.ndarray, dst_padded_nodes_neighbor_ids: np.ndarray):
         """

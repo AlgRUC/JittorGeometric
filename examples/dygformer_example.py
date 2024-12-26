@@ -7,7 +7,8 @@ from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 from jittor_geometric.nn.models.dygformer import DyGFormer
 import time
-from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
+from jittor_geometric.datasets import JODIEDataset
+from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoader
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.sampler.TemporalSampler import get_neighbor_sampler
 from jittor_geometric.nn.models.modules import MergeLayer
@@ -68,11 +69,11 @@ def train():
             train_idx_data_loader_tqdm.set_description(f'Epoch: {epoch + 1}, train for the {batch_idx + 1}-th batch, train loss: {loss.item()}')
         train_loss = np.mean(train_losses)
         print(f'Epoch: {epoch:03d}, Train Loss: {train_loss:.4f}')
-        model[0].set_neighbor_sampler(full_neighbor_sampler) 
         ap = test(val_loader)
         print(f'Epoch: {epoch:03d}, Val: {ap}')
         if ap['AP'] > best_ap:
             best_ap = ap['AP']
+            jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_DyGFormer.pkl')
         else:
             patience -= 1
             if patience == 0:
@@ -88,7 +89,7 @@ time_feat_dim = 100
 num_neighbors = 30
 dropout = 0.1
 bipartite = False
-
+save_model_path = './data/saved_models/'
 
 criterion = jt.nn.BCEWithLogitsLoss()
 dataset_name = 'wikipedia'
@@ -116,7 +117,6 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']:
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
 # Define the neighbor loader
-train_neighbor_sampler = get_neighbor_sampler(train_data, 'recent',seed=0)
 full_neighbor_sampler = get_neighbor_sampler(data, 'recent',seed=1)
 
 node_raw_features = np.zeros((data.num_nodes+1, node_feat_dims))
@@ -127,16 +127,18 @@ else:
         edge_raw_features = jt.array(dataset.edge_feat)
 
 if edge_raw_features is not None:
-    if edge_raw_features.shape[0] != data.num_edges:
+    if edge_raw_features.shape[0] != data.num_edges + 1:
         edge_raw_features = np.concatenate((np.zeros((1, edge_raw_features.shape[1])), edge_raw_features), axis=0)
     edge_feat_dims = edge_raw_features.shape[1]
 else:
     edge_raw_features = np.zeros((data.num_edges+1, edge_feat_dims))
-dynamic_backbone = DyGFormer(node_raw_features, edge_raw_features, train_neighbor_sampler,time_feat_dim=time_feat_dim, channel_embedding_dim=hidden_dims, patch_size=1, num_layers=num_layers, num_heads=2, dropout=dropout, max_input_sequence_length=32, bipartite=bipartite)
+edge_raw_features = np.zeros((data.num_edges+1, edge_feat_dims))
+dynamic_backbone = DyGFormer(node_raw_features, edge_raw_features, full_neighbor_sampler,time_feat_dim=time_feat_dim, channel_embedding_dim=hidden_dims, patch_size=1, num_layers=num_layers, num_heads=2, dropout=dropout, max_input_sequence_length=32, bipartite=bipartite)
 link_predictor = MergeLayer(input_dim1=node_raw_features.shape[1], input_dim2=node_raw_features.shape[1],hidden_dim=node_raw_features.shape[1], output_dim=1)
 model = nn.Sequential(dynamic_backbone, link_predictor)
 
 optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 
 train()
+model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_DyGFormer.pkl'))
 print(test(test_loader))

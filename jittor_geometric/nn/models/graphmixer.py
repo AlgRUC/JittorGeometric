@@ -24,8 +24,10 @@ class GraphMixer(Module):
         """
         super(GraphMixer, self).__init__()
 
-        self.node_raw_features = jt.Var(node_raw_features)
-        self.edge_raw_features = jt.Var(edge_raw_features)
+        self.node_raw_features = jt.nn.Parameter(
+            jt.Var(node_raw_features), requires_grad=False)
+        self.edge_raw_features = jt.nn.Parameter(
+            jt.Var(edge_raw_features), requires_grad=False)
 
         self.node_feat_dim = self.node_raw_features.shape[1]
         self.edge_feat_dim = self.edge_raw_features.shape[1]
