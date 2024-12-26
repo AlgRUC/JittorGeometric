@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 parser.add_argument('--dataset', help='graph dataset')
-parser.add_argument('--spmm', default=False,help='whether using spmm')
+parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
@@ -55,22 +55,25 @@ with jt.no_grad():
 
 
 class Net(nn.Module):
-    def __init__(self, dataset, dropout=0.5):
+    def __init__(self, dataset, dropout=0.8):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=args.spmm)
-        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=args.spmm)
+        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=512,spmm=args.spmm)
+        self.conv2 = GCNConv(in_channels=512, out_channels=512,spmm=args.spmm)
+        self.conv3 = GCNConv(in_channels=512, out_channels=dataset.num_classes,spmm=args.spmm)
         self.dropout = dropout
 
     def execute(self):
         x, csc, csr = data.x, data.csc, data.csr
         x = nn.relu(self.conv1(x, csc, csr))
-        x = nn.dropout(x, self.dropout)
-        x = self.conv2(x,csc,csr)
+        x = nn.dropout(x, self.dropout, is_train=self.training)
+        x = nn.relu(self.conv2(x, csc, csr))
+        x = nn.dropout(x, self.dropout, is_train=self.training)
+        x = self.conv3(x,csc,csr)
         return nn.log_softmax(x, dim=1)
 
 
 model, data = Net(dataset), data
-optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4) 
+optimizer = nn.Adam(params=model.parameters(), lr=0.001, weight_decay=5e-4) 
 
 def train():
     global total_forward_time, total_backward_time
@@ -92,7 +95,6 @@ def test():
     return accs
 
 
-train()
 best_val_acc = test_acc = 0
 start = time.time()
 for epoch in range(1, 201):
