@@ -17,9 +17,9 @@ import numpy as np
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 
-jt.flags.use_cuda = 1 #jt.has_cuda
+jt.flags.use_cuda = 0 #jt.has_cuda
 
-dataset_name = 'GoogleLocal'# wikipedia, mooc, reddit, lastfm
+dataset_name = 'wikipedia'# wikipedia, mooc, reddit, lastfm
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     # Load the dataset
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
@@ -102,9 +102,8 @@ gnn = GraphAttentionEmbedding(
 
 link_pred = LinkPredictor(in_channels=embedding_dim)
 
-optimizer = jt.nn.Adam(
-    list(memory.parameters()) + list(gnn.parameters()) + list(link_pred.parameters()), lr=0.0001)
-
+model = jt.nn.Sequential(memory, gnn, link_pred)
+optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 criterion = jt.nn.BCEWithLogitsLoss()
 
 # Helper vector to map global node indices to local ones.
@@ -112,48 +111,43 @@ assoc = jt.empty(data.num_nodes, dtype=jt.int32)
 
 
 def train():
-    memory.train()
-    gnn.train()
-    link_pred.train()
+    model.train()
 
-    memory.reset_state()  # Start with a fresh memory.
+    model[0].reset_state()  # Start with a fresh memory.
     neighbor_loader.reset_state()  # Start with an empty graph.
 
     total_loss = 0
     for batch in tqdm(train_loader):
-        optimizer.zero_grad()
         n_id, edge_index, e_id = neighbor_loader(batch.n_id)
         assoc[n_id] = jt.arange(n_id.size(0))
         
         # Get updated memory of all nodes involved in the computation.
-        z, last_update = memory(n_id)
-        z = gnn(z, last_update, edge_index, data.t[e_id], data.msg[e_id])
+        z, last_update = model[0](n_id)
+        z = model[1](z, last_update, edge_index, data.t[e_id], data.msg[e_id])
 
         # Compute predictions and loss.
-        pos_out = link_pred(z[assoc[batch.src]], z[assoc[batch.dst]])
+        pos_out = model[2](z[assoc[batch.src]], z[assoc[batch.dst]])
         
-        neg_out = link_pred(z[assoc[batch.src]], z[assoc[batch.neg_dst]])
+        neg_out = model[2](z[assoc[batch.src]], z[assoc[batch.neg_dst]])
         
         loss = criterion(pos_out, jt.ones_like(pos_out))
         loss += criterion(neg_out, jt.zeros_like(neg_out))
 
         # Update memory and neighbor loader with ground-truth state.
-        memory.update_state(batch.src, batch.dst, batch.t, batch.msg)
+        model[0].update_state(batch.src, batch.dst, batch.t, batch.msg)
         neighbor_loader.insert(batch.src, batch.dst)
-        
 
         # Backpropagation and optimization.
+        optimizer.zero_grad()
         optimizer.step(loss)
-        memory.detach()
+        model[0].detach()
         total_loss += float(loss) * batch.num_events
 
     return total_loss / train_data.num_events
 
 
 def test(loader):
-    memory.eval()
-    gnn.eval()
-    link_pred.eval()
+    model.eval()
 
     jt.set_seed(12345)  # Ensure deterministic sampling across epochs.
 
@@ -166,11 +160,11 @@ def test(loader):
         n_id, edge_index, e_id = neighbor_loader(n_id)
         assoc[n_id] = jt.arange(n_id.shape[0])
 
-        z, last_update = memory(n_id)
-        z = gnn(z, last_update, edge_index, data.t[e_id], data.msg[e_id])
+        z, last_update = model[0](n_id)
+        z = model[1](z, last_update, edge_index, data.t[e_id], data.msg[e_id])
 
-        pos_out = link_pred(z[assoc[src]], z[assoc[pos_dst]])
-        neg_out = link_pred(z[assoc[src]], z[assoc[neg_dst]])
+        pos_out = model[2](z[assoc[src]], z[assoc[pos_dst]])
+        neg_out = model[2](z[assoc[src]], z[assoc[neg_dst]])
 
         y_pred = jt.concat([pos_out, neg_out], dim=0).sigmoid().numpy()
         y_true = jt.concat([jt.ones(pos_out.shape[0]), jt.zeros(neg_out.shape[0])], dim=0).numpy()
@@ -178,16 +172,26 @@ def test(loader):
         aps.append(average_precision_score(y_true, y_pred))
         aucs.append(roc_auc_score(y_true, y_pred))
 
-        memory.update_state(src, pos_dst, t, msg)
+        model[0].update_state(src, pos_dst, t, msg)
         neighbor_loader.insert(src, pos_dst)
 
     return float(jt.Var(aps).mean()), float(jt.Var(aucs).mean())
 
-
+best_ap = 0
+patience = 10
+save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
 for epoch in range(1, 51):
     loss = train()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
     val_ap, val_auc = test(val_loader)
-    test_ap, test_auc = test(test_loader)
     print(f'Val AP: {val_ap:.4f}, Val AUC: {val_auc:.4f}')
-    print(f'Test AP: {test_ap:.4f}, Test AUC: {test_auc:.4f}')
+    if val_ap > best_ap:
+        best_ap = val_ap
+        jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
+    else:
+        patience -= 1
+        if patience == 0:
+            break
+model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_model_DyRep.pkl'))
+test_ap, test_auc = test(test_loader)
+print(f'Test AP: {test_ap:.4f}, Test AUC: {test_auc:.4f}')

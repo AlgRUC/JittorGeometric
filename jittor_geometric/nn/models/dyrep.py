@@ -8,7 +8,6 @@ from jittor.nn import RNNCell, Linear
 from jittor_geometric.nn.inits import zeros, glorot
 
 DyRepMessageStoreType = Dict[int, Tuple[jt.Var, jt.Var, jt.Var, jt.Var]]
-import time
 
 
 def scatter_argmax(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None) -> jt.Var:
@@ -72,9 +71,10 @@ class DyRepMemory(nn.Module):
         self.time_enc = TimeEncoder(time_dim)
         self.rnn = RNNCell(message_module.out_channels, memory_dim)
 
-        self.register_buffer('memory', jt.empty(num_nodes, memory_dim))
-        self.register_buffer('last_update', jt.empty(self.num_nodes, dtype=jt.int32))
-        self.register_buffer('_assoc', jt.empty(num_nodes, dtype=jt.int32))
+        self.memory = jt.empty((num_nodes, memory_dim))
+        self.last_update = jt.empty((num_nodes,), dtype=jt.int32)
+        self._assoc = jt.empty((num_nodes,), dtype=jt.int32)
+        self.memory.requires_grad = False
 
         self.msg_s_store = {}
         self.msg_d_store = {}
@@ -109,7 +109,6 @@ class DyRepMemory(nn.Module):
         self._reset_message_store()
 
     def detach(self):
-        # self.memory.stop_grad()
         self.memory.detach()
 
     def execute(self, n_id: jt.Var) -> Tuple[jt.Var, jt.Var]:
@@ -193,16 +192,13 @@ class DyRepMemory(nn.Module):
         super(DyRepMemory, self).train()
 
 def unique_consecutive(input_tensor):
-    # 将 Jittor tensor 转换为 NumPy 数组
     np_array = input_tensor.numpy()
     if np_array.size == 0:
         return jt.array([]), jt.array([])
     
-    # 初始化
     unique_elements = []
     counts = []
 
-    # 追踪当前元素和计数
     last_element = np_array[0]
     count = 1
 
@@ -215,11 +211,9 @@ def unique_consecutive(input_tensor):
             last_element = element
             count = 1
     
-    # 添加最后一个元素
     unique_elements.append(last_element)
     counts.append(count)
 
-    # 将结果转换回 Jittor tensor
     unique_elements_tensor = jt.array(unique_elements)
     counts_tensor = jt.array(counts)
     
