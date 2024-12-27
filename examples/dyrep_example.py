@@ -178,7 +178,7 @@ def test(loader):
     return float(jt.Var(aps).mean()), float(jt.Var(aucs).mean())
 
 best_ap = 0
-patience = 10
+patience = 5
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
 for epoch in range(1, 51):
     loss = train()
@@ -189,6 +189,7 @@ for epoch in range(1, 51):
         best_ap = val_ap
         jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
         print('Saved model is updated')
+        patience = 5
     else:
         patience -= 1
         if patience == 0:

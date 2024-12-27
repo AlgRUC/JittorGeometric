@@ -138,6 +138,7 @@ for epoch in range(1, 11):
         best_ap = val_ap
         jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_jodie.pkl')
         print('Saved model is updated')
+        patience = 5
     elif val_ap <= best_ap and epoch >= 3:
         patience -= 1
         if patience == 0:
