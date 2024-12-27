@@ -17,7 +17,7 @@ from jittor_geometric.nn.models.tgn import (
 from tqdm import *
 import numpy as np
 
-jt.flags.use_cuda = 0 #jt.has_cuda
+jt.flags.use_cuda = 1 #jt.has_cuda
 
 dataset_name = 'wikipedia'# wikipedia, mooc, reddit, lastfm
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
