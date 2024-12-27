@@ -188,6 +188,7 @@ for epoch in range(1, 51):
     if val_ap > best_ap:
         best_ap = val_ap
         jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_TGN.pkl')
+        print('Saved model is updated')
     else:
         patience -= 1
         if patience == 0:

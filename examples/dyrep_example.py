@@ -17,7 +17,7 @@ import numpy as np
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 
-jt.flags.use_cuda = 0 #jt.has_cuda
+jt.flags.use_cuda = 1 #jt.has_cuda
 
 dataset_name = 'wikipedia'# wikipedia, mooc, reddit, lastfm
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
@@ -188,6 +188,7 @@ for epoch in range(1, 51):
     if val_ap > best_ap:
         best_ap = val_ap
         jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
+        print('Saved model is updated')
     else:
         patience -= 1
         if patience == 0:
