@@ -20,8 +20,6 @@ from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
-parser.add_argument('--use_gdc', action='store_true',
-                    help='Use GDC preprocessing.')
 parser.add_argument('--dataset', help='graph dataset')
 parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()

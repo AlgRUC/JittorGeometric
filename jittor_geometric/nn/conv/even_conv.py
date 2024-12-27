@@ -17,24 +17,29 @@ from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 
 class EvenNet(Module):
     r"""EvenNet: Ignoring Odd-Hop Neighbors Improves
-        Robustness of Graph Neural Networks"
-    <https://arxiv.org/pdf/2205.13892>`_ paper
+    Robustness of Graph Neural Networks
+    <https://arxiv.org/pdf/2205.13892>`_ paper.
+
+    This class implements the EvenNet architecture, which improves the robustness of graph neural networks by focusing on even-hop neighbors while ignoring odd-hop neighbors. 
+
+    Args:
+        K (int): Maximum number of hops considered for message passing.
+        alpha (float): Parameter controlling the weighting of different hops.
+        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
+        **kwargs (optional): Additional arguments for the base `Module`.
     """
 
     #_cached_edge_index: Optional[Tuple[Var, Var]]
     #_cached_csc: Optional[CSC]
-    def __init__(self, K: int, alpha: float, Init: str, spmm:bool=True, **kwargs):
+    def __init__(self, K: int, alpha: float, spmm:bool=True, **kwargs):
         kwargs.setdefault('aggr', 'add')
         super(EvenNet, self).__init__(**kwargs)
         self.K = K
         self.Init = Init
         self.alpha = alpha
 
-        assert Init in ['SGC', 'PPR', 'NPPR', 'Random', 'WS']
-        if Init == 'PPR':
-            # PPR-like
-            TEMP = alpha*(1-alpha)**np.arange(K+1)
-            TEMP[-1] = (1-alpha)**K
+        TEMP = alpha*(1-alpha)**np.arange(K+1)
+        TEMP[-1] = (1-alpha)**K
 
         TEMP_jt = jt.array(TEMP)
         self.temp = nn.Parameter(jt.Var(TEMP_jt))

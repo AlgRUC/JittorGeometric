@@ -10,7 +10,12 @@ from jittor_geometric.data import InMemoryDataset, download_url, decide_download
 class OGBNodePropPredDataset(InMemoryDataset):
     r"""The Open Graph Benchmark (OGB) Node Property Prediction Datasets, provided by the OGB team. 
     These datasets are designed to benchmark large-scale node property prediction tasks on real-world graphs.
-    
+
+    This class provides access to various OGB datasets focused on node property prediction tasks. Each dataset contains 
+    nodes representing entities (e.g., papers, products) and edges representing relationships (e.g., citations, co-purchases). 
+    The goal is to predict specific node-level properties, such as categories or timestamps, based on the graph structure 
+    and node features.
+
     Dataset Details:
     
     - **ogbn-arxiv**: A citation network where nodes represent arXiv papers and directed edges indicate citation relationships.
@@ -20,8 +25,8 @@ class OGBNodePropPredDataset(InMemoryDataset):
     - **ogbn-paper100M**: A large-scale citation network where nodes represent research papers and edges indicate citation links.
       The node features are derived from word embeddings of the paper abstracts. The task is to predict the subject area of each paper.
 
-    These datasets are provided by the Open Graph Benchmark (OGB) team, which aims to provide diverse and large-scale graph datasets 
-    for machine learning research. More information on these datasets can be found on the OGB website: https://ogb.stanford.edu/.
+    These datasets are provided by the Open Graph Benchmark (OGB) team, which aims to facilitate machine learning research 
+    on graphs by offering diverse, large-scale datasets. For more details, visit the OGB website: https://ogb.stanford.edu/.
 
     Args:
         name (str): The name of the dataset to load. Options include:
@@ -35,6 +40,14 @@ class OGBNodePropPredDataset(InMemoryDataset):
             The graph object will be transformed before being saved to disk. (default: :obj:`None`)
         meta_dict (dict, optional): A dictionary containing meta-information about the dataset.
             When provided, it overrides default meta-information, useful for debugging or contributions from external users.
+
+    Example:
+        >>> dataset = OGBNodePropPredDataset(name="ogbn-arxiv", root="path/to/dataset")
+        >>> data = dataset[0]  # Access the first graph object
+
+    Acknowledgment:
+        The OGBNodePropPredDataset is developed and maintained by the Open Graph Benchmark (OGB) team. We sincerely thank 
+        the OGB team for their significant contributions to the graph machine learning community.
     """
 
     def __init__(self, name, root='dataset', transform=None, pre_transform=None, meta_dict=None):
@@ -213,6 +226,10 @@ class OGBNodePropPredDataset(InMemoryDataset):
     def __repr__(self):
         return '{}()'.format(self.__class__.__name__)
 
+
+
+
+## TODO: DELETE
 
 if __name__ == '__main__':
     dataset = OGBNodePropPredDataset(name='ogbn-mag')
