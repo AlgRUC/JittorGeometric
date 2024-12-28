@@ -18,13 +18,13 @@ from jittor.compile_extern import cusparse_ops # latest jittor
 jt.flags.use_cuda=1
 class SpmmCooFunc(Function):
     def execute(self,x,edge_index,edge_weight):
-        print(x)
+        # print(x)
         self.edge_index=edge_index
         row_indices=edge_index[0,:]
         col_indices=edge_index[1,:]
-        print(row_indices)
-        print(col_indices)
-        print(edge_weight)
+        # print(row_indices)
+        # print(col_indices)
+        # print(edge_weight)
         self.row_indices=row_indices
         self.col_indices=col_indices
         self.edge_weight=edge_weight
@@ -34,7 +34,7 @@ class SpmmCooFunc(Function):
         self.feature_dim=feature_dim
         output=jt.zeros(v_num,feature_dim)
         cusparse_ops.cusparse_spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num).fetch_sync()
-        print(output)
+        # print(output)
         return output
 
     def grad(self, grad_output):

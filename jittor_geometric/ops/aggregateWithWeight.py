@@ -22,21 +22,21 @@ class AggregateFunc(Function):
         self.csr=csr
         self.weight=edge_weight
         if isinstance(edge_weight, Var)==False:
-            edge_weight=csc.edge_weight
-        indices=csc.row_indices
-        offset=csc.column_offset
-        output=x
+            edge_weight=csr.edge_weight
+        indices=csr.column_indices
+        offset=csr.row_offset
+        output=jt.zeros_like(x)
         aggregate_op.aggregate(output,x,indices,offset,edge_weight,True).fetch_sync()
         return output
 
     def grad(self, grad_output):
         if isinstance(self.weight, Var)==False:
-            edge_weight=self.csr.edge_weight
+            edge_weight=self.csc.edge_weight
         else:
             edge_weight=self.weight
-        indices=self.csr.column_indices
-        offset=self.csr.row_offset
-        output_grad=grad_output
+        indices=self.csc.row_indices
+        offset=self.csc.column_offset
+        output_grad=jt.zeros_like(grad_output)
         aggregate_op.aggregate(output_grad,grad_output,indices,offset,edge_weight,False).fetch_sync()
         return output_grad,None,None
     
