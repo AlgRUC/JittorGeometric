@@ -40,13 +40,37 @@ def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
 class GCNConv(Module):
     r"""The graph convolutional operator from the `"Semi-supervised
     Classification with Graph Convolutional Networks"
-    <https://arxiv.org/abs/1609.02907>`_ paper
+    <https://arxiv.org/abs/1609.02907>`_ paper.
+
+    This class implements the Graph Convolutional Network (GCN) layer, which updates node representations by aggregating information from neighboring nodes, taking the graph structure into account. 
+    It supports both message-passing and sparse matrix multiplication (SPMM) for propagation.
+
+    Args:
+        in_channels (int): Size of each input sample (number of input features per node).
+        out_channels (int): Size of each output sample (number of output features per node).
+        bias (bool, optional): If set to `True`, adds a learnable bias to the output. Default is `True`.
+        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
+        **kwargs (optional): Additional arguments for the base `Module`.
+
+    Example:
+        >>> dataset = MyGraphDataset(root='/path/to/dataset')
+        >>> data = dataset[0]  # Access the first graph object
+        >>> conv = GCNConv(in_channels=16, out_channels=32, bias=True, spmm=True)
+        >>> v_num = data.x.shape[0]  # Number of nodes
+        >>> edge_index, edge_weight = data.edge_index, data.edge_attr
+        >>> edge_index, edge_weight = gcn_norm(edge_index, edge_weight, v_num,
+        ...                                    improved=False, add_self_loops=True)
+        >>> with jt.no_grad():
+        ...     csc = cootocsc(edge_index, edge_weight, v_num)
+        ...     csr = cootocsr(edge_index, edge_weight, v_num)
+        >>> x = jt.random((v_num, 16))  # Randomly initialize node features
+        >>> out = conv(x, csc, csr)  # Apply GCN layer
     """
 
     _cached_edge_index: Optional[Tuple[Var, Var]]
     _cached_csc: Optional[CSC]
     def __init__(self, in_channels: int, out_channels: int,
-                 bias: bool = True, spmm:bool=True,**kwargs):
+                 bias: bool = True, spmm:bool=True, **kwargs):
         kwargs.setdefault('aggr', 'add')
         super(GCNConv, self).__init__(**kwargs)
         self.in_channels = in_channels

@@ -6,39 +6,40 @@ import jittor as jt
 from jittor_geometric.data import Data, InMemoryDataset, download_url
 from jittor_geometric.utils import coalesce
 
+
 class WikipediaNetwork(InMemoryDataset):
     r"""The Wikipedia networks introduced in the
     `"Multi-scale Attributed Node Embedding"
     <https://arxiv.org/abs/1909.13021>`_ paper.
-    Nodes represent web pages and edges represent hyperlinks between them.
-    Node features represent several informative nouns in the Wikipedia pages.
-    The task is to predict the average daily traffic of the web page.
+
+    This class represents Wikipedia networks where nodes correspond to web pages, and edges represent hyperlinks between them. The node features are derived from informative nouns on the Wikipedia pages, and the task is to predict the average daily traffic of each web page.
+
+    Dataset Details:
+    
+    - **Chameleon**: A Wikipedia page graph with node features representing nouns and the task of predicting traffic.
+    - **Squirrel**: Similar to Chameleon but derived from a different subset of Wikipedia pages.
+
+    Geometric GCN Preprocessing:
+    - If `geom_gcn_preprocess` is set to `True`, the dataset is preprocessed following the `"Geom-GCN: Geometric Graph Convolutional Networks"
+      <https://arxiv.org/abs/2002.05287>`_ paper. In this case, the traffic prediction task is converted into a five-category classification problem.
 
     Args:
         root (str): Root directory where the dataset should be saved.
-        name (str): The name of the dataset (:obj:`"chameleon"`,
-            :obj:`"crocodile"`, :obj:`"squirrel"`).
-        geom_gcn_preprocess (bool): If set to :obj:`True`, will load the
-            pre-processed data as introduced in the `"Geom-GCN: Geometric
-            Graph Convolutional Networks" <https://arxiv.org/abs/2002.05287>_`,
-            in which the average monthly traffic of the web page is converted
-            into five categories to predict.
-            If set to :obj:`True`, the dataset :obj:`"crocodile"` is not
-            available.
-            If set to :obj:`True`, train/validation/test splits will be
-            available as masks for multiple splits with shape
-            :obj:`[num_nodes, num_splits]`. (default: :obj:`True`)
-        transform (callable, optional): A function/transform that takes in an
+        name (str): The name of the dataset (:obj:`"chameleon"`, :obj:`"squirrel"`).
+        geom_gcn_preprocess (bool): Whether to load the preprocessed data from the Geom-GCN paper.
+            If set to `True`, preprocessed splits will also be available. (default: :obj:`True`)
+        transform (callable, optional): A function/transform that takes in a
             :obj:`jittor_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
             (default: :obj:`None`)
-        pre_transform (callable, optional): A function/transform that takes in
-            an :obj:`jittor_geometric.data.Data` object and returns a
-            transformed version. The data object will be transformed before
-            being saved to disk. (default: :obj:`None`)
-        force_reload (bool, optional): Whether to re-process the dataset.
-            (default: :obj:`False`)
+        pre_transform (callable, optional): A function/transform that takes in a
+            :obj:`jittor_geometric.data.Data` object and returns a transformed
+            version. The data object will be transformed before being saved to disk.
+            (default: :obj:`None`)
 
+    Example:
+        >>> dataset = WikipediaNetwork(root='/path/to/dataset', name='chameleon', geom_gcn_preprocess=True)
+        >>> data = dataset[0]  # Access the processed data object
     """
 
     raw_url = 'https://graphmining.ai/datasets/ptg/wiki'

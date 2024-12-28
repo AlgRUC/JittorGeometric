@@ -10,6 +10,8 @@ class HeteroDataset(InMemoryDataset):
     heterophily: Are we really making progress?'
     <https://arxiv.org/abs/2302.11640>.
 
+    This class represents a collection of heterophilic graph datasets used to evaluate the performance of Graph Neural Networks (GNNs) in heterophilic settings. These datasets consist of graphs where nodes are connected based on certain relationships, and the task is to classify the nodes based on their features or labels. The datasets in this collection come from different domains, and each dataset has a unique structure and task.
+
     Dataset Details:
 
     - **Roman Empire**: A graph from the Wikipedia article on the Roman Empire. Nodes represent words, 
@@ -37,6 +39,11 @@ class HeteroDataset(InMemoryDataset):
         pre_transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
             and returns a transformed version. The data object will be transformed before being saved to disk.
             (default: :obj:`None`)
+
+    Example:
+        >>> dataset = HeteroDataset(root='/path/to/dataset', name='amazon-ratings')
+        >>> dataset.data
+        >>> dataset[0]  # Accessing the first data point
     """
 
     url = ('https://github.com/yandex-research/heterophilous-graphs/raw/'

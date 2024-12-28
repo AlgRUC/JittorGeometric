@@ -23,7 +23,6 @@ python/jittor.egg-info
 dist/
 !doc/source/*
 core
-__data__
-data/
 examples/dyrep_example.py
 examples/jodie_example.py
+data/*

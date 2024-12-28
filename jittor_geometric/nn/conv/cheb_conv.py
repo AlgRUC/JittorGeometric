@@ -31,6 +31,16 @@ class ChebConv(MessagePassing):
 
     and :math:`\mathbf{\hat{L}}` denotes the scaled and normalized Laplacian
     :math:`\frac{2\mathbf{L}}{\lambda_{\max}} - \mathbf{I}`.
+
+    Args:
+        in_channels (int): Number of input features per node.
+        out_channels (int): Number of output features per node.
+        K (int): Order of Chebyshev polynomials used in the layer.
+        normalization (str, optional): Type of Laplacian normalization. 
+            Options are: :obj:`"sym"` (symmetric), :obj:`"rw"` (random walk), or :obj:`None` (no normalization). 
+            Default is :obj:`"sym"`.
+        bias (bool, optional): Whether to include a learnable bias term. Default is :obj:`True`.
+        **kwargs (optional): Additional arguments for the `MessagePassing` class.
     """
 
     def __init__(self, in_channels, out_channels, K, normalization='sym',

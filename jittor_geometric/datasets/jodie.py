@@ -10,6 +10,8 @@ class JODIEDataset(InMemoryDataset):
     "JODIE: Predicting Dynamic Embedding Trajectory in Temporal Interaction Networks"
     <https://cs.stanford.edu/~srijan/pubs/jodie-kdd2019.pdf>.
 
+    This class handles loading and processing temporal graph datasets used in the JODIE paper. It is designed for graph-based machine learning tasks, such as dynamic embedding and link prediction. The dataset includes interactions between users and entities (e.g., subreddits, Wikipedia pages, songs, or MOOC course items), and the interactions are timestamped.
+
     Dataset Details:
     
     - **Reddit Post Dataset**: This dataset consists of interactions between users and subreddits. 
@@ -38,6 +40,11 @@ class JODIEDataset(InMemoryDataset):
         pre_transform (callable, optional): A function/transform that takes in a 
             :obj:`Data` object and returns a transformed version. The data object 
             will be transformed before being saved to disk. (default: :obj:`None`)
+
+    Example:
+        >>> dataset = JODIEDataset(root='/path/to/dataset', name='Reddit')
+        >>> dataset.data
+        >>> dataset[0]  # Accessing the first data point
     """
     
     url = 'http://snap.stanford.edu/jodie/{}.csv'
@@ -70,14 +77,12 @@ class JODIEDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> str:
-        # return 'data.pt'
         return 'data.pkl'
 
     def download(self):
         download_url(self.url.format(self.name), self.raw_dir)
 
     def process(self):
-
         df = pd.read_csv(self.raw_paths[0], skiprows=1, header=None)
 
         src = jt.array(df.iloc[:, 0].values).to(jt.int64)
@@ -96,10 +101,26 @@ class JODIEDataset(InMemoryDataset):
 
     def __repr__(self) -> str:
         return f'{self.name.capitalize()}()'
-    
 
 
 class TemporalDataLoader:
+    r"""A data loader for batching and sampling temporal graph data, including negative sampling for link prediction tasks.
+
+    This class is designed to efficiently load temporal graph data in batches. It supports optional negative sampling, which is commonly used in link prediction tasks to generate non-existent edges in a graph. The loader iterates over the data, creating batches of source and destination node pairs, and optionally generates negative samples based on the provided negative sampling ratio.
+
+    Args:
+        data (TemporalData): A `TemporalData` object containing the source (`src`), destination (`dst`), and other relevant temporal information.
+        batch_size (int, optional): The number of samples in each batch. Default is 1.
+        neg_sampling_ratio (float, optional): The ratio of negative samples to generate for each batch. Default is 0.0 (no negative sampling).
+        drop_last (bool, optional): If `True`, the last batch will be dropped if it contains fewer than `batch_size` elements. Default is `False`.
+
+    Example:
+        >>> data_loader = TemporalDataLoader(data, batch_size=64, neg_sampling_ratio=0.1)
+        >>> for batch in data_loader:
+        >>>     print(batch.src, batch.dst)  # Source and destination nodes in the batch
+        >>>     print(batch.neg_dst)  # Negative destination nodes (if any)
+    """
+    
     def __init__(self, data, batch_size=1, neg_sampling_ratio=0.0, drop_last=False):
         self.data = data
         self.batch_size = batch_size
@@ -131,3 +152,4 @@ class TemporalDataLoader:
 
             batch.n_id = jt.concat(n_ids).unique()
             yield batch
+

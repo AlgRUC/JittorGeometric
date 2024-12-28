@@ -15,24 +15,31 @@ from ..inits import glorot
 class GCN2Conv(MessagePassing):
     r"""The graph convolutional operator with initial residual connections and
     identity mapping (GCNII) from the `"Simple and Deep Graph Convolutional
-    Networks" <https://arxiv.org/abs/2007.02133>`_ paper
+    Networks" <https://arxiv.org/abs/2007.02133>`_ paper.
 
+    This class implements the GCNII layer, which combines initial residual connections and identity mapping 
+    to enable deeper graph convolutional networks without oversmoothing. The layer supports both message-passing 
+    and sparse matrix multiplication (SPMM) for efficient propagation.
+
+    Mathematical Formulation:
     .. math::
-        \mathbf{X}^{\prime} = \left( (1 - \alpha) \mathbf{\hat{P}}\mathbf{X} +
-        \alpha \mathbf{X^{(0)}}\right) \left( (1 - \beta) \mathbf{I} + \beta
-        \mathbf{\Theta} \right)
+        \mathbf{H}^{(l)} = (1 - \beta) \big( (1 - \alpha) \mathbf{H}^{(l-1)} + \alpha \mathbf{H}^{(0)} \big) +
+        \beta \big( \mathbf{\Theta}_1 \mathbf{H}^{(l-1)} + \mathbf{\Theta}_2 \mathbf{H}^{(0)} \big)
 
-    with :math:`\mathbf{\hat{P}} = \mathbf{\hat{D}}^{-1/2} \mathbf{\hat{A}}
-    \mathbf{\hat{D}}^{-1/2}`, where
-    :math:`\mathbf{\hat{A}} = \mathbf{A} + \mathbf{I}` denotes the adjacency
-    matrix with inserted self-loops and
-    :math:`\hat{D}_{ii} = \sum_{j=0} \hat{A}_{ij}` its diagonal degree matrix,
-    and :math:`\mathbf{X}^{(0)}` being the initial feature representation.
-    Here, :math:`\alpha` models the strength of the initial residual
-    connection, while :math:`\beta` models the strength of the identity
-    mapping.
-    The adjacency matrix can include other values than :obj:`1` representing
-    edge weights via the optional :obj:`edge_weight` Var.
+    where:
+    - :math:`\mathbf{H}^{(l)}` is the node feature matrix at layer :math:`l`.
+    - :math:`\mathbf{H}^{(0)}` is the initial node feature matrix.
+    - :math:`\mathbf{\Theta}_1` and :math:`\mathbf{\Theta}_2` are learnable weight matrices.
+    - :math:`\alpha` controls the strength of the initial residual connection.
+    - :math:`\beta` balances feature aggregation and transformation.
+
+    Args:
+        in_channels (int): Number of input features per node.
+        out_channels (int): Number of output features per node.
+        cached (bool, optional): If set to `True`, caches the normalized edge indices. Default is `False`.
+        add_self_loops (bool, optional): If set to `True`, adds self-loops to the input graph. Default is `True`.
+        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `False`.
+        **kwargs (optional): Additional arguments for the base `MessagePassing` class.
     """
 
     def __init__(self, in_channels: int, out_channels: int, cached: bool = False, add_self_loops: bool = True, 
