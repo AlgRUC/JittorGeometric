@@ -17,25 +17,27 @@ import numpy as np
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 
-jt.flags.use_cuda = 1 #jt.has_cuda
+# Use cuda
+jt.flags.use_cuda = 1
 
-dataset_name = 'wikipedia'# wikipedia, mooc, reddit, lastfm
+# Load dataset from DGB or TGB-Seq
+dataset_name = 'wikipedia' # wikipedia, mooc, reddit, lastfm
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
-    # Load the dataset
+    # Load dataset from DGB
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
     dataset = JODIEDataset(path, name=dataset_name) 
     data = dataset[0]
-
     min_dst_idx, max_dst_idx = int(data.dst.min()), int(data.dst.max())
-
-    # Split the dataset into train/val/test
+    
+    # Split the dataset into train/val/test sets
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
+    
     # Create TemporalDataLoader objects
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
-
 elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
+    # Load dataset from TGB-Seq
     path='/data/lu_yi/tgb-seq/'
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
@@ -46,7 +48,11 @@ elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTu
         data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), msg=jt.array(dataset.edge_feat), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), test_ns=jt.array(dataset.test_ns.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
     else:
         data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), msg=jt.array(dataset.edge_feat), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
+    
+    # Split the dataset into train/val/test sets
     train_data, val_data, test_data = data.train_val_test_split_w_mask()
+    
+    # Create TemporalDataLoader objects
     train_loader = TemporalDataLoader(train_data, batch_size=200, num_neg_sample=1)
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
@@ -54,6 +60,7 @@ elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTu
 # Define the neighbor loader
 neighbor_loader = LastNeighborLoader(data.num_nodes, size=10)
 
+# Define attention module
 class GraphAttentionEmbedding(jt.nn.Module):
     def __init__(self, in_channels, out_channels, msg_dim, time_enc):
         super(GraphAttentionEmbedding, self).__init__()
@@ -68,7 +75,7 @@ class GraphAttentionEmbedding(jt.nn.Module):
         edge_attr = jt.concat([rel_t_enc, msg], dim=-1)
         return self.conv(x, edge_index, edge_attr)
 
-
+# Define MLP-based predictor
 class LinkPredictor(jt.nn.Module):
     def __init__(self, in_channels):
         super(LinkPredictor, self).__init__()
@@ -81,9 +88,8 @@ class LinkPredictor(jt.nn.Module):
         h = jt.nn.relu(h)
         return self.lin_final(h)
 
-
+# Define Memory module
 memory_dim = time_dim = embedding_dim = 100
-
 memory = DyRepMemory(
     data.num_nodes,
     data.msg.size(-1),
@@ -106,38 +112,35 @@ model = jt.nn.Sequential(memory, gnn, link_pred)
 optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 criterion = jt.nn.BCEWithLogitsLoss()
 
-# Helper vector to map global node indices to local ones.
+# Helper vector to map global node indices to local ones
 assoc = jt.empty(data.num_nodes, dtype=jt.int32)
 
 
 def train():
     model.train()
-
-    model[0].reset_state()  # Start with a fresh memory.
-    neighbor_loader.reset_state()  # Start with an empty graph.
+    model[0].reset_state()
+    neighbor_loader.reset_state()
 
     total_loss = 0
     for batch in tqdm(train_loader):
         n_id, edge_index, e_id = neighbor_loader(batch.n_id)
         assoc[n_id] = jt.arange(n_id.size(0))
         
-        # Get updated memory of all nodes involved in the computation.
+        # Get updated memory of all nodes involved in the computation
         z, last_update = model[0](n_id)
         z = model[1](z, last_update, edge_index, data.t[e_id], data.msg[e_id])
 
-        # Compute predictions and loss.
+        # Compute predictions and loss
         pos_out = model[2](z[assoc[batch.src]], z[assoc[batch.dst]])
-        
         neg_out = model[2](z[assoc[batch.src]], z[assoc[batch.neg_dst]])
-        
         loss = criterion(pos_out, jt.ones_like(pos_out))
         loss += criterion(neg_out, jt.zeros_like(neg_out))
 
-        # Update memory and neighbor loader with ground-truth state.
+        # Update memory and neighbor loader with ground-truth state
         model[0].update_state(batch.src, batch.dst, batch.t, batch.msg)
         neighbor_loader.insert(batch.src, batch.dst)
 
-        # Backpropagation and optimization.
+        # Backpropagation and optimization
         optimizer.zero_grad()
         optimizer.step(loss)
         model[0].detach()
@@ -149,7 +152,8 @@ def train():
 def test(loader):
     model.eval()
 
-    jt.set_seed(12345)  # Ensure deterministic sampling across epochs.
+    # Ensure deterministic sampling across epochs
+    jt.set_seed(12345)
 
     aps, aucs = [], []
     for batch in loader:
@@ -160,15 +164,17 @@ def test(loader):
         n_id, edge_index, e_id = neighbor_loader(n_id)
         assoc[n_id] = jt.arange(n_id.shape[0])
 
+        # Get updated memory of all nodes involved in the computation
         z, last_update = model[0](n_id)
         z = model[1](z, last_update, edge_index, data.t[e_id], data.msg[e_id])
 
+        # Compute predictions
         pos_out = model[2](z[assoc[src]], z[assoc[pos_dst]])
         neg_out = model[2](z[assoc[src]], z[assoc[neg_dst]])
-
         y_pred = jt.concat([pos_out, neg_out], dim=0).sigmoid().numpy()
         y_true = jt.concat([jt.ones(pos_out.shape[0]), jt.zeros(neg_out.shape[0])], dim=0).numpy()
 
+        # Compute metrics
         aps.append(average_precision_score(y_true, y_pred))
         aucs.append(roc_auc_score(y_true, y_pred))
 
@@ -187,13 +193,17 @@ for epoch in range(1, 51):
     print(f'Val AP: {val_ap:.4f}, Val AUC: {val_auc:.4f}')
     if val_ap > best_ap:
         best_ap = val_ap
+        # Save the model when achieving better performance on val set
         jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
         print('Saved model is updated')
         patience = 5
     else:
         patience -= 1
+        # Early stop if patience decreases to zero
         if patience == 0:
             break
+
+# Load the saved model for testing
 model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_model_DyRep.pkl'))
 test_ap, test_auc = test(test_loader)
 print(f'Test AP: {test_ap:.4f}, Test AUC: {test_auc:.4f}')
