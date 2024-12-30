@@ -17,6 +17,7 @@ from .even_conv import EvenNet
 from .bernnet_conv import BernNet
 from .chebnet2_conv import ChebNetII
 from .transformer_conv import TransformerConv
+from .optbasis_conv import OptBasisConv
 
 __all__ = [
     'MessagePassing',
@@ -33,6 +34,7 @@ __all__ = [
     'BernNet',
     'ChebNetII',
     'TransformerConv',
+    'OptBasisConv',
 ]
 
 classes = __all__
