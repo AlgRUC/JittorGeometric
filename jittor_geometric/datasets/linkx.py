@@ -197,6 +197,11 @@ class LINKXDataset(InMemoryDataset):
         pre_transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
             and returns a transformed version. The data object will be transformed before being saved to disk.
             (default: :obj:`None`)
+
+    Example:
+        >>> dataset = LINKXDataset(root='/path/to/dataset', name='pokec')
+        >>> dataset.data
+        >>> dataset[0]  # Accessing the first data point
     """
 
     def __init__(self, root: str, name: str,

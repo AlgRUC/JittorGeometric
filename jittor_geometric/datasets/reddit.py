@@ -19,9 +19,20 @@ class Reddit(InMemoryDataset):
     Large Graphs" <https://arxiv.org/abs/1706.02216>`_ paper, containing
     Reddit posts belonging to different communities.
 
+    This dataset is designed for large-scale graph representation learning. Nodes in the graph represent Reddit posts, and edges represent interactions (e.g., comments) between posts in the same community. The task is to classify posts into one of the 41 communities based on their content and connectivity.
+
+    **Dataset Statistics:**
+
+    - **Number of Nodes**: 232,965
+    - **Number of Edges**: 114,615,892
+    - **Number of Features**: 602
+    - **Number of Classes**: 41
+
+    The dataset is pre-split into training, validation, and test sets using node type masks.
+
     Args:
         root (str): Root directory where the dataset should be saved.
-        transform (callable, optional): A function/transform that takes in an
+        transform (callable, optional): A function/transform that takes in a
             :obj:`torch_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
             (default: :obj:`None`)
@@ -32,20 +43,9 @@ class Reddit(InMemoryDataset):
         force_reload (bool, optional): Whether to re-process the dataset.
             (default: :obj:`False`)
 
-    **STATS:**
-
-    .. list-table::
-        :widths: 10 10 10 10
-        :header-rows: 1
-
-        * - #nodes
-          - #edges
-          - #features
-          - #classes
-        * - 232,965
-          - 114,615,892
-          - 602
-          - 41
+    Example:
+        >>> dataset = Reddit(root='/path/to/reddit')
+        >>> data = dataset[0]  # Access the first graph object
     """
 
     url = 'https://data.dgl.ai/dataset/reddit.zip'

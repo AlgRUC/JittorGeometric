@@ -25,7 +25,6 @@ parser.add_argument('--use_gdc', action='store_true',
 parser.add_argument('--dataset', default="cora", help='graph dataset')
 parser.add_argument('--alpha', type=float, default=0.2, help='alpha for PPR')
 parser.add_argument('--K', type=int, default=10, help='number of coe')
-parser.add_argument('--Init', type=str, default="PPR", help='Init of coe')
 parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
@@ -51,7 +50,7 @@ v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
-                        improved=False, add_self_loops=True)
+                        improved=False, add_self_loops=False)
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
@@ -64,7 +63,7 @@ class Net(nn.Module):
         self.lin1 = nn.Linear(dataset.num_features, hidden)
         self.lin2 = nn.Linear(hidden, dataset.num_classes)
         
-        self.prop = EvenNet(args.K, args.alpha, args.Init)
+        self.prop = EvenNet(args.K, args.alpha)
         self.dropout = dropout
 
     def execute(self):

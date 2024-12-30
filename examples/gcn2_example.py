@@ -2,8 +2,12 @@ import os.path as osp
 
 import jittor as jt
 from jittor import nn
+import sys
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 from jittor_geometric.datasets import Planetoid
 import jittor_geometric.transforms as T
+
 from jittor_geometric.nn import GCN2Conv
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
