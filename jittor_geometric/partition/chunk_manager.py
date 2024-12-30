@@ -5,15 +5,15 @@ Date: 2024-12-03 15:49:39
 '''
 import os
 import os.path as osp
-from typing import List
-from jittor_geometric.data import GraphChunk,CSR
-from jittor_geometric.ops import cootocsr
+from typing import List, Optional
+#from jittor_geometric.data import GraphChunk,CSR
+#from jittor_geometric.ops import cootocsr
 import pickle
 import numpy as np
 from pymetis import part_graph
 
 class ChunkManager:
-    def __init__(self, output_dir, graph_data=None):
+    def __init__(self, output_dir : Optional[str]=None, graph_data=None):
         """
         初始化 ChunkManager。
         :param output_dir: 文件保存路径。
@@ -21,7 +21,8 @@ class ChunkManager:
         """
         self.output_dir = output_dir
         self.graph_data = graph_data
-        os.makedirs(output_dir, exist_ok=True)
+        if self.output_dir is not None:
+            os.makedirs(output_dir, exist_ok=True)
 
     def metis_partition(self, edge_index, num_nodes, num_parts):
         """
@@ -36,10 +37,11 @@ class ChunkManager:
         partition = np.array(partition)
 
         # 保存分区文件
-        partition_file = osp.join(self.output_dir, f"partition_{num_parts}.bin")
-        with open(partition_file, 'wb') as f:
-            pickle.dump(partition, f)
-        print(f"Partition file saved to {partition_file}")
+        if self.output_dir is not None:
+            partition_file = osp.join(self.output_dir, f"partition_{num_parts}.bin")
+            with open(partition_file, 'wb') as f:
+                pickle.dump(partition, f)
+            print(f"Partition file saved to {partition_file}")
         return partition
 
     def partition_to_chunk(self, partition_file, edge_index, edge_weight, num_nodes, num_parts):

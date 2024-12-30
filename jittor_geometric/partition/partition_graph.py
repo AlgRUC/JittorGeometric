@@ -10,7 +10,7 @@ import os
 import sys
 import jittor as jt
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from jittor_geometric.data import GraphChunk,CSR
+#from jittor_geometric.data import GraphChunk,CSR
 from jittor import Var
 from jittor_geometric.partition.chunk_manager import ChunkManager
 from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset, HeteroDataset, Reddit
