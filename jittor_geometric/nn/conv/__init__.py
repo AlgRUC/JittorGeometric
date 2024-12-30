@@ -17,6 +17,7 @@ from .even_conv import EvenNet
 from .bernnet_conv import BernNet
 from .chebnet2_conv import ChebNetII
 from .transformer_conv import TransformerConv
+from .optbasis_conv import OptBasisConv
 from .clustergcn_conv import ClusterGCNConv
 from .sage_conv import SAGEConv
 
@@ -35,8 +36,6 @@ __all__ = [
     'BernNet',
     'ChebNetII',
     'TransformerConv',
-    'ClusterGCNConv',
-    'SAGEConv'
 ]
 
 classes = __all__

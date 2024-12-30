@@ -25,5 +25,6 @@ dist/
 core
 examples/dyrep_example.py
 examples/jodie_example.py
+data/
 data/*
 dhp_test.py
