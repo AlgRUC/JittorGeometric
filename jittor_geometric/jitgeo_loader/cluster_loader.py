@@ -3,21 +3,24 @@ from jittor import sparse
 import copy
 from .general_loader import GeneralLoader
 from ..utils import induced_graph
+from jittor_geometric.partition.chunk_manager import ChunkManager
+import numpy as np
 
-class RandomNodeLoader(GeneralLoader):
+
+class ClusterLoader(GeneralLoader):
     
     r'''
-    The graph dataset loader, randomly split all of the nodes into 'num_parts' mini-batches.
+    The graph dataset loader, using metis to partition graph into 'mini_splits' groups and randomly merge them into 'num_parts' mini-batches for training.
     The dataset loader yields the induced graph of the selected nodes iteratively.
     
     Args:
         dataset (InMemoryDataset): The original graph dataset.
         num_parts (int): Number of expected mini-batches.
+        mini_splits (int): Number of parts that metis partitions.
         fixed (bool, optional): If set to 'True', the dataset loader will yield identical mini-batches every round.
     '''
     
-    
-    def __init__(self, dataset, num_parts: int, fixed: bool = True):
+    def __init__(self, dataset, num_parts: int, mini_splits: int, fixed: bool = False):
         self.data = copy.copy(dataset[0])
         self.N = self.data.num_nodes
         self.E = self.data.num_edges
@@ -25,15 +28,42 @@ class RandomNodeLoader(GeneralLoader):
         self.data.edge_index = None
         
         self.num_parts = num_parts
+        self.mini_splits = mini_splits
         self.fixed = fixed
         
         self.itermax = num_parts
         
-        self.itercnt = 0
-        self.n_ids = self.get_node_indices()
+        self.parts = self.partition(self.edge_index, self.N, self.mini_splits)
         
+        self.itercnt = 0
+        self.n_splits = self.get_node_indices()
+        for i in self.n_splits:
+            print(i)
+        
+    def partition(self, edge_index, num_nodes, mini_splits):
+        chunk_manager = ChunkManager(output_dir=None)
+        partition = chunk_manager.metis_partition(edge_index, num_nodes, mini_splits)
+        partition = jt.Var(partition)
+        partition = partition.sort()
+        
+        parts = []
+        part_begin = 0
+        part_end = 1
+        for i in range(self.mini_splits):
+            part_end = part_begin + 1
+            while part_end <= num_nodes - 1 and partition[0][part_end] == partition[0][part_end - 1]:
+                part_end += 1
+            if part_begin >= part_end:
+                parts.append(jt.zeros(0, dtype='int'))
+            elif part_end >= num_nodes:
+                parts.append(partition[1][part_begin:])
+            else:
+                parts.append(partition[1][part_begin: part_end])
+            part_begin = part_end
+        return parts
+    
     def get_node_indices(self):
-        n_id = jt.randint(0, self.num_parts, (self.N, ), dtype="int32")
+        n_id = np.random.permutation(self.mini_splits) % self.num_parts
         n_ids = [jt.nonzero((n_id == i)).view(-1) for i in range(self.num_parts)]
         return n_ids
 
@@ -48,18 +78,10 @@ class RandomNodeLoader(GeneralLoader):
     def __next__(self):
         if self.itercnt < self.itermax:
             
-            node_id = None
-            
-            while True:
-                node_id = self.n_ids[self.itercnt]    
-                if node_id.size(0) != 0:
-                    break
-                else:
-                    self.itercnt += 1
-                    if self.itercnt >= self.itermax:
-                        self.__reset__()
-                        raise StopIteration
-            
+            node_id = jt.zeros(0, dtype='int')
+            for i in self.n_splits[self.itercnt]:
+                node_id = jt.concat([node_id, self.parts[i]])
+                
             node_map, edge_id = induced_graph(self.edge_index, node_id, self.N)
             
             # node_mask = jt.zeros(self.N, dtype='bool')
