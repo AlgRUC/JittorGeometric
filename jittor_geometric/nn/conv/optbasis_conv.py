@@ -1,7 +1,7 @@
 '''
 Description: 
-Author: ivam
-Date: 2024-12-13
+Author: Yuhe Guo
+Date: 2024-12-30
 '''
 from typing import Optional, Tuple
 from jittor_geometric.typing import Adj, OptVar
@@ -16,6 +16,21 @@ from jittor_geometric.data import CSC, CSR
 from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 
 class OptBasisConv(Module):
+    r"""Graph Neural Networks with Learnable and Optimal Polynomial Bases
+    <https://openreview.net/pdf?id=UjQIoJv927>`_ paper.
+
+    This class implements the OptBasisConv architecture, which implicitly utilize the optimal polynomial bases on each channel via three term recurrence propagation. 
+    Check Algorithm 4 and Algorithm 5 in the paper for more details.
+
+    Mathematical Formulation:
+        Please refer to Algorithm 2, 4 and 5 in paper for more details.
+
+    Args:
+        K (int): Order of polynomial bases.
+        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
+        n_channels (int): Number of signal channels to be filtered.
+        **kwargs (optional): Additional arguments for the base `Module`.
+    """
     def __init__(self, K: int, n_channels:int, spmm:bool=True,  **kwargs):
         kwargs.setdefault('aggr', 'add')
         super(OptBasisConv, self).__init__(**kwargs)
@@ -26,16 +41,13 @@ class OptBasisConv(Module):
         
         self.reset_parameters()
 
-    
     def reset_parameters(self):
         t = jt.zeros(self.K+1)
         t[0] = 1
         t = t.repeat(self.n_channels, 1)
         self.alpha_params = jt.Var(t) 
 
-
     def three_term_prop(self, csr, last_h, second_last_h):
-        # rst = self.propagate(edge_index=edge_index, x=last_h, norm=norm_A)
         rst = self.propagate_spmm(x=last_h, csr=csr)
         _t = jt.linalg.einsum('nh,nh->h',rst,last_h)
         rst = rst - jt.linalg.einsum('h,nh->nh', _t, last_h)
@@ -44,7 +56,6 @@ class OptBasisConv(Module):
         rst = rst / jt.clamp((jt.norm(rst,dim=0)),1e-8)
         return rst
     
-
     def execute(self, x, csr):
         blank_noise = jt.randn_like(x)*1e-5
         x = x + blank_noise
@@ -62,11 +73,6 @@ class OptBasisConv(Module):
             last_h = h_i
 
         return rst
-
-
-
-
-
 
     # propagate by message passing
     def propagate_msg(self,x, csc: CSC, csr:CSR):

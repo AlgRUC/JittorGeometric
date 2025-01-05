@@ -19,10 +19,18 @@ class GPRGNN(Module):
     r"""The graph propagation operator from the `"Adaptive Universal 
     Generalized PageRank Graph Neural Network"
     <https://arxiv.org/abs/2006.07988>`_ paper
+
+    Mathematical Formulation:
+    .. math::
+        \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathbf{P}^{k} \mathbf{X}.
+
+    Args:
+        K (int): Order of polynomial, or maximum number of hops considered for message passing. 
+        alpha (float): Parameter controlling the weighting of different hops.
+        Init (str): Initialization method for the propagation weights. Possible values are 'SGC', 'PPR', 'NPPR', 'Random', 'WS'.
+        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
     """
 
-    #_cached_edge_index: Optional[Tuple[Var, Var]]
-    #_cached_csc: Optional[CSC]
     def __init__(self, K: int, alpha: float, Init: str, spmm:bool=True, **kwargs):
         kwargs.setdefault('aggr', 'add')
         super(GPRGNN, self).__init__(**kwargs)
@@ -58,10 +66,6 @@ class GPRGNN(Module):
 
     def reset_parameters(self):
     	pass
-        #glorot(self.weight)
-        #zeros(self.bias)
-        #self._cached_adj_t = None
-        #self._cached_csc=None
 
     def execute(self, x: Var, csc: OptVar, csr: OptVar) -> Var:
         out = x*(self.temp[0])

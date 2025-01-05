@@ -19,10 +19,23 @@ class BernNet(Module):
     r"""The graph propagation operator from the `"BernNet: Learning Arbitrary 
     Graph Spectral Filters via Bernstein Approximation"
     <https://arxiv.org/abs/2106.10994>`_ paper
+    
+    Mathematical Formulation:
+    .. math::
+        \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathrm{Bern}_{k}(\tilde{L}) \mathbf{X}.
+    where:
+        :math:`\mathbf{X}` is the input node feature matrix.
+        :math:`\mathbf{Z}` is the output node feature matrix.
+        :math:`\mathrm{Bern}_{k}` is the Bernstein polynomial of order :math:`k`.
+        :math:`\tilde{\mathbf{L}}` is the normalized Laplacian matrix of the graph, translated to the interval :math:`[-1,1]`.
+        :math:`\alpha_k` is the parameter for the :math:`k`-th order Bernstein polynomial. 
+
+    Args:
+        K (int): Order of polynomial, or maximum number of hops considered for message passing. 
+        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
+        **kwargs (optional): Additional arguments for the `MessagePassing` class.
     """
 
-    #_cached_edge_index: Optional[Tuple[Var, Var]]
-    #_cached_csc: Optional[CSC]
     def __init__(self, K: int, spmm:bool=True, **kwargs):
         kwargs.setdefault('aggr', 'add')
         super(BernNet, self).__init__(**kwargs)
@@ -34,10 +47,6 @@ class BernNet(Module):
 
     def reset_parameters(self):
     	ones(self.temp)
-        #glorot(self.weight)
-        #zeros(self.bias)
-        #self._cached_adj_t = None
-        #self._cached_csc=None
 
     def execute(self, x: Var, csc1: OptVar, csr1: OptVar, csc2: OptVar, csr2: OptVar) -> Var:
         TEMP=nn.relu(self.temp)
