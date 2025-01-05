@@ -8,7 +8,7 @@ setup(
     # author_email='your.email@example.com',恳请大佬们写一下吧
     packages=find_packages(),
     package_data={
-        'jittor_geometric': ['ops/cpp/*.cpp', 'ops/cpp/*.h'],
+        'jittor_geometric': ['ops/cpp/*.cc', 'ops/cpp/*.h'],
     },
     # description='A brief description of the library',
     long_description=open('README.md').read(),
