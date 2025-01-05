@@ -122,6 +122,7 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDatas
 # Define the neighbor loader
 full_neighbor_sampler = get_neighbor_sampler(data, 'recent',seed=1)
 
+edge_raw_features = None
 # The index of node and edge both start from 1
 node_raw_features = np.zeros((data.num_nodes+1, node_feat_dims))
 if isinstance(dataset, JODIEDataset):

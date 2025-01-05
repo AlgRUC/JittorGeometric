@@ -3,9 +3,29 @@ from jittor.nn import Embedding, Linear, RNNCell
 import numpy as np
 
 class JODIEEmbedding(jt.nn.Module):
-    def __init__(self, embedding_dim, num_users, num_items,
-                 src_node_mean_time_shift, src_node_std_time_shift,
-                 dst_node_mean_time_shift, dst_node_std_time_shift):
+    r"""The implementation of JODIE model for temporal link prediction, as described in the paper
+    `"Predicting Dynamic Embedding Trajectory in Temporal Interaction Networks"
+    <https://arxiv.org/abs/1908.01207>`_.
+
+    This model learns dynamic embeddings for users and items in temporal graphs by modeling their interactions over time.
+
+    .. note::
+
+        For an example of using JODIEEmbedding, see `examples/jodie_example.py`.
+
+    Args:
+        :param embedding_dim: int, the dimensionality of the embedding space for users and items
+        :param num_users: int, the total number of users in the graph
+        :param num_items: int, the total number of items in the graph
+        :param src_node_mean_time_shift: float, the mean time shift for source node embeddings
+        :param src_node_std_time_shift: float, the standard deviation of time shift for source node embeddings
+        :param dst_node_mean_time_shift: float, the mean time shift for destination node embeddings
+        :param dst_node_std_time_shift: float, the standard deviation of time shift for destination node embeddings
+
+    """
+    def __init__(self, embedding_dim: int, num_users: int, num_items: int,
+                 src_node_mean_time_shift: float, src_node_std_time_shift: float,
+                 dst_node_mean_time_shift: float, dst_node_std_time_shift: float):
         super(JODIEEmbedding, self).__init__()
         
         self.user_embedding = Embedding(num_users, embedding_dim)

@@ -9,54 +9,29 @@ from jittor_geometric.nn.inits import zeros, glorot
 
 DyRepMessageStoreType = Dict[int, Tuple[jt.Var, jt.Var, jt.Var, jt.Var]]
 
-
-def scatter_argmax(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None) -> jt.Var:
-    assert src.ndim == 1 and index.ndim == 1
-    assert dim == 0 or dim == -1
-    assert src.numel() == index.numel()
-
-    if dim_size is None:
-        dim_size = int(index.max().item()) + 1 if index.numel() > 0 else 0
-
-    res = jt.full((dim_size,), -float('inf'))
-
-    for i in range(index.numel()):
-        res[index[i]] = jt.maximum(res[index[i]], src[i])
-
-    out = jt.full((dim_size,), dim_size - 1)
-
-    gathered_res = jt.gather(res, 0, index)
-    mask = (src == gathered_res)
-    nonzero = jt.nonzero(mask).reshape((-1,))
-    
-    out[index[nonzero]] = nonzero
-
-    return out
-
-
-def scatter_max(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None):
-    if src.numel() == 0 or index.numel() == 0:
-        if dim_size is None:
-            dim_size = 0
-        return jt.zeros((dim_size,)), jt.zeros((dim_size,), dtype=index.dtype)
-
-    if dim_size is None:
-        dim_size = int(index.max().item()) + 1 if index.numel() > 0 else 0
-
-    max_values = jt.full((dim_size,), -float('inf'))
-    argmax_indices = jt.full((dim_size,), dim_size - 1, dtype=index.dtype)
-
-    for i in range(index.numel()):
-        if src[i] > max_values[index[i]]:
-            max_values[index[i]] = src[i]
-            argmax_indices[index[i]] = i
-
-    return max_values, argmax_indices
-
-
 class DyRepMemory(nn.Module):
+    r"""The implementation of DyRep (Dynamic Representation Learning) Memory, as described in the paper
+    `"DYREP: LEARNING REPRESENTATIONS OVER DYNAMIC GRAPHS"
+    <https://openreview.net/pdf?id=HyePrhR5KX>`_.
+
+    DyRep is a model designed to learn node representations in dynamic graphs. It leverages recurrent neural networks 
+    (RNNs) to handle time-varying graph structures and messages, providing dynamic embeddings for nodes across time.
+
+    .. note::
+
+        For an example of using DyRepMemory, see `examples/dyrep_example.py`.
+
+    Args:
+        :param num_nodes: int, the total number of nodes in the graph
+        :param raw_msg_dim: int, the dimensionality of the raw message (input feature dimension)
+        :param memory_dim: int, the dimensionality of the memory for each node, used for temporal encoding
+        :param time_dim: int, the dimension of the time feature used for encoding temporal information
+        :param message_module: Callable, the module used to compute messages that will be passed between nodes
+        :param aggregator_module: Callable, the module used to aggregate messages at each node
+
+    """
     def __init__(self, num_nodes: int, raw_msg_dim: int, memory_dim: int,
-                 time_dim: int, message_module: Callable,
+                 time_dim: int, message_module: Callable, 
                  aggregator_module: Callable):
         super().__init__()
 
@@ -190,6 +165,49 @@ class DyRepMemory(nn.Module):
             self._update_memory(jt.arange(self.num_nodes))
             self._reset_message_store()
         super(DyRepMemory, self).train()
+
+def scatter_argmax(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None) -> jt.Var:
+    assert src.ndim == 1 and index.ndim == 1
+    assert dim == 0 or dim == -1
+    assert src.numel() == index.numel()
+
+    if dim_size is None:
+        dim_size = int(index.max().item()) + 1 if index.numel() > 0 else 0
+
+    res = jt.full((dim_size,), -float('inf'))
+
+    for i in range(index.numel()):
+        res[index[i]] = jt.maximum(res[index[i]], src[i])
+
+    out = jt.full((dim_size,), dim_size - 1)
+
+    gathered_res = jt.gather(res, 0, index)
+    mask = (src == gathered_res)
+    nonzero = jt.nonzero(mask).reshape((-1,))
+    
+    out[index[nonzero]] = nonzero
+
+    return out
+
+
+def scatter_max(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None):
+    if src.numel() == 0 or index.numel() == 0:
+        if dim_size is None:
+            dim_size = 0
+        return jt.zeros((dim_size,)), jt.zeros((dim_size,), dtype=index.dtype)
+
+    if dim_size is None:
+        dim_size = int(index.max().item()) + 1 if index.numel() > 0 else 0
+
+    max_values = jt.full((dim_size,), -float('inf'))
+    argmax_indices = jt.full((dim_size,), dim_size - 1, dtype=index.dtype)
+
+    for i in range(index.numel()):
+        if src[i] > max_values[index[i]]:
+            max_values[index[i]] = src[i]
+            argmax_indices[index[i]] = i
+
+    return max_values, argmax_indices
 
 def unique_consecutive(input_tensor):
     np_array = input_tensor.numpy()
