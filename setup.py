@@ -4,11 +4,11 @@ from setuptools import setup, find_packages, Extension
 setup(
     name='jittor_geometric',
     version='0.1',
-    # author='Your Name',有一些信息不清楚发行版该怎么填，就先注释掉了
-    # author_email='your.email@example.com',恳请大佬们写一下吧
+    # author='Your Name',
+    # author_email='your.email@example.com',
     packages=find_packages(),
     package_data={
-        'jittor_geometric': ['ops/cpp/*.cpp', 'ops/cpp/*.h'],
+        'jittor_geometric': ['ops/cpp/*.cc', 'ops/cpp/*.h'],
     },
     # description='A brief description of the library',
     long_description=open('README.md').read(),
