@@ -6,13 +6,13 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 from jittor_geometric.nn.models.dygformer import DyGFormer
-import time
 from jittor_geometric.datasets import JODIEDataset
 from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoader
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.sampler.TemporalSampler import get_neighbor_sampler
 from jittor_geometric.nn.models.modules import MergeLayer
 import os.path as osp
+import os
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -46,15 +46,12 @@ def test(loader):
 def train():
     best_ap = 0
     patience = 5
-    execute_time, load_time, get_neighbor_time, compute_time = 0, 0, 0, 0
     for epoch in range(num_epochs):
         model.train()
         train_losses = []
         train_idx_data_loader_tqdm = tqdm(train_loader, ncols=120)
-        load_time_s = time.perf_counter()
         for batch_idx, batch_data in enumerate(train_idx_data_loader_tqdm):
             src, dst, t, neg_dst = batch_data.src, batch_data.dst, batch_data.t, batch_data.neg_dst
-            load_time_e = time.perf_counter()
             # compute the embeddings of src and dst nodes
             src_node_embeddings, dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src, dst, t)
             # compute the embeddings of src and neg_dst nodes
@@ -67,9 +64,6 @@ def train():
             optimizer.zero_grad()
             optimizer.step(loss)
             train_losses.append(loss.item())
-            load_time += load_time_e - load_time_s
-            load_time_s = time.perf_counter()
-            execute_time += load_time_s - load_time_e
             train_idx_data_loader_tqdm.set_description(f'Epoch: {epoch + 1}, train for the {batch_idx + 1}-th batch, train loss: {loss.item()}')
         train_loss = np.mean(train_losses)
         print(f'Epoch: {epoch:03d}, Train Loss: {train_loss:.4f}')
@@ -95,10 +89,13 @@ num_neighbors = 30
 dropout = 0.1
 bipartite = False
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
-
+if not osp.exists(save_model_path):
+    os.makedirs(save_model_path)
 criterion = jt.nn.BCEWithLogitsLoss()
 dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
+if not osp.exists(path):
+    os.makedirs(path)
 if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
