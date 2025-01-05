@@ -23,6 +23,11 @@ class GPRGNN(Module):
     Mathematical Formulation:
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathbf{P}^{k} \mathbf{X}.
+    where:  
+        :math:`\mathbf{X}` is the input node feature matrix.
+        :math:`\mathbf{Z}` is the output node feature matrix.
+        :math:`\mathbf{P}` is the normalized adjacency matrix of the graph.
+        :math:`\alpha_k` is the parameter for the :math:`k`-th order polynomial.
 
     Args:
         K (int): Order of polynomial, or maximum number of hops considered for message passing. 
