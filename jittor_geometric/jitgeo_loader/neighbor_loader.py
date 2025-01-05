@@ -6,8 +6,23 @@ import jittor as jt
 from jittor import sparse
 import copy
 from .general_loader import GeneralLoader
+from ..utils import neighbor_sampler
 
 class NeighborLoader(GeneralLoader):
+    
+    r'''
+    The graph dataset loader, samples the neighbors of source nodes for graph convolution iteratively and randomly.
+    The dataset loader yields all the tuples of (source_node, sampled neighbor) as the graph edge.
+    The yielded data block will contain the node map and node index.
+    
+    Args:
+        dataset (InMemoryDataset): The original graph dataset.
+        source_node (Var): The list of source_node. 
+        num_neighbors (List[int]): Number of sampled neighbors per layer. For example, [2, 3] represents sample 2 neighbors, and 3 neighbors of each sampled ones.
+        batch_size (int): Size of each mini-batch
+        fixed (bool, optional): If set to 'True', the dataset loader will yield identical mini-batches every round.
+    '''
+    
     
     def __init__(
         self, 
@@ -36,13 +51,13 @@ class NeighborLoader(GeneralLoader):
         # print(self.n_ids)
         # print(self.edge_index[:,0:15])
         
-        self.row_offsets = jt.zeros((self.N+1, ),dtype=int)
+        self.row_offsets = jt.zeros((self.N+1, ),dtype='int')
         for i in range(self.E - 1, -1, -1):
             self.row_offsets[self.edge_index[0,i]] = i
+        self.row_offsets[-1] = self.E
         for i in range(self.N - 1, -1, -1):
             if self.row_offsets[i] == 0:
                 self.row_offsets[i] = self.row_offsets[i+1]
-        self.row_offsets[-1] = self.E
         # print(self.row_offsets[0:5], self.row_offsets[-1])
         self.row_range = self.row_offsets[1:] - self.row_offsets[:-1]
         for i in range(self.N):
@@ -53,7 +68,7 @@ class NeighborLoader(GeneralLoader):
         # print(testsubgraph)
         
     def get_node_indices(self):
-        n_id = np.random.default_rng(1).permutation(self.source_node.size(0))
+        n_id = np.random.permutation(self.source_node.size(0))
         # print(n_id)
         n_ids = []
         for i in range(self.itermax):
@@ -64,9 +79,10 @@ class NeighborLoader(GeneralLoader):
         results = jt.empty((2, 0), dtype=int)
         for i in self.num_neighbors:
             source_nodes = jt.repeat_interleave(source_nodes, i)
-            idx = jt.randint_like(source_nodes, 0, self.E)
-            idx = (idx % self.row_range[source_nodes] + self.row_offsets[source_nodes]) % self.E
-            target_nodes = self.edge_index[1][idx]
+            target_nodes = neighbor_sampler(self.edge_index, self.row_offsets, self.row_range, source_nodes, self.N, self.E)
+            # idx = jt.randint_like(source_nodes, 0, self.E)
+            # idx = (idx % self.row_range[source_nodes] + self.row_offsets[source_nodes]) % self.E
+            # target_nodes = self.edge_index[1][idx]
             edges = jt.stack([target_nodes, source_nodes])
             
             new_results = jt.empty((2, results.shape[1] + edges.shape[1]), dtype=int)
@@ -76,7 +92,7 @@ class NeighborLoader(GeneralLoader):
             results = new_results
             source_nodes = target_nodes
             
-            # print(results)
+            # print(results)              
             
         return results
         
@@ -110,7 +126,7 @@ class NeighborLoader(GeneralLoader):
             
             data = self.data.__class__()
             
-            node_map = jt.zeros(self.N, dtype='int32')
+            node_map = jt.zeros(self.N, dtype='int')
             node_map[node_id] = jt.arange(0, node_id.size(0))
             
             data.node_map = node_id

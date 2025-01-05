@@ -1,6 +1,6 @@
 /*
  * @Description: 
- * @Author: lusz
+ * @Author: lusz, liyx
  * @Date: 2024-06-21 14:14:03
  */
 #include "var.h"
@@ -35,8 +35,7 @@ namespace jittor {
             Tint start;
             Tint end;
             //avx
-            #ifdef __AVX__
-            // std::cout<<"enabled avx"<<std::endl; 
+            #ifndef __AVX__
             const Tint LEN = 8;
             Tint loop = feature_dim / LEN;
             Tint res = feature_dim % LEN;
@@ -59,16 +58,13 @@ namespace jittor {
                 }
             }
             #else
-            // 待加速 AVX 
             for(Tint i=0;i<v_num;i++){
                 start=o_ptr[i];
                 end=o_ptr[i+1];
                 for(Tint j=start;j<end;j++){
                     for(Tint k=0;k<feature_dim;k++){
-                        out_ptr[i*feature_dim+k]=out_ptr[i*feature_dim+k]+x_ptr[i_ptr[j]*feature_dim+k]*w_ptr[j];
-
+                        out_ptr[i*feature_dim+k]=out_ptr[i*feature_dim+k]+x_ptr[i_ptr[j]*feature_dim+k]*w_ptr[j]; 
                     }
-                    
                 }
             }
             #endif//avx
@@ -80,11 +76,10 @@ namespace jittor {
             Tint batch_size_, Tint feature_size_){
             //int large_size=blockDim.x;
             Tint threadId = blockIdx.x * blockDim.x + threadIdx.x;
-            for (long i = threadId; i < feature_size_ * batch_size_; i += blockDim.x * gridDim.x) {
+            for (Tint i = threadId; i < feature_size_ * batch_size_; i += blockDim.x * gridDim.x) {
                 if (i >= feature_size_ * batch_size_) return;  // 防止越界
-                int local_dst = i / feature_size_;
-                int rank = i % feature_size_;
-
+                Tint local_dst = i / feature_size_;
+                Tint rank = i % feature_size_;
                 // 核心计算部分
                 for (Tint i_i = column_offset[local_dst]; i_i < column_offset[local_dst + 1]; i_i++) {
                     Tint local_src = row_indices[i_i];
@@ -92,6 +87,7 @@ namespace jittor {
                             old_feature[feature_size_ * local_src + rank] * weight[i_i]);
                 }
             }
+            __syncthreads();
         }
 
         void AggregateOp::jit_run() {
@@ -103,15 +99,12 @@ namespace jittor {
             Tint e_num=indices->shape[1];
             Tint v_num=x->shape[0];
             Tint feature_dim=x->shape[1];
-            Tint start;
-            Tint end;
-            const float alpha = 1.0f;
-            const float beta = 1.0f;
             Tint blockSize = 256;
             // int numBlocks = 128;
-            Tint numBlocks = (feature_dim*v_num + blockSize - 1) / blockSize;
+            Tint numBlocks = (feature_dim * v_num + blockSize - 1) / blockSize;
             computeKernel<<<numBlocks, blockSize>>>(i_ptr,o_ptr, x_ptr, out_ptr, w_ptr, v_num, feature_dim);
         }
+
     #endif //cuda
 #endif // JIT
 } // jittor

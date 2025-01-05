@@ -12,25 +12,28 @@ class GeomGCN(InMemoryDataset):
     "Geom-GCN: Geometric Graph Convolutional Networks"
     <https://openreview.net/forum?id=S1e2agrFvS>`_ paper.
 
-    Nodes represent web pages and edges represent hyperlinks between them.
-    Node features are the bag-of-words representation of web pages.
-    The task is to classify the nodes into one of the five categories: student,
-    project, course, staff, and faculty.
+    This class represents the datasets used in the Geom-GCN paper, which focuses on geometric graph convolutional networks. The datasets consist of graphs where nodes represent various entities, and edges represent relationships between them. The goal is to apply graph convolutional networks (GCNs) in the context of geometric graphs to classify nodes based on their features.
+
+    Dataset Details:
+
+    - **Cornell, Texas, Wisconsin**: These datasets represent web pages from the Cornell, Texas, and Wisconsin universities, where nodes are web pages, and edges represent hyperlinks between them. The task is to classify web pages into one of five categories: student, project, course, staff, and faculty.
+    - **Actor**: In the Actor dataset, each node corresponds to an actor, and edges between nodes represent co-occurrence on the same Wikipedia page. The task is to classify the actors into one of five categories based on keywords extracted from their Wikipedia pages.
 
     Args:
         root (str): Root directory where the dataset should be saved.
-        name (str): The name of the dataset (options: :obj:`"Cornell"`, :obj:`"Texas"`,
-            :obj:`"Wisconsin"`, :obj:`"Actor"`).
-        transform (callable, optional): A function/transform that takes in a
-            :obj:`jittor_geometric.data.Data` object and returns a transformed
-            version. The data object will be transformed before every access.
-            (default: :obj:`None`)
-        pre_transform (callable, optional): A function/transform that takes in
-            an :obj:`jittor_geometric.data.Data` object and returns a
-            transformed version. The data object will be transformed before
-            being saved to disk. (default: :obj:`None`)
-    """
+        name (str): The name of the dataset to load. Options include:
+            - :obj:`"Cornell"`
+            - :obj:`"Texas"`
+            - :obj:`"Wisconsin"`
+            - :obj:`"Actor"`
+        transform (callable, optional): A function/transform that takes in a :obj:`jittor_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in a :obj:`jittor_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. (default: :obj:`None`)
 
+    Example:
+        >>> dataset = GeomGCN(root='/path/to/dataset', name='Cornell')
+        >>> dataset.data
+        >>> dataset[0]  # Accessing the first data point
+    """
 
     url = 'https://raw.githubusercontent.com/graphdml-uiuc-jlu/geom-gcn/master'
 

@@ -1,6 +1,6 @@
 '''
-Author: lusz
-Date: 2024-06-16 15:42:52
+Author: Yuhe Guo
+Date: 2024-12-25 
 Description: 
 '''
 import os.path as osp
@@ -13,15 +13,17 @@ root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 from jittor_geometric.datasets import Planetoid, Amazon, WikipediaNetwork, OGBNodePropPredDataset, HeteroDataset, Reddit
 import jittor_geometric.transforms as T
-from jittor_geometric.nn import GCNConv
+from jittor_geometric.nn import OptBasisConv
 import time
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
 jt.flags.use_cuda = 1
-jt.misc.set_global_seed(42)
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', help='graph dataset')
+parser.add_argument('--use_gdc', action='store_true',
+                    help='Use GDC preprocessing.')
+parser.add_argument('--dataset', default="cora", help='graph dataset')
+parser.add_argument('--K', type=int, default=10, help='number of coe')
 parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 dataset=args.dataset
@@ -54,22 +56,38 @@ with jt.no_grad():
 
 
 class Net(nn.Module):
-    def __init__(self, dataset, dropout=0.8):
+    def __init__(self, dataset, dropout=0.5):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=args.spmm)
-        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=args.spmm)
+        hidden = 64
+        self.lin1 = nn.Linear(dataset.num_features, hidden)
+        self.lin2 = nn.Linear(hidden, dataset.num_classes)
+        
+        self.prop = OptBasisConv(args.K, hidden, spmm=args.spmm)
         self.dropout = dropout
 
     def execute(self):
         x, csc, csr = data.x, data.csc, data.csr
-        x = nn.relu(self.conv1(x, csc, csr))
         x = nn.dropout(x, self.dropout, is_train=self.training)
-        x = self.conv2(x, csc, csr)
+        x = self.lin1(x)
+        x = nn.relu(x)
+
+        x = nn.dropout(x, self.dropout, is_train=self.training)
+        x = self.prop(x, csr)
+
+        x = nn.dropout(x, self.dropout)
+        x = self.lin2(x)
+                
         return nn.log_softmax(x, dim=1)
 
 
 model, data = Net(dataset), data
-optimizer = nn.Adam(params=model.parameters(), lr=0.001, weight_decay=5e-4) 
+# optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4) 
+
+optimizer = nn.Adam([
+    dict(params=model.lin1.parameters(), learning_rate=0.01, weight_decay=1e-2),
+    dict(params=model.lin2.parameters(), learning_rate=0.01, weight_decay=5e-4),
+    dict(params=model.prop.parameters(), learning_rate=0.01, weight_decay=0)
+], lr=0.01)
 
 def train():
     global total_forward_time, total_backward_time
@@ -91,9 +109,10 @@ def test():
     return accs
 
 
+train()
 best_val_acc = test_acc = 0
 start = time.time()
-for epoch in range(1, 201):
+for epoch in range(1, 1001):
     train()
     train_acc, val_acc, tmp_test_acc = test()
     if val_acc > best_val_acc:
