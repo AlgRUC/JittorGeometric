@@ -71,8 +71,3 @@ Follow these steps to install Jittor Geometric:
    git clone https://github.com/AlgRUC/JittorGeometric.git
    cd "the project root directory that contains the setup.py file"
    pip install .
-   ```
-   After the project is uploaded to the pypi platform, you can also run the following command to download it
-   ```bash
-   pip install jittor_geometric
-   ```
