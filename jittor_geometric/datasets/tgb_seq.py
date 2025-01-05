@@ -15,6 +15,10 @@ class TGBSeqDataset(InMemoryDataset):
     "TGB-Seq Benchmark: Challenging Temporal GNNs with Complex Sequential Dynamics"
     <https://openreview.net/pdf?id=8e2LirwiJT>.
 
+    ! IF YOU MEET NETWORK ERROR, PLEASE TRY TO RUN THE COMMAND BELOW:
+    `export HF_ENDPOINT=https://hf-mirror.com`,
+    TO USE THE MIRROR PROVIDED BY Hugging Face.
+
     Dataset Details:
 
     - **ML-20M**: This dataset contains movie rating data, where each record includes the rating recode from a user to a specific movie along with the timestamp of the rating. The rating is omitted in the dataset to represent the implicit feedback. 

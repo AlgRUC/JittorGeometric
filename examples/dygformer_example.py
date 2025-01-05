@@ -12,6 +12,7 @@ from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoade
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.sampler.TemporalSampler import get_neighbor_sampler
 from jittor_geometric.nn.models.modules import MergeLayer
+import os.path as osp
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -54,8 +55,11 @@ def train():
         for batch_idx, batch_data in enumerate(train_idx_data_loader_tqdm):
             src, dst, t, neg_dst = batch_data.src, batch_data.dst, batch_data.t, batch_data.neg_dst
             load_time_e = time.perf_counter()
+            # compute the embeddings of src and dst nodes
             src_node_embeddings, dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src, dst, t)
+            # compute the embeddings of src and neg_dst nodes
             neg_src_node_embeddings, neg_dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src,neg_dst,t)
+            # compute the scores of positive and negative samples
             pos_score = model[1](src_node_embeddings, dst_node_embeddings)
             neg_score = model[1](neg_src_node_embeddings, neg_dst_node_embeddings)
             loss=criterion(pos_score, jt.ones_like(pos_score))
@@ -71,6 +75,7 @@ def train():
         print(f'Epoch: {epoch:03d}, Train Loss: {train_loss:.4f}')
         ap = test(val_loader)
         print(f'Epoch: {epoch:03d}, Val: {ap}')
+        # save the best model if AP is improved
         if ap['AP'] > best_ap:
             best_ap = ap['AP']
             jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_DyGFormer.pkl')
@@ -89,17 +94,18 @@ time_feat_dim = 100
 num_neighbors = 30
 dropout = 0.1
 bipartite = False
-save_model_path = './data/saved_models/'
+save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
 
 criterion = jt.nn.BCEWithLogitsLoss()
 dataset_name = 'wikipedia'
-path='./data/'
-if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
+path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
+if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
     val_idx=np.nonzero(dataset.val_mask)[0]
     test_idx=np.nonzero(dataset.test_mask)[0]
     edge_ids=np.arange(dataset.num_edges)+1
+    # test_ns is the negative samples for test set
     if dataset.test_ns is not None:
         data = TemporalData(src=jt.array(dataset.src_node_ids.astype(np.int32)), dst=jt.array(dataset.dst_node_ids.astype(np.int32)), t=jt.array(dataset.time), train_mask=jt.array(train_idx.astype(np.int32)), val_mask=jt.array(val_idx.astype(np.int32)), test_mask=jt.array(test_idx.astype(np.int32)), test_ns=jt.array(dataset.test_ns.astype(np.int32)), edge_ids=jt.array(edge_ids.astype(np.int32)))
     else:
@@ -108,8 +114,8 @@ if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube
     train_loader = TemporalDataLoader(train_data, batch_size=200, num_neg_sample=1)
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
-elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']:
-    dataset = JODIEDataset(path, name=dataset_name) # wikipedia, mooc, reddit, lastfm
+elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDataset
+    dataset = JODIEDataset(path, name=dataset_name)
     data = dataset[0]
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
@@ -119,6 +125,7 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']:
 # Define the neighbor loader
 full_neighbor_sampler = get_neighbor_sampler(data, 'recent',seed=1)
 
+# The index of node and edge both start from 1
 node_raw_features = np.zeros((data.num_nodes+1, node_feat_dims))
 if isinstance(dataset, JODIEDataset):
     edge_raw_features = data.msg

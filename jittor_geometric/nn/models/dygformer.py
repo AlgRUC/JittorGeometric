@@ -6,12 +6,15 @@ from jittor_geometric.nn.models.modules import TimeEncoder
 
 
 class DyGFormer(nn.Module):
+    r"""The implementation of DyGFormer model from the
+    `"Towards Better Dynamic Graph Learning: New Architecture and Unified Library"
+    <https://arxiv.org/abs/2303.13047>`_ paper. Most of the code is adapted from the original implementation in https://github.com/yule-BUAA/DyGLib/.
 
-    def __init__(self, node_raw_features: np.ndarray, edge_raw_features: np.ndarray, neighbor_sampler,
-                 time_feat_dim: int, channel_embedding_dim: int, patch_size: int = 1, num_layers: int = 2, num_heads: int = 2,
-                 dropout: float = 0.1, max_input_sequence_length: int = 512, bipartite: bool = False):
-        """
-        DyGFormer model.
+    .. note::
+
+        For an example of using DyGFormer, see `examples/dygformer_example.py`.
+
+    Args:
         :param node_raw_features: ndarray, shape (num_nodes + 1, node_feat_dim)
         :param edge_raw_features: ndarray, shape (num_edges + 1, edge_feat_dim)
         :param neighbor_sampler: neighbor sampler
@@ -22,7 +25,11 @@ class DyGFormer(nn.Module):
         :param num_heads: int, number of attention heads
         :param dropout: float, dropout rate
         :param max_input_sequence_length: int, maximal length of the input sequence for each node
-        """
+        :param bipartite: bool, whether to use bipartite graph. This is implemented by Jittor-Geometric Team to accelerate the computation of neighbor co-occurrence features for bipartite graphs. 
+    """
+    def __init__(self, node_raw_features: np.ndarray, edge_raw_features: np.ndarray, neighbor_sampler,
+                 time_feat_dim: int, channel_embedding_dim: int, patch_size: int = 1, num_layers: int = 2, num_heads: int = 2,
+                 dropout: float = 0.1, max_input_sequence_length: int = 512, bipartite: bool = False):
         super(DyGFormer, self).__init__()
 
         self.node_raw_features = jt.nn.Parameter(

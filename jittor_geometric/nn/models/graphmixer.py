@@ -6,12 +6,15 @@ import jittor.nn as nn
 from jittor_geometric.nn.models.modules import TimeEncoder
 
 class GraphMixer(Module):
+    r"""The implementation of GraphMixer model from the
+    `"Do We Really Need Complicated Model Architectures For Temporal Networks?"
+    <https://arxiv.org/abs/2302.11636>`_ paper. Most of the code is adapted from the DyGLib implementation in https://github.com/yule-BUAA/DyGLib/.
 
-    def __init__(self, node_raw_features: np.ndarray, edge_raw_features: np.ndarray, neighbor_sampler: LastNeighborLoader,
-                 time_feat_dim: int, num_tokens: int, num_layers: int = 2, token_dim_expansion_factor: float = 0.5,
-                 channel_dim_expansion_factor: float = 4.0, dropout: float = 0.1):
-        """
-        TCL model.
+    .. note::
+
+        For an example of using GraphMixer, see `examples/graphmixer_example.py`.
+
+    Args:
         :param node_raw_features: ndarray, shape (num_nodes + 1, node_feat_dim)
         :param edge_raw_features: ndarray, shape (num_edges + 1, edge_feat_dim)
         :param neighbor_sampler: neighbor sampler
@@ -21,7 +24,10 @@ class GraphMixer(Module):
         :param token_dim_expansion_factor: float, dimension expansion factor for tokens
         :param channel_dim_expansion_factor: float, dimension expansion factor for channels
         :param dropout: float, dropout rate
-        """
+    """
+    def __init__(self, node_raw_features: np.ndarray, edge_raw_features: np.ndarray, neighbor_sampler: LastNeighborLoader,
+                 time_feat_dim: int, num_tokens: int, num_layers: int = 2, token_dim_expansion_factor: float = 0.5,
+                 channel_dim_expansion_factor: float = 4.0, dropout: float = 0.1):
         super(GraphMixer, self).__init__()
 
         self.node_raw_features = jt.nn.Parameter(
