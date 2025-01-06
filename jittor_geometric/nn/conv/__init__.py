@@ -36,6 +36,9 @@ __all__ = [
     'BernNet',
     'ChebNetII',
     'TransformerConv',
+    'OptBasisConv',
+    'ClusterGCNConv',
+    'SAGEConv'
 ]
 
 classes = __all__
