@@ -38,7 +38,6 @@ def scatter(src, batch, dim=0, reduce='add', dim_size=None):
 
 def swish(x):
     import jittor
-    #return x * torch.sigmoid(x)
     return x * jittor.sigmoid(x)
 
 
@@ -65,7 +64,6 @@ class dist_emb(jittor.nn.Module):
         self.envelope = Envelope(envelope_exponent)
 
         self.freq = jittor.Var(num_radial)
-        #self.freq = torch.nn.Parameter(torch.Tensor(num_radial))
 
         #self.reset_parameters()
 
@@ -139,7 +137,7 @@ class torsion_emb(jittor.nn.Module):
         for i in range(self.num_spherical):
             if i == 0:
                 sph1 = sym.lambdify([theta, phi], sph_harm_forms[i][0], modules)
-                self.sph_funcs.append(lambda x, y: jittor.zeros_like(x) + jittor.zeros_like(y) + sph1(0,0)) #torch.zeros_like(x) + torch.zeros_like(y)
+                self.sph_funcs.append(lambda x, y: jittor.zeros_like(x) + jittor.zeros_like(y) + sph1(0,0))
             else:
                 for k in range(-i, i + 1):
                     sph = sym.lambdify([theta, phi], sph_harm_forms[i][k+i], modules)
@@ -604,7 +602,6 @@ class dist_emb(jittor.nn.Module):
         self.envelope = Envelope(envelope_exponent)
 
         self.freq = jittor.Var(num_radial)
-        #self.freq = torch.nn.Parameter(torch.Tensor(num_radial))
 
         #self.reset_parameters()
 
@@ -678,7 +675,7 @@ class torsion_emb(jittor.nn.Module):
         for i in range(self.num_spherical):
             if i == 0:
                 sph1 = sym.lambdify([theta, phi], sph_harm_forms[i][0], modules)
-                self.sph_funcs.append(lambda x, y: jittor.zeros_like(x) + jittor.zeros_like(y) + sph1(0,0)) #torch.zeros_like(x) + torch.zeros_like(y)
+                self.sph_funcs.append(lambda x, y: jittor.zeros_like(x) + jittor.zeros_like(y) + sph1(0,0))
             else:
                 for k in range(-i, i + 1):
                     sph = sym.lambdify([theta, phi], sph_harm_forms[i][k+i], modules)
