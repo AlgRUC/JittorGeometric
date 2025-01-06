@@ -5,7 +5,7 @@ from typing import Callable, List, Optional
 import jittor as jt
 from jittor import dataset, Var
 from tqdm import tqdm
-
+import numpy as np
 from jittor_geometric.data import (
     Data,
     InMemoryDataset,
@@ -147,7 +147,8 @@ class QM9(InMemoryDataset):
         pre_filter: Optional[Callable] = None,
     ) -> None:
         super().__init__(root, transform, pre_transform, pre_filter)
-        # jt.load(self.processed_paths[0])
+        self.data, self.slices = jt.load(self.processed_paths[0])
+        self.num_data = len(self.data['idx'])
 
     def mean(self, target: int) -> float:
         y = jt.cat([self.get(i).y for i in range(len(self))], dim=0)
@@ -239,7 +240,8 @@ class QM9(InMemoryDataset):
         for i, mol in enumerate(tqdm(suppl)):
             if i in skip:
                 continue
-
+            if i ==10000:
+                break
             N = mol.GetNumAtoms()
 
             conf = mol.GetConformer()
@@ -311,5 +313,29 @@ class QM9(InMemoryDataset):
 
             data_list.append(data)
 
-        jt.save(data_list, self.processed_paths[0])
+        jt.save(self.collate(data_list), self.processed_paths[0])
 
+    def get_idx_split(self, frac_train: float = 0.8, frac_valid: float = 0.1, frac_test: float = 0.1, seed: int = 42):
+
+            assert np.isclose(frac_train + frac_valid + frac_test, 1.0)
+
+            if seed is not None:
+                np.random.seed(seed)
+
+            # random split
+            num_data = self.num_data
+            shuffled_indices = np.random.permutation(num_data)
+
+            train_cutoff = int(frac_train * num_data)
+            valid_cutoff = int((frac_train + frac_valid) * num_data)
+
+            train_idx = jt.array(shuffled_indices[:train_cutoff])
+            valid_idx = jt.array(shuffled_indices[train_cutoff:valid_cutoff])
+            test_idx = jt.array(shuffled_indices[valid_cutoff:])
+
+            split_dict = {
+                'train': train_idx,
+                'valid': valid_idx,
+                'test': test_idx
+            }
+            return split_dict
