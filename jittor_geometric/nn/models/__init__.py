@@ -4,6 +4,7 @@ from .jodie import JODIEEmbedding, compute_src_dst_node_time_shifts
 from .graphmixer import GraphMixer
 from .modules import MergeLayer, TimeEncoder
 from .dygformer import DyGFormer
+from .schnet import SchNet
 __all__ = [
     'TGNMemory',
     'DyRepMemory',
@@ -12,6 +13,7 @@ __all__ = [
     'MergeLayer',
     'TimeEncoder',
     'DyGFormer',
+    'SchNet',
     'compute_src_dst_node_time_shifts',
 ]
 
