@@ -11,7 +11,7 @@ major, minor, _ = jittor.__version__.split('.', maxsplit=2)
 major, minor = int(major), int(minor)
 has_pyjittor112 = major > 1 or (major == 1 and minor >= 12)
 
-if has_pyjittor112:  # pragma: no cover
+if True:  # pragma: no cover
 
     warnings.filterwarnings('ignore', '.*is in beta and the API may change.*')
 
@@ -71,7 +71,7 @@ if has_pyjittor112:  # pragma: no cover
         # For "sum" and "mean" reduction, we make use of `scatter_add_`:
         if reduce == 'sum' or reduce == 'add':
             index = broadcast(index, src, dim)
-            return src.new_zeros(size).scatter_add_(dim, index, src)
+            return jittor.scatter(src.new_zeros(size), dim, index, src, reduce=reduce)
 
         if reduce == 'mean':
             count = src.new_zeros(dim_size)

@@ -1,5 +1,5 @@
 import os.path as osp
-
+from rdkit import Chem
 import jittor as jt
 from jittor import nn
 import sys

@@ -5,7 +5,7 @@ Description:
 '''
 import os.path as osp
 import argparse
-
+from rdkit import Chem
 import jittor as jt
 from jittor import nn
 import sys,os

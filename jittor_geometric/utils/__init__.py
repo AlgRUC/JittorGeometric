@@ -11,6 +11,7 @@ from .sparse import is_jittor_sparse_tensor
 from .scatter import scatter
 from .induced_graph import induced_graph
 from .neighbor_sampler import neighbor_sampler, randomwalk_sampler
+from .one_hot import one_hot
 
 __all__ = [
     'coalesce',
@@ -30,7 +31,8 @@ __all__ = [
     'induced_graph',
     'unique',
     'neighbor_sampler',
-    'randomwalk_sampler'
+    'randomwalk_sampler',
+    'one_hot',
 ]
 
 classes = __all__
