@@ -8,8 +8,8 @@ import sys,os
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 from jittor import nn
-from jittor_geometric.nn import EGNNConv
-from jittor_geometric.nn.conv.egnn_conv import GlobalLinearAttention
+from jittor_geometric.nn import EGNNConv, global_add_pool
+from jittor_geometric.nn.conv.egnn_conv import GlobalLinearAttention, SiLU
 from jittor_geometric.typing import Var
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T
@@ -59,6 +59,7 @@ class EGNN_Sparse_Network(nn.Module):
                  pos_dim = 3,
                  edge_attr_dim = 0, 
                  m_dim = 16,
+                 out_dim = 19,
                  fourier_features = 0, 
                  soft_edge = 0,
                  embedding_nums=[], 
@@ -107,6 +108,7 @@ class EGNN_Sparse_Network(nn.Module):
         self.pos_dim          = pos_dim
         self.edge_attr_dim    = edge_attr_dim
         self.m_dim            = m_dim
+        self.out_dim          = out_dim
         self.fourier_features = fourier_features
         self.soft_edge        = soft_edge
         self.norm_feats       = norm_feats
@@ -150,6 +152,14 @@ class EGNN_Sparse_Network(nn.Module):
             # normal case
             else: 
                 self.mpnn_layers.append(layer)
+        self.dropout_module = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
+        self.out_mlp = nn.Sequential(
+            nn.Linear(feats_dim, feats_dim * 2),
+            self.dropout_module,
+            SiLU(),
+            nn.Linear(feats_dim * 2, self.out_dim),
+        )
+        self.pool = global_add_pool
             
 
     def execute(self, x, edge_index, batch, edge_attr,
@@ -192,9 +202,13 @@ class EGNN_Sparse_Network(nn.Module):
             # recalculate edge info - not needed if last layer
             if self.recalc and ((i%self.recalc == 0) and not (i == len(self.mpnn_layers)-1)) :
                 edge_index, edge_attr, _ = recalc_edge(x) # returns attr, idx, any_other_info
-                edges_need_embedding = True
-            
-        return x
+                edges_need_embedding = true
+
+        x_pos = x[:, :self.pos_dim]
+        x_node = self.out_mlp(x[:, self.pos_dim:])
+        x_graph = self.pool(x_node, batch)
+        
+        return x_graph, x_node, x_pos
 
     def __repr__(self):
         return 'EGNN_Sparse_Network of: {0} layers'.format(len(self.mpnn_layers))
@@ -219,7 +233,8 @@ def train(model, loader, optimizer):
     loss_accum = 0
 
     for step, batch in enumerate(tqdm(loader, desc="Iteration")):
-        pred = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
+        batch.x = jt.concat([batch.pos, batch.x], dim=-1)
+        pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
         loss = mae_loss(pred, batch.y)
         optimizer.step(loss)
         loss_accum += loss
@@ -227,13 +242,14 @@ def train(model, loader, optimizer):
     return float(loss_accum / (step + 1))
 
 
-def eval(model, loader, evaluator):
+def eval(model, loader):
     model.eval()
     y_true = []
     y_pred = []
 
     for step, batch in enumerate(tqdm(loader, desc="Iteration")):
-        pred = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
+        batch.x = jt.concat([batch.pos, batch.x], dim=-1)
+        pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
         y_true.append(batch.y)
         y_pred.append(pred)
 
@@ -258,7 +274,7 @@ def main():
     test_loader = DataLoader(qm9_dataset[split_dict["test"]], batch_size=8, shuffle=False)
 
     # model
-    model = EGNN_Sparse_Network(n_layers=3, feats_dim=3, m_dim=16, fourier_features=0, dropout=0.1)
+    model = EGNN_Sparse_Network(n_layers=3, feats_dim=11, edge_attr_dim=4, m_dim=19, out_dim =19, fourier_features=0, dropout=0.1)
     optimizer = jt.optim.Adam(model.parameters(), lr=1e-3)
 
     best_valid_mae = 1000
@@ -269,10 +285,10 @@ def main():
             train_mae = train(model, train_loader, optimizer)
 
             print('Evaluating...')
-            valid_mae = eval(model, valid_loader, evaluator)
+            valid_mae = eval(model, valid_loader)
 
             print('Testing...')
-            test_mae = eval(model, test_loader, evaluator)
+            test_mae = eval(model, test_loader)
 
             print({'Train': train_mae, 'Validation': valid_mae, 'Test': test_mae})
 
