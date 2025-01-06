@@ -2,12 +2,13 @@ import jittor as jt
 from jittor import nn
 from typing import Optional, Tuple
 import numpy as np
+from jittor_geometric.utils import scatter
 
 class Aggregation(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(
+    def execute(
         self,
         x: jt.Var,
         index: Optional[jt.Var] = None,
@@ -79,10 +80,10 @@ class Aggregation(nn.Module):
         if ptr is not None:
             ptr = self.expand_left(ptr, dim, dims=x.dim())
             return self.segment(x, ptr, reduce=reduce)
-
+        
         if index is None:
             raise NotImplementedError("Aggregation requires 'index' to be specified")
-        return jt.scatter(x, index, dim, dim_size, reduce)
+        return scatter(x, index, dim, dim_size, reduce)
 
     def segment(self, x: jt.Var, ptr: jt.Var, reduce: str = 'sum') -> jt.Var:
         """Segment operation using ptr, similar to `torch_scatter.segment`."""

@@ -12,6 +12,7 @@ from jittor_geometric.typing import OptVar
 
 from jittor_geometric.data import Dataset, download_url, extract_zip
 from jittor_geometric.nn.conv import MessagePassing
+# from jittor_geometric.nn.pool import global_add_pool
 from jittor_geometric.nn.aggr import SumAggregation
 from jittor_geometric.nn.resolver import aggregation_resolver as aggr_resolver
 
@@ -182,8 +183,8 @@ class SchNet(nn.Module):
         if self.dipole:
             import ase
 
-            atomic_mass = jt.array(ase.data.atomic_masses)
-            self.register_buffer('atomic_mass', atomic_mass)
+            self.atomic_mass = jt.array(ase.data.atomic_masses)
+            # self.register_buffer('atomic_mass', atomic_mass)
 
         # Support z == 0 for padding atoms so that their embedding vectors
         # are zeroed and do not receive any gradients.
@@ -207,7 +208,7 @@ class SchNet(nn.Module):
         self.act = ShiftedSoftplus()
         self.lin2 = Linear(hidden_channels // 2, 1)
 
-        self.register_buffer('initial_atomref', atomref)
+        # self.register_buffer('initial_atomref', atomref)
         self.atomref = None
         if atomref is not None:
             self.atomref = Embedding(100, 1)
@@ -217,13 +218,16 @@ class SchNet(nn.Module):
 
     def reset_parameters(self):
         r"""Resets all learnable parameters of the module."""
-        self.embedding.reset_parameters()
+        # self.embedding.reset_parameters()
+        nn.init.gauss_(self.embedding.weight)
         for interaction in self.interactions:
             interaction.reset_parameters()
         xavier_normal(self.lin1.weight)
-        self.lin1.bias.data.fill_(0)
+        # self.lin1.bias.data.fill_(0)
+        self.lin1.bias.data[:] = 0
         xavier_normal(self.lin2.weight)
-        self.lin2.bias.data.fill_(0)
+        # self.lin2.bias.data.fill_(0)
+        self.lin2.bias.data[:] = 0
         if self.atomref is not None:
             self.atomref.weight.data.copy_(self.initial_atomref)
 
@@ -274,11 +278,11 @@ class SchNet(nn.Module):
         test_idx = assoc[test_idx[np.isin(test_idx, idx)]]
 
         path = osp.join(root, 'trained_schnet_models', name, 'best_model')
-
+        import torch
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            # state = torch.load(path, map_location='cpu')
-            state=jt.load(path)
+            state = torch.load(path, map_location='cpu')
+            # state=jt.load(path)
 
         net = SchNet(
             hidden_channels=128,
@@ -290,25 +294,25 @@ class SchNet(nn.Module):
             atomref=dataset.atomref(target),
         )
 
-        net.embedding.weight = state.representation.embedding.weight
+        net.embedding.weight = jt.array(state.representation.embedding.weight.detach().numpy())
 
         for int1, int2 in zip(state.representation.interactions,
                               net.interactions):
-            int2.mlp[0].weight = int1.filter_network[0].weight
-            int2.mlp[0].bias = int1.filter_network[0].bias
-            int2.mlp[2].weight = int1.filter_network[1].weight
-            int2.mlp[2].bias = int1.filter_network[1].bias
-            int2.lin.weight = int1.dense.weight
-            int2.lin.bias = int1.dense.bias
+            int2.mlp[0].weight = jt.array(int1.filter_network[0].weight.detach().numpy())
+            int2.mlp[0].bias = jt.array(int1.filter_network[0].bias.detach().numpy())
+            int2.mlp[2].weight = jt.array(int1.filter_network[1].weight.detach().numpy())
+            int2.mlp[2].bias = jt.array(int1.filter_network[1].bias.detach().numpy())
+            int2.lin.weight = jt.array(int1.dense.weight.detach().numpy())
+            int2.lin.bias = jt.array(int1.dense.bias.detach().numpy())
 
-            int2.conv.lin1.weight = int1.cfconv.in2f.weight
-            int2.conv.lin2.weight = int1.cfconv.f2out.weight
-            int2.conv.lin2.bias = int1.cfconv.f2out.bias
+            int2.conv.lin1.weight = jt.array(int1.cfconv.in2f.weight.detach().numpy())
+            int2.conv.lin2.weight = jt.array(int1.cfconv.f2out.weight.detach().numpy())
+            int2.conv.lin2.bias = jt.array(int1.cfconv.f2out.bias.detach().numpy())
 
-        net.lin1.weight = state.output_modules[0].out_net[1].out_net[0].weight
-        net.lin1.bias = state.output_modules[0].out_net[1].out_net[0].bias
-        net.lin2.weight = state.output_modules[0].out_net[1].out_net[1].weight
-        net.lin2.bias = state.output_modules[0].out_net[1].out_net[1].bias
+        net.lin1.weight = jt.array(state.output_modules[0].out_net[1].out_net[0].weight.detach().numpy())
+        net.lin1.bias = jt.array(state.output_modules[0].out_net[1].out_net[0].bias.detach().numpy())
+        net.lin2.weight = jt.array(state.output_modules[0].out_net[1].out_net[1].weight.detach().numpy())
+        net.lin2.bias = jt.array(state.output_modules[0].out_net[1].out_net[1].bias.detach().numpy())
 
         mean = state.output_modules[0].atom_pool.average
         net.readout = aggr_resolver('mean' if mean is True else 'add')
@@ -320,7 +324,7 @@ class SchNet(nn.Module):
         net.std = state.output_modules[0].standardize.stddev.item()
 
         if state.output_modules[0].atomref is not None:
-            net.atomref.weight = state.output_modules[0].atomref.weight
+            net.atomref.weight = jt.array(state.output_modules[0].atomref.weight.detach().numpy())
         else:
             net.atomref = None
 
@@ -357,8 +361,8 @@ class SchNet(nn.Module):
         if self.dipole:
             # Get center of mass.
             mass = self.atomic_mass[z].view(-1, 1)
-            M = self.sum_aggr(mass, batch, dim=0)
-            c = self.sum_aggr(mass * pos, batch, dim=0) / M
+            M = self.sum_aggr(x=mass, batch=batch, dim=0)
+            c = self.sum_aggr(x=mass * pos, index=batch, dim=0) / M
             h = h * (pos - c.index_select(0, batch))
 
         if not self.dipole and self.mean is not None and self.std is not None:
@@ -438,12 +442,15 @@ class InteractionBlock(nn.Module):
 
     def reset_parameters(self):
         xavier_normal(self.mlp[0].weight)
-        self.mlp[0].bias.data.fill_(0)
+        # self.mlp[0].bias.data.fill_(0)
+        self.mlp[0].bias.data[:] = 0
         xavier_normal(self.mlp[2].weight)
-        self.mlp[2].bias.data.fill_(0)
+        # self.mlp[2].bias.data.fill_(0)
+        self.mlp[2].bias.data[:] = 0
         self.conv.reset_parameters()
         xavier_normal(self.lin.weight)
-        self.lin.bias.data.fill_(0)
+        # self.lin.bias.data.fill_(0)
+        self.lin.bias.data[:] = 0
 
     def execute(self, x: jt.Var, edge_index: jt.Var, edge_weight: jt.Var,
                 edge_attr: jt.Var) -> jt.Var:
@@ -473,7 +480,8 @@ class CFConv(MessagePassing):
     def reset_parameters(self):
         xavier_normal(self.lin1.weight)
         xavier_normal(self.lin2.weight)
-        self.lin2.bias.data.fill_(0)
+        # self.lin2.bias.data.fill_(0)
+        self.lin2.bias.data[:] = 0
 
     def execute(self, x: jt.Var, edge_index: jt.Var, edge_weight: jt.Var,
                 edge_attr: jt.Var) -> jt.Var:
@@ -497,11 +505,11 @@ class GaussianSmearing(nn.Module):
         num_gaussians: int = 50,
     ):
         super().__init__()
-        offset = jt.linspace(start, stop, num_gaussians)
-        self.coeff = -0.5 / (offset[1] - offset[0]).item()**2
-        self.register_buffer('offset', offset)
+        self.offset = jt.linspace(start, stop, num_gaussians)
+        self.coeff = -0.5 / (self.offset[1] - self.offset[0]).item()**2
+        # self.register_buffer('offset', self.offset)
 
-    def forward(self, dist: jt.Var) -> jt.Var:
+    def execute(self, dist: jt.Var) -> jt.Var:
         dist = dist.view(-1, 1) - self.offset.view(1, -1)
         return jt.exp(self.coeff * jt.pow(dist, 2))
 
