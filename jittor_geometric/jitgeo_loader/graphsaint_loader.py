@@ -10,14 +10,7 @@ import numpy as np
 class GraphSAINTLoader(GeneralLoader):
     
     r'''
-    The graph dataset loader, using metis to partition graph into 'mini_splits' groups and randomly merge them into 'num_parts' mini-batches for training.
-    The dataset loader yields the induced graph of the selected nodes iteratively.
-    
-    Args:
-        dataset (InMemoryDataset): The original graph dataset.
-        num_parts (int): Number of expected mini-batches.
-        mini_splits (int): Number of parts that metis partitions.
-        fixed (bool, optional): If set to 'True', the dataset loader will yield identical mini-batches every round.
+    NOT YET FINISHED!
     '''
     
     def __init__(self, dataset, num_parts: int, mini_splits: int, fixed: bool = False):
