@@ -34,7 +34,7 @@ def sage_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
         shape = list(edge_weight.shape)
         shape[0] = num_nodes
         deg = jt.zeros(shape)
-        deg = jt.scatter(deg, 0, col, src=edge_weight, reduce='add')
+        deg = jt.scatter(deg, 0, row, src=edge_weight, reduce='add')
         deg_inv = deg.pow(-1)
         deg_inv.masked_fill(deg_inv == float('inf'), 0)
         return edge_index, edge_weight * deg_inv[row]
