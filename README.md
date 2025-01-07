@@ -4,7 +4,8 @@
 Jittor Geometric is a graph machine learning library based on the Jittor framework. As a Chinese-developed library, it is tailored for research and applications in Graph Neural Networks (GNNs), aiming to provide an efficient and flexible GNN implementation for researchers and engineers working with graph-structured data.
 
 ## Highlights
-- **Faster GNN Training and Inference**: Leveraging Jittor’s dynamic compilation, Jittor Geometric achieves significant speedups in both training and inference.
+- **Easier Code Modification with JIT (Just-In-Time) Compilation**: Jittor Geometric leverages JIT compilation to enable easier code modification without any pre-compilation requirements.
+- **Optimized Sparse Matrix Computation**: Jittor Geometric provides a rich set of operators and utilizes CuSparse to accelerate sparse matrix computations.
 - **Comprehensive Spectral Domain Support**: Supports various spectral methods, enabling a wide range of spectral-based GNN architectures.
 - **Rich Dynamic Dataset Support**: Easily handle dynamic datasets, allowing for efficient processing and transformation of graph data.
 
@@ -66,7 +67,7 @@ Follow these steps to install Jittor Geometric:
    ```bash
    pip install -r requirements.txt
    ```
-4. When you install the Python package from source code, run the following command:
+4. To install the Python package from the source code:
    ```bash
    git clone https://github.com/AlgRUC/JittorGeometric.git
    cd "the project root directory that contains the setup.py file"
