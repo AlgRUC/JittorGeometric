@@ -67,7 +67,7 @@ Follow these steps to install Jittor Geometric:
    ```bash
    pip install -r requirements.txt
    ```
-4. To install the Python package from the source code:
+4. Install Jittor Geometric from the source code:
    ```bash
    git clone https://github.com/AlgRUC/JittorGeometric.git
    cd "the project root directory that contains the setup.py file"
