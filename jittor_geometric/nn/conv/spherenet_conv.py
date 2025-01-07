@@ -22,10 +22,12 @@ from jittor_geometric.typing import Adj, OptVar
 from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 
+from jittor_geometric.utils import scatter
 from jittor_geometric.data import CSC, CSR
 from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 
 
+"""
 def scatter(src, batch, dim=0, reduce='add', dim_size=None):
     dim_0 = src.shape[1]
     num_0 = batch.shape[0]
@@ -35,6 +37,7 @@ def scatter(src, batch, dim=0, reduce='add', dim_size=None):
     batch = batch.repeat_interleave(dim_0).reshape(num_0, dim_0)
     x = jittor.scatter(x, dim, batch, src, reduce=reduce)
     return x
+"""
 
 def swish(x):
     import jittor
