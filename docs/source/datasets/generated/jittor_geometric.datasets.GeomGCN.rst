@@ -3,4 +3,4 @@
 
 .. currentmodule:: jittor_geometric.datasets
 
-.. autoclass:: GeomGCN
+.. autoclass:: GeomGCN 
