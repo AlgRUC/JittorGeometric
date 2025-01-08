@@ -277,11 +277,12 @@ class SchNet(nn.Module):
         val_idx = assoc[val_idx[np.isin(val_idx, idx)]]
         test_idx = assoc[test_idx[np.isin(test_idx, idx)]]
 
-        path = osp.join(root, 'trained_schnet_models', name, 'best_model')
-        import torch
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            state = torch.load(path, map_location='cpu')
+        # path = osp.join(root, 'trained_schnet_models', name, 'best_model')
+        path = osp.join(root, 'trained_schnet_models', name, 'best_model.pkl')
+        import pickle
+        # with warnings.catch_warnings():
+        #     warnings.simplefilter('ignore')
+        #     state = torch.load(path, map_location='cpu')
             # state=jt.load(path)
 
         net = SchNet(
@@ -294,42 +295,39 @@ class SchNet(nn.Module):
             atomref=dataset.atomref(target),
         )
 
-        net.embedding.weight = jt.array(state.representation.embedding.weight.detach().numpy())
+        with open(path, 'rb') as f : 
+            state = pickle.load(f)
+        net.embedding.weight = state['embedding_weight']
+        for int2 in net.interactions : 
+            int2.mlp[0].weight = state['int2']['mlp0_weight']
+            int2.mlp[0].bias = state['int2']['mlp0_bias']
+            int2.mlp[2].weight = state['int2']['mlp2_weight']
+            int2.mlp[2].bias = state['int2']['mlp2_bias']
+            int2.lin.weight = state['int2']['lin_weight']
+            int2.lin.bias = state['int2']['lin_bias']
 
-        for int1, int2 in zip(state.representation.interactions,
-                              net.interactions):
-            int2.mlp[0].weight = jt.array(int1.filter_network[0].weight.detach().numpy())
-            int2.mlp[0].bias = jt.array(int1.filter_network[0].bias.detach().numpy())
-            int2.mlp[2].weight = jt.array(int1.filter_network[1].weight.detach().numpy())
-            int2.mlp[2].bias = jt.array(int1.filter_network[1].bias.detach().numpy())
-            int2.lin.weight = jt.array(int1.dense.weight.detach().numpy())
-            int2.lin.bias = jt.array(int1.dense.bias.detach().numpy())
-
-            int2.conv.lin1.weight = jt.array(int1.cfconv.in2f.weight.detach().numpy())
-            int2.conv.lin2.weight = jt.array(int1.cfconv.f2out.weight.detach().numpy())
-            int2.conv.lin2.bias = jt.array(int1.cfconv.f2out.bias.detach().numpy())
-
-        net.lin1.weight = jt.array(state.output_modules[0].out_net[1].out_net[0].weight.detach().numpy())
-        net.lin1.bias = jt.array(state.output_modules[0].out_net[1].out_net[0].bias.detach().numpy())
-        net.lin2.weight = jt.array(state.output_modules[0].out_net[1].out_net[1].weight.detach().numpy())
-        net.lin2.bias = jt.array(state.output_modules[0].out_net[1].out_net[1].bias.detach().numpy())
-
-        mean = state.output_modules[0].atom_pool.average
+            int2.conv.lin1.weight = state['int2']['conv_lin1_weight']
+            int2.conv.lin2.weight = state['int2']['conv_lin2_weight']
+            int2.conv.lin2.bias = state['int2']['conv_lin2_bias']
+            
+        net.lin1.weight = state['lin1_weight']
+        net.lin1.bias = state['lin1_bias']
+        net.lin2.weight = state['lin2_weight']
+        net.lin2.bias = state['lin2_bias']
+        
+        mean = state['is_mean']
         net.readout = aggr_resolver('mean' if mean is True else 'add')
-
-        dipole = state.output_modules[0].__class__.__name__ == 'DipoleMoment'
+        dipole = state['dipole']
         net.dipole = dipole
-
-        net.mean = state.output_modules[0].standardize.mean.item()
-        net.std = state.output_modules[0].standardize.stddev.item()
-
-        if state.output_modules[0].atomref is not None:
-            net.atomref.weight = jt.array(state.output_modules[0].atomref.weight.detach().numpy())
-        else:
-            net.atomref = None
-
+        
+        net.mean = state['_mean']
+        net.std = state['_std']
+        if state['atomref'] is not None : 
+            net.atomref.weight = state['atomref_weight']
+        else : net.atomref = None
+        
         net.scale = 1.0 / units[target]
-
+        
         return net, (dataset[train_idx], dataset[val_idx], dataset[test_idx])
 
     def execute(self, z: jt.Var, pos: jt.Var,
