@@ -31,3 +31,4 @@ examples/jodie_example.py
 data/
 data/*
 dhp_test.py
+dhp_test_arxiv.py
