@@ -24,3 +24,4 @@ Jittor Geometric is a library designed for machine learning on graph data based 
 
    datasets/datasets
    modules/nn
+   ops
