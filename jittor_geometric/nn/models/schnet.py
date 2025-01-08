@@ -277,7 +277,6 @@ class SchNet(nn.Module):
         val_idx = assoc[val_idx[np.isin(val_idx, idx)]]
         test_idx = assoc[test_idx[np.isin(test_idx, idx)]]
 
-        # path = osp.join(root, 'trained_schnet_models', name, 'best_model')
         path = osp.join(root, 'trained_schnet_models', name, 'best_model.pkl')
         import pickle
         # with warnings.catch_warnings():
