@@ -264,7 +264,6 @@ def main():
     dataset_name = 'qm9'
     path = osp.join(osp.dirname(osp.realpath(__file__)), '../data/qm9')
     qm9_dataset = QM9(path, transform=T.NormalizeFeatures())
-    qm9_dataset.get(4)
     # random split train/val/test = 8/1/1
     split_dict = qm9_dataset.get_idx_split()
 
