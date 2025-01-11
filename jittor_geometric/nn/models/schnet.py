@@ -210,9 +210,10 @@ class SchNet(nn.Module):
 
         # self.register_buffer('initial_atomref', atomref)
         self.atomref = None
-        if atomref is not None:
+        if self.atomref is not None:
             self.atomref = Embedding(100, 1)
-            self.atomref.weight.data.copy_(atomref)
+            # self.atomref.weight.data.copy_(atomref)
+            self.atomref.weight.data = self.atomref
 
         self.reset_parameters()
 
@@ -229,7 +230,8 @@ class SchNet(nn.Module):
         # self.lin2.bias.data.fill_(0)
         self.lin2.bias.data[:] = 0
         if self.atomref is not None:
-            self.atomref.weight.data.copy_(self.initial_atomref)
+            # self.atomref.weight.data.copy_(self.initial_atomref)
+            self.atomref.weight.data = self.atomref
 
     @staticmethod
     def from_qm9_pretrained(
@@ -321,9 +323,10 @@ class SchNet(nn.Module):
         
         net.mean = state['_mean']
         net.std = state['_std']
-        if state['atomref'] is not None : 
-            net.atomref.weight = state['atomref_weight']
-        else : net.atomref = None
+        net.atomref = None
+        # if state['atomref'] is not None : 
+        #     net.atomref.weight = state['atomref_weight']
+        # else : net.atomref = None
         
         net.scale = 1.0 / units[target]
         
