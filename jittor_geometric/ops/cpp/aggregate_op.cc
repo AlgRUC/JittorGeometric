@@ -35,7 +35,7 @@ namespace jittor {
             Tint start;
             Tint end;
             //avx
-            #ifndef __AVX__
+            #ifdef __AVX__
             const Tint LEN = 8;
             Tint loop = feature_dim / LEN;
             Tint res = feature_dim % LEN;
