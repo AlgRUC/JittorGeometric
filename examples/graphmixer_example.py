@@ -1,4 +1,3 @@
-from rdkit import chem
 import jittor as jt
 from jittor import nn
 import numpy as np
