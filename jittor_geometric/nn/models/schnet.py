@@ -2,8 +2,9 @@ import os
 import os.path as osp
 import warnings
 from math import pi as PI
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple, List, Union, Any
 import numpy as np
+import inspect
 import jittor as jt
 from jittor import nn
 from jittor.nn import Embedding, Linear, ModuleList, Sequential
@@ -12,9 +13,7 @@ from jittor_geometric.typing import OptVar
 
 from jittor_geometric.data import Dataset, download_url, extract_zip
 from jittor_geometric.nn.conv import MessagePassing
-# from jittor_geometric.nn.pool import global_add_pool
 from jittor_geometric.nn.aggr import SumAggregation
-from jittor_geometric.nn.resolver import aggregation_resolver as aggr_resolver
 
 
 qm9_target_dict: Dict[int, str] = {
@@ -92,6 +91,61 @@ def radius_graph(data, r, batch=None, max_num_neighbors=None, loop=False):
     # 转换为 Jittor 张量并返回
     edges = jt.array(edges).transpose()
     return edges
+
+def normalize_string(s: str) -> str:
+    return s.lower().replace('-', '').replace('_', '').replace(' ', '')
+
+def resolver(
+    classes: List[Any],
+    class_dict: Dict[str, Any],
+    query: Union[Any, str],
+    base_cls: Optional[Any],
+    base_cls_repr: Optional[str],
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+
+    if not isinstance(query, str):
+        return query
+
+    query_repr = normalize_string(query)
+    if base_cls_repr is None:
+        base_cls_repr = base_cls.__name__ if base_cls else ''
+    base_cls_repr = normalize_string(base_cls_repr)
+
+    for key_repr, cls in class_dict.items():
+        if query_repr == key_repr:
+            if inspect.isclass(cls):
+                obj = cls(*args, **kwargs)
+                return obj
+            return cls
+
+    for cls in classes:
+        cls_repr = normalize_string(cls.__name__)
+        if query_repr in [cls_repr, cls_repr.replace(base_cls_repr, '')]:
+            if inspect.isclass(cls):
+                obj = cls(*args, **kwargs)
+                return obj
+            return cls
+
+    choices = set(cls.__name__ for cls in classes) | set(class_dict.keys())
+    raise ValueError(f"Could not resolve '{query}' among choices {choices}")
+
+
+def aggr_resolver(query: Union[Any, str], *args, **kwargs):
+    import jittor_geometric.nn.aggr as aggr
+    if isinstance(query, (list, tuple)):
+        return aggr.MultiAggregation(query, *args, **kwargs)
+
+    base_cls = aggr.Aggregation
+    aggrs = [
+        aggr for aggr in vars(aggr).values()
+        if isinstance(aggr, type) and issubclass(aggr, base_cls)
+    ]
+    aggr_dict = {
+        'add': aggr.SumAggregation,
+    }
+    return resolver(aggrs, aggr_dict, query, base_cls, None, *args, **kwargs)
 
 class SchNet(nn.Module):
     r"""The continuous-filter convolutional neural network SchNet from the
