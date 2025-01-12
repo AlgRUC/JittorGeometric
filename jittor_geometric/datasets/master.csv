@@ -1,0 +1,16 @@
+,ogbn-proteins,ogbn-products,ogbn-arxiv,ogbn-mag,ogbn-papers100M
+num tasks,112,1,1,1,1
+num classes,2,47,40,349,172
+eval metric,rocauc,acc,acc,acc,acc
+task type,binary classification,multiclass classification,multiclass classification,multiclass classification,multiclass classification
+download_name,proteins,products,arxiv,mag,papers100M-bin
+version,1,1,1,2,1
+url,http://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip,http://snap.stanford.edu/ogb/data/nodeproppred/products.zip,http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip,http://snap.stanford.edu/ogb/data/nodeproppred/mag.zip,http://snap.stanford.edu/ogb/data/nodeproppred/papers100M-bin.zip
+add_inverse_edge,True,True,False,False,False
+has_node_attr,False,True,True,True,True
+has_edge_attr,True,False,False,False,False
+split,species,sales_ranking,time,time,time
+additional node files,node_species,None,node_year,node_year,node_year
+additional edge files,None,None,None,edge_reltype,None
+is hetero,False,False,False,True,False
+binary,False,False,False,False,True
