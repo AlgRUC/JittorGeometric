@@ -174,6 +174,8 @@ Performs Sparse Matrix Multiplication (SpMM) using the COO (Coordinate) represen
 - **`x` (Var)**: The vertex embedding matrix of shape `(v_num, dim)`, where `v_num` is the number of vertices, and `dim` is the dimension of the embeddings.
 - **`edge_index` (Var)**: A 2D Var where each column represents an edge in COO format. The first row contains the source nodes, and the second row contains the destination nodes.
 - **`edge_weight` (Var)**: The weights of the edges in COO format. It is a 1D Var where each element corresponds to the weight of the respective edge.
+- **`trans_A` (bool, optional)**: Whether to transpose the sparse matrix. Defaults to `True`.
+- **`trans_B` (bool, optional)**: Whether to transpose the dense matrix. Defaults to `False`.
 
 #### Outputs
 - **`output` (Var)**: The result of the sparse matrix multiplication, with the same shape as the input Var `x` (`(v_num, dim)`).
@@ -205,6 +207,8 @@ Performs Sparse Matrix Multiplication (SpMM) using the CSR (Compressed Sparse Ro
   - `csr.column_indices` (jt.Var): The column indices of non-zero entries in CSR format.
   - `csr.edge_weight` (jt.Var): The edge weights in CSR format.
   - `csr.row_offset` (jt.Var): The row offsets in CSR format.
+- **`trans_A` (bool, optional)**: Whether to transpose the sparse matrix. Defaults to `True`.
+- **`trans_B` (bool, optional)**: Whether to transpose the dense matrix. Defaults to `False`.
 
 #### Outputs
 - **`output` (Var)**: The result of the sparse matrix multiplication, with the same shape as the input Var `x` (`(v_num, dim)`).

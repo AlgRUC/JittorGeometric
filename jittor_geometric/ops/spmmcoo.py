@@ -17,14 +17,10 @@ from jittor.compile_extern import cusparse_ops # latest jittor
 # Run the test
 jt.flags.use_cuda=1
 class SpmmCooFunc(Function):
-    def execute(self,x,edge_index,edge_weight):
-        print(x)
+    def execute(self,x,edge_index,edge_weight,trans_A,trans_B):
         self.edge_index=edge_index
         row_indices=edge_index[0,:]
         col_indices=edge_index[1,:]
-        print(row_indices)
-        print(col_indices)
-        print(edge_weight)
         self.row_indices=row_indices
         self.col_indices=col_indices
         self.edge_weight=edge_weight
@@ -32,9 +28,10 @@ class SpmmCooFunc(Function):
         v_num=jt.size(x,0)
         self.v_num=v_num
         self.feature_dim=feature_dim
+        self.trans_A=trans_A
+        self.trans_B=trans_B
         output=jt.zeros(v_num,feature_dim)
-        cusparse_ops.cusparse_spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num).fetch_sync()
-        print(output)
+        cusparse_ops.cusparse_spmmcoo(output,x,row_indices,col_indices,edge_weight,v_num,v_num,trans_A,trans_B).fetch_sync()
         return output
 
     def grad(self, grad_output):
@@ -43,6 +40,6 @@ class SpmmCooFunc(Function):
         return output_grad,None,None
     
 
-def SpmmCoo(x,edge_index,edge_weight):
-    out = SpmmCooFunc.apply(x,edge_index,edge_weight)
+def SpmmCoo(x,edge_index,edge_weight,trans_A=True,trans_B=False):
+    out = SpmmCooFunc.apply(x,edge_index,edge_weight,trans_A,trans_B)
     return out

@@ -69,14 +69,6 @@ def extract_zip(path, folder, log=True):
         log (bool, optional): If :obj:`False`, will not print anything to the
             console. (default: :obj:`True`)
     """
-    if osp.isdir(folder) and os.listdir(folder):
-        if log:
-            print(f"Folder '{folder}' already contains files, skipping extraction.")
-        return
     maybe_log(path, log)
     with zipfile.ZipFile(path, 'r') as f:
         f.extractall(folder)
-    if osp.isdir(folder) and os.listdir(folder):
-        if log:
-            print(f"Folder '{folder}' already contains files, skipping extraction.")
-        return

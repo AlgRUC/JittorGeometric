@@ -99,7 +99,10 @@ class InMemoryDataset(Dataset):
                 s = slices[start]
             else:
                 s = slice(start, end)
-            data[key] = item[tuple(s)]
+            if key in ['smiles','name']:
+                data[key] = item[s]
+            else:
+                data[key] = item[tuple(s)]
 
         if hasattr(self, '__data_list__'):
             self.__data_list__[idx] = copy.copy(data)

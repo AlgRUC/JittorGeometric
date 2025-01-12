@@ -13,4 +13,4 @@ def degree(index, num_nodes: Optional[int] = None,
     N = maybe_num_nodes(index, num_nodes)
     out = jt.zeros((N, ), dtype=dtype)
     one = jt.ones((index.size(0), ), dtype=out.dtype)
-    return out.scatter_add_(0, index, one)
+    return jt.scatter(out, 0, index, one, reduce = 'sum')

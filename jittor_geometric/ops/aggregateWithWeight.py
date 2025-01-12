@@ -25,7 +25,7 @@ class AggregateFunc(Function):
             edge_weight=csc.edge_weight
         indices=csc.row_indices
         offset=csc.column_offset
-        output=x
+        output=jt.zeros_like(x)
         aggregate_op.aggregate(output,x,indices,offset,edge_weight,True).fetch_sync()
         return output
 
@@ -36,7 +36,7 @@ class AggregateFunc(Function):
             edge_weight=self.weight
         indices=self.csr.column_indices
         offset=self.csr.row_offset
-        output_grad=grad_output
+        output_grad=jt.zeros_like(grad_output)
         aggregate_op.aggregate(output_grad,grad_output,indices,offset,edge_weight,False).fetch_sync()
         return output_grad,None,None
     

@@ -5,7 +5,7 @@ Description:
 '''
 import os.path as osp
 import argparse
-
+from rdkit import Chem
 import jittor as jt
 from jittor import nn
 import sys,os
@@ -19,9 +19,8 @@ from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
 jt.flags.use_cuda = 1
+jt.misc.set_global_seed(42)
 parser = argparse.ArgumentParser()
-parser.add_argument('--use_gdc', action='store_true',
-                    help='Use GDC preprocessing.')
 parser.add_argument('--dataset', help='graph dataset')
 parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
@@ -57,18 +56,15 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.8):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=512,spmm=args.spmm)
-        self.conv2 = GCNConv(in_channels=512, out_channels=512,spmm=args.spmm)
-        self.conv3 = GCNConv(in_channels=512, out_channels=dataset.num_classes,spmm=args.spmm)
+        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=args.spmm)
+        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=args.spmm)
         self.dropout = dropout
 
     def execute(self):
         x, csc, csr = data.x, data.csc, data.csr
         x = nn.relu(self.conv1(x, csc, csr))
         x = nn.dropout(x, self.dropout, is_train=self.training)
-        x = nn.relu(self.conv2(x, csc, csr))
-        x = nn.dropout(x, self.dropout, is_train=self.training)
-        x = self.conv3(x,csc,csr)
+        x = self.conv2(x, csc, csr)
         return nn.log_softmax(x, dim=1)
 
 

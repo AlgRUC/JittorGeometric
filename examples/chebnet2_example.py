@@ -41,7 +41,7 @@ elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', '
     dataset = HeteroDataset(path, dataset)
 elif dataset in ['reddit']:
     dataset = Reddit(os.path.join(path, 'Reddit'))
-
+  
 data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
@@ -71,9 +71,9 @@ class Net(nn.Module):
         x = data.x
         csc, csr = data.csc, data.csr
 
-        x = nn.dropout(x, self.dropout)
+        x = nn.dropout(x, self.dropout, is_train=self.training)
         x = nn.relu(self.lin1(x))
-        x = nn.dropout(x, self.dropout)
+        x = nn.dropout(x, self.dropout, is_train=self.training)
         x = self.lin2(x)
         x = self.prop(x, csc, csr)
         
@@ -81,7 +81,13 @@ class Net(nn.Module):
 
 
 model, data = Net(dataset), data
-optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4) 
+
+optimizer = nn.Adam([
+    dict(params=model.lin1.parameters(), learning_rate=0.01, weight_decay=5e-4),
+    dict(params=model.lin2.parameters(), learning_rate=0.01, weight_decay=5e-4),
+    dict(params=model.prop.parameters(), learning_rate=0.01, weight_decay=0)
+], lr=0.01)
+
 
 def train():
     global total_forward_time, total_backward_time

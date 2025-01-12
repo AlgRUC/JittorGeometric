@@ -10,40 +10,34 @@ class Planetoid(InMemoryDataset):
     r"""The citation network datasets "Cora", "CiteSeer" and "PubMed" from the
     `"Revisiting Semi-Supervised Learning with Graph Embeddings"
     <https://arxiv.org/abs/1603.08861>`_ paper.
-    Nodes represent documents and edges represent citation links.
-    Training, validation and test splits are given by binary masks.
+
+    This class represents three widely-used citation network datasets: Cora, CiteSeer, and PubMed. Nodes correspond to documents, and edges represent citation links between them. The datasets are designed for semi-supervised learning tasks, where training, validation, and test splits are provided as binary masks.
+
+    Dataset Details:
+    
+    - **Cora**: A citation network where nodes represent machine learning papers, and edges represent citations. The task is to classify papers into one of seven classes.
+    - **CiteSeer**: A citation network of research papers in computer and information science. The task is to classify papers into one of six classes.
+    - **PubMed**: A citation network of biomedical papers on diabetes. The task is to classify papers into one of three classes.
+
+    Splitting Options:
+    - **public**: The original fixed split from the paper `"Revisiting Semi-Supervised Learning with Graph Embeddings"`.
+    - **full**: Uses all nodes except those in the validation and test sets for training, inspired by `"FastGCN: Fast Learning with Graph Convolutional Networks via Importance Sampling"`.
+    - **random**: Generates random splits for train, validation, and test sets based on the specified parameters.
 
     Args:
-        root (string): Root directory where the dataset should be saved.
-        name (string): The name of the dataset (:obj:`"Cora"`,
-            :obj:`"CiteSeer"`, :obj:`"PubMed"`).
-        split (string): The type of dataset split
-            (:obj:`"public"`, :obj:`"full"`, :obj:`"random"`).
-            If set to :obj:`"public"`, the split will be the public fixed split
-            from the
-            `"Revisiting Semi-Supervised Learning with Graph Embeddings"
-            <https://arxiv.org/abs/1603.08861>`_ paper.
-            If set to :obj:`"full"`, all nodes except those in the validation
-            and test sets will be used for training (as in the
-            `"FastGCN: Fast Learning with Graph Convolutional Networks via
-            Importance Sampling" <https://arxiv.org/abs/1801.10247>`_ paper).
-            If set to :obj:`"random"`, train, validation, and test sets will be
-            randomly generated, according to :obj:`num_train_per_class`,
-            :obj:`num_val` and :obj:`num_test`. (default: :obj:`"public"`)
-        num_train_per_class (int, optional): The number of training samples
-            per class in case of :obj:`"random"` split. (default: :obj:`20`)
-        num_val (int, optional): The number of validation samples in case of
-            :obj:`"random"` split. (default: :obj:`500`)
-        num_test (int, optional): The number of test samples in case of
-            :obj:`"random"` split. (default: :obj:`1000`)
-        transform (callable, optional): A function/transform that takes in an
-            :obj:`torch_geometric.data.Data` object and returns a transformed
-            version. The data object will be transformed before every access.
-            (default: :obj:`None`)
-        pre_transform (callable, optional): A function/transform that takes in
-            an :obj:`torch_geometric.data.Data` object and returns a
-            transformed version. The data object will be transformed before
-            being saved to disk. (default: :obj:`None`)
+        root (str): Root directory where the dataset should be saved.
+        name (str): The name of the dataset (:obj:`"Cora"`, :obj:`"CiteSeer"`, :obj:`"PubMed"`).
+        split (str): The type of dataset split (:obj:`"public"`, :obj:`"full"`, :obj:`"random"`).
+            Default is :obj:`"public"`.
+        num_train_per_class (int, optional): Number of training samples per class for :obj:`"random"` split. Default is 20.
+        num_val (int, optional): Number of validation samples for :obj:`"random"` split. Default is 500.
+        num_test (int, optional): Number of test samples for :obj:`"random"` split. Default is 1000.
+        transform (callable, optional): A function/transform that takes in a :obj:`torch_geometric.data.Data` object and returns a transformed version. Default is :obj:`None`.
+        pre_transform (callable, optional): A function/transform that takes in a :obj:`torch_geometric.data.Data` object and returns a transformed version before saving to disk. Default is :obj:`None`.
+
+    Example:
+        >>> dataset = Planetoid(root='/path/to/dataset', name='Cora', split='random')
+        >>> data = dataset[0]  # Access the processed data object
     """
 
     url = 'https://github.com/kimiyoung/planetoid/raw/master/data'
