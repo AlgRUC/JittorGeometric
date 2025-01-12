@@ -16,7 +16,7 @@ System Requirements
 Core Dependencies
 -----------------
 
-- jittor==1.3.9.14
+- jittor
 - numpy
 - tqdm
 - pybind11
@@ -37,7 +37,19 @@ Installation Steps
 
     python -m pip install git+https://github.com/Jittor/jittor.git
 
-2. Installing dependencies
+2. Installing other dependencies, such as::
+
+    pip install numpy
+    pip install tqdm
+    pip install pybind11
+    pip install psutil
+    pip install pillow
+    pip install scipy
+    pip install requests
+    pip install pandas
+    pip install pyparsing
+    pip install scikit-learn
+    pip install six
 
 3. Install the package::
 
