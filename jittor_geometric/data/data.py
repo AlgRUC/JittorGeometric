@@ -39,7 +39,6 @@ def size_repr(key, item, indent=0):
 
     return f'{indent_str}{key}={out}'
 
-# add by lusz
 class CSR:
     def __init__(self, column_indices=None, row_offset=None, edge_weight=None):
         self.column_indices = column_indices

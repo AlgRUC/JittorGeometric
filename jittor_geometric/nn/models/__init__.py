@@ -5,6 +5,7 @@ from .graphmixer import GraphMixer
 from .modules import MergeLayer, TimeEncoder
 from .dygformer import DyGFormer
 from .schnet import SchNet
+from .unimol import UniMolModel
 __all__ = [
     'TGNMemory',
     'DyRepMemory',
@@ -15,6 +16,7 @@ __all__ = [
     'DyGFormer',
     'SchNet',
     'compute_src_dst_node_time_shifts',
+    'UniMolModel',
 ]
 
 classes = __all__

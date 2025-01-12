@@ -39,329 +39,26 @@ def scatter(src, batch, dim=0, reduce='add', dim_size=None):
     return x
 """
 
-def swish(x):
-    import jittor
-    return x * jittor.sigmoid(x)
-
-
-class Envelope(jittor.nn.Module):
-    def __init__(self, exponent):
-        super(Envelope, self).__init__()
-        self.p = exponent + 1
-        self.a = -(self.p + 1) * (self.p + 2) / 2
-        self.b = self.p * (self.p + 2)
-        self.c = -self.p * (self.p + 1) / 2
-
-    def execute(self, x):
-        p, a, b, c = self.p, self.a, self.b, self.c
-        x_pow_p0 = x.pow(p - 1)
-        x_pow_p1 = x_pow_p0 * x
-        x_pow_p2 = x_pow_p1 * x
-        return 1. / x + a * x_pow_p0 + b * x_pow_p1 + c * x_pow_p2
-
-
-class dist_emb(jittor.nn.Module):
-    def __init__(self, num_radial, cutoff=5.0, envelope_exponent=5):
-        super(dist_emb, self).__init__()
-        self.cutoff = cutoff
-        self.envelope = Envelope(envelope_exponent)
-
-        self.freq = jittor.Var(num_radial)
-
-        #self.reset_parameters()
-
-    def reset_parameters(self):
-        self.freq = jittor.arange(1, self.freq + 1).float().mul_(PI)
-
-    def execute(self, dist):
-        dist = dist.unsqueeze(-1) / self.cutoff
-        return self.envelope(dist) * (self.freq * dist).sin()
-
-
-class angle_emb(jittor.nn.Module):
-    def __init__(self, num_spherical, num_radial, cutoff=5.0,
-                 envelope_exponent=5):
-        super(angle_emb, self).__init__()
-        assert num_radial <= 64
-        self.num_spherical = num_spherical
-        self.num_radial = num_radial
-        self.cutoff = cutoff
-        # self.envelope = Envelope(envelope_exponent)
-
-        bessel_forms = bessel_basis(num_spherical, num_radial)
-        sph_harm_forms = real_sph_harm(num_spherical)
-        self.sph_funcs = []
-        self.bessel_funcs = []
-
-        x, theta = sym.symbols('x theta')
-        modules = {'sin': jittor.sin, 'cos':jittor.cos}
-        for i in range(num_spherical):
-            if i == 0:
-                sph1 = sym.lambdify([theta], sph_harm_forms[i][0], modules)(0)
-                self.sph_funcs.append(lambda x: jittor.zeros_like(x) + sph1)
-            else:
-                sph = sym.lambdify([theta], sph_harm_forms[i][0], modules)
-                self.sph_funcs.append(sph)
-            for j in range(num_radial):
-                bessel = sym.lambdify([x], bessel_forms[i][j], modules)
-                self.bessel_funcs.append(bessel)
-
-    def execute(self, dist, angle, idx_kj):
-        dist = dist / self.cutoff
-        rbf = jittor.stack([f(dist) for f in self.bessel_funcs], dim=1)
-        # rbf = self.envelope(dist).unsqueeze(-1) * rbf
-
-        cbf = jittor.stack([f(angle) for f in self.sph_funcs], dim=1)
-
-        n, k = self.num_spherical, self.num_radial
-        out = (rbf[idx_kj].view(-1, n, k) * cbf.view(-1, n, 1)).view(-1, n * k)
-        return out
-
-
-class torsion_emb(jittor.nn.Module):
-    def __init__(self, num_spherical, num_radial, cutoff=5.0,
-                 envelope_exponent=5):
-        super(torsion_emb, self).__init__()
-        assert num_radial <= 64
-        self.num_spherical = num_spherical #
-        self.num_radial = num_radial
-        self.cutoff = cutoff
-        # self.envelope = Envelope(envelope_exponent)
-
-        bessel_forms = bessel_basis(num_spherical, num_radial)
-        sph_harm_forms = real_sph_harm(num_spherical, zero_m_only=False)
-        self.sph_funcs = []
-        self.bessel_funcs = []
-
-        x = sym.symbols('x')
-        theta = sym.symbols('theta')
-        phi = sym.symbols('phi')
-        modules = {'sin': jittor.sin, 'cos': jittor.cos}
-        for i in range(self.num_spherical):
-            if i == 0:
-                sph1 = sym.lambdify([theta, phi], sph_harm_forms[i][0], modules)
-                self.sph_funcs.append(lambda x, y: jittor.zeros_like(x) + jittor.zeros_like(y) + sph1(0,0))
-            else:
-                for k in range(-i, i + 1):
-                    sph = sym.lambdify([theta, phi], sph_harm_forms[i][k+i], modules)
-                    self.sph_funcs.append(sph)
-            for j in range(self.num_radial):
-                bessel = sym.lambdify([x], bessel_forms[i][j], modules)
-                self.bessel_funcs.append(bessel)
-
-    def execute(self, dist, angle, phi, idx_kj):
-        dist = dist / self.cutoff
-        rbf = jittor.stack([f(dist) for f in self.bessel_funcs], dim=1)
-        """
-        print(angle, phi)
-        print(jittor.zeros_like(angle).shape)
-        print(jittor.zeros_like(phi).shape)
-        tmp = jittor.zeros_like(angle) + jittor.zeros_like(phi)
-        """
-        #+ self.sph1(0,0)
-        cbf = jittor.stack([f(angle, phi) for f in self.sph_funcs], dim=1)
-
-        n, k = self.num_spherical, self.num_radial
-        out = (rbf[idx_kj].view(-1, 1, n, k) * cbf.view(-1, n, n, 1)).view(-1, n * n * k)
-        return out
-
-class emb(jittor.nn.Module):
-    def __init__(self, num_spherical, num_radial, cutoff, envelope_exponent):
-        super(emb, self).__init__()
-        self.dist_emb = dist_emb(num_radial, cutoff, envelope_exponent)
-        self.angle_emb = angle_emb(num_spherical, num_radial, cutoff, envelope_exponent)
-        self.torsion_emb = torsion_emb(num_spherical, num_radial, cutoff, envelope_exponent)
-
-    def reset_parameters(self):
-        self.dist_emb.reset_parameters()
-
-    def execute(self, dist, angle, torsion, idx_kj):
-        dist_emb = self.dist_emb(dist)
-        angle_emb = self.angle_emb(dist, angle, idx_kj)
-        torsion_emb = self.torsion_emb(dist, angle, torsion, idx_kj)
-        return dist_emb, angle_emb, torsion_emb
-
-class ResidualLayer(jittor.nn.Module):
-    def __init__(self, hidden_channels, act=swish):
-        super(ResidualLayer, self).__init__()
-        self.act = act
-        self.lin1 = Linear(hidden_channels, hidden_channels)
-        self.lin2 = Linear(hidden_channels, hidden_channels)
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        glorot(self.lin1.weight)
-        self.lin1.bias.fill_(0)
-        glorot(self.lin2.weight)
-        self.lin2.bias.fill_(0)
-
-    def execute(self, x):
-        return x + self.act(self.lin2(self.act(self.lin1(x))))
-
-
-class init(jittor.nn.Module):
-    def __init__(self, num_radial, hidden_channels, act=swish, use_node_features=True, use_extra_node_feature=False):
-        super(init, self).__init__()
-        self.act = act
-        self.use_node_features = use_node_features
-        self.use_extra_node_feature = use_extra_node_feature
-        if self.use_node_features:
-            self.emb = Embedding(95, hidden_channels)
-        else: # option to use no node features and a learned embedding vector for each node instead
-            self.node_embedding = nn.Parameter(jittor.empty((hidden_channels,)))
-            nn.init.normal_(self.node_embedding)
-        self.lin_rbf_0 = Linear(num_radial, hidden_channels)
-        if self.use_extra_node_feature:
-            self.lin = Linear(5 * hidden_channels, hidden_channels)
-        else:
-            self.lin = Linear(3 * hidden_channels, hidden_channels)
-        self.lin_rbf_1 = nn.Linear(num_radial, hidden_channels, bias=False)
-        #self.reset_parameters()
-
-    def reset_parameters(self):
-        if self.use_node_features:
-            self.emb.weight.uniform_(-sqrt(3), sqrt(3))
-        #self.lin_rbf_0.reset_parameters()
-        #self.lin.reset_parameters()
-        glorot(self.lin.weight)
-        glorot(self.lin_rbf_0.weight)
-        glorot(self.lin_rbf_1.weight)
-
-    def execute(self, x, node_feature, emb, i, j):
-        rbf,_,_ = emb
-        if self.use_node_features:
-            x = self.emb(x)
-        else:
-            x = self.node_embedding[None, :].expand(x.shape[0], -1)
-        if node_feature != None and self.use_extra_node_feature:
-            x = jittor.concat((x, node_feature), 1)
-        rbf0 = self.act(self.lin_rbf_0(rbf))
-        e1 = self.act(self.lin(jittor.concat([x[i], x[j], rbf0], dim=-1)))
-        e2 = self.lin_rbf_1(rbf) * e1
-
-        return e1, e2
-
-
-# 改了这里
-class update_e(jittor.nn.Module):
-    def __init__(self, hidden_channels, int_emb_size, basis_emb_size_dist, basis_emb_size_angle, basis_emb_size_torsion, num_spherical, num_radial,
-        num_before_skip, num_after_skip, act=swish):
-        super(update_e, self).__init__()
-        self.act = act
-        self.lin_rbf1 = nn.Linear(num_radial, basis_emb_size_dist, bias=False)
-        self.lin_rbf2 = nn.Linear(basis_emb_size_dist, hidden_channels, bias=False)
-        self.lin_sbf1 = nn.Linear(num_spherical * num_radial, basis_emb_size_angle, bias=False)
-        self.lin_sbf2 = nn.Linear(basis_emb_size_angle, int_emb_size, bias=False)
-        self.lin_t1 = nn.Linear(num_spherical * num_spherical * num_radial, basis_emb_size_torsion, bias=False)
-        self.lin_t2 = nn.Linear(basis_emb_size_torsion, int_emb_size, bias=False)
-        self.lin_rbf = nn.Linear(num_radial, hidden_channels, bias=False)
-
-        self.lin_kj = nn.Linear(hidden_channels, hidden_channels)
-        self.lin_ji = nn.Linear(hidden_channels, hidden_channels)
-
-        self.lin_down = nn.Linear(hidden_channels, int_emb_size, bias=False)
-        self.lin_up = nn.Linear(int_emb_size, hidden_channels, bias=False)
-
-        self.layers_before_skip = jittor.nn.ModuleList([
-            ResidualLayer(hidden_channels, act)
-            for _ in range(num_before_skip)
-        ])
-        self.lin = nn.Linear(hidden_channels, hidden_channels)
-        self.layers_after_skip = jittor.nn.ModuleList([
-            ResidualLayer(hidden_channels, act)
-            for _ in range(num_after_skip)
-        ])
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        glorot(self.lin_rbf1.weight)
-        glorot(self.lin_rbf2.weight)
-        glorot(self.lin_sbf1.weight)
-        glorot(self.lin_sbf2.weight)
-        glorot(self.lin_t1.weight)
-        glorot(self.lin_t2.weight)
-
-        glorot(self.lin_kj.weight)
-        self.lin_kj.bias.fill_(0)
-        glorot(self.lin_ji.weight)
-        self.lin_ji.bias.fill_(0)
-
-        glorot(self.lin_down.weight)
-        glorot(self.lin_up.weight)
-
-        for res_layer in self.layers_before_skip:
-            res_layer.reset_parameters()
-        glorot(self.lin.weight)
-        self.lin.bias.fill_(0)
-        for res_layer in self.layers_after_skip:
-            res_layer.reset_parameters()
-
-        glorot(self.lin_rbf.weight)
-
-    def execute(self, x, emb, idx_kj, idx_ji):
-        rbf0, sbf, t = emb
-        x1,_ = x
-
-        x_ji = self.act(self.lin_ji(x1))
-        x_kj = self.act(self.lin_kj(x1))
-
-        rbf = self.lin_rbf1(rbf0)
-        rbf = self.lin_rbf2(rbf)
-        x_kj = x_kj * rbf
-
-        x_kj = self.act(self.lin_down(x_kj))
-
-        sbf = self.lin_sbf1(sbf)
-        sbf = self.lin_sbf2(sbf)
-        x_kj = x_kj[idx_kj] * sbf
-
-        t = self.lin_t1(t)
-        t = self.lin_t2(t)
-        x_kj = x_kj * t
-
-        x_kj = scatter(x_kj, idx_ji, dim=0, dim_size=x1.size(0))
-        x_kj = self.act(self.lin_up(x_kj))
-
-        e1 = x_ji + x_kj
-        for layer in self.layers_before_skip:
-            e1 = layer(e1)
-        e1 = self.act(self.lin(e1)) + x1
-        for layer in self.layers_after_skip:
-            e1 = layer(e1)
-        e2 = self.lin_rbf(rbf0) * e1
-
-        return e1, e2
-
-
-# 重写 radius graph
 def radius_graph(pos, batch, r):
     n = pos.size(0)
     #device = node.device
 
-    # 计算所有节点对之间的距离
     node_expanded = pos.unsqueeze(1).expand(n, n, 3)
     node_pairwise_diff = node_expanded - pos.unsqueeze(0).expand(n, n, 3)
     distances = jittor.norm(node_pairwise_diff, dim=2)
 
-    # 创建批次索引对
     batch_expanded = batch.unsqueeze(1).expand(n, n)
     batch_pairs = batch_expanded == batch_expanded.t()
 
-    # 只保留批次内部的节点对
     mask = batch_pairs & (distances < r)
 
-    # 获取边的索引
     edge_index = jittor.nonzero(mask)
     edge_index = edge_index.t()
     return edge_index
 
-# 无需修改
 def Jn(r, n):
     return np.sqrt(np.pi / (2 * r)) * sp.jv(n + 0.5, r)
 
-# 无需修改
 def Jn_zeros(n, k):
     zerosj = np.zeros((n, k), dtype='float32')
     zerosj[0] = np.arange(1, k + 1) * np.pi
@@ -376,8 +73,6 @@ def Jn_zeros(n, k):
 
     return zerosj
 
-
-# 无需修改
 def spherical_bessel_formulas(n):
     x = sym.symbols('x')
 
@@ -390,7 +85,6 @@ def spherical_bessel_formulas(n):
     return f
 
 
-# 无需修改
 def bessel_basis(n, k):
     zeros = Jn_zeros(n, k)
     normalizer = []
@@ -415,13 +109,11 @@ def bessel_basis(n, k):
     return bess_basis
 
 
-# 无需修改
 def sph_harm_prefactor(k, m):
     return ((2 * k + 1) * np.math.factorial(k - abs(m)) /
             (4 * np.pi * np.math.factorial(k + abs(m))))**0.5
 
 
-# 无需修改
 def associated_legendre_polynomials(k, zero_m_only=True):
     z = sym.symbols('z')
     P_l_m = [[0] * (j + 1) for j in range(k)]
@@ -447,7 +139,6 @@ def associated_legendre_polynomials(k, zero_m_only=True):
     return P_l_m
 
 
-# 无需修改
 def real_sph_harm(l, zero_m_only=False, spherical_coordinates=True):
     """
     Computes formula strings of the the real part of the spherical harmonics up to order l (excluded).
@@ -516,7 +207,10 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion=False):
     """
     j, i = edge_index  # j -> i
 
-    dist = jittor.norm(pos[i] - pos[j], p=2, dim=-1)
+    # inf jittor.norm
+    #dist = jittor.norm(pos[i] - pos[j], p=2, dim=-1)
+    dist =  (pos[i] - pos[j]).sqr().sum(dim=1).sqrt()
+    dist = dist + 0.001
 
 
     # （k -> j -> i）
@@ -690,13 +384,7 @@ class torsion_emb(jittor.nn.Module):
     def execute(self, dist, angle, phi, idx_kj):
         dist = dist / self.cutoff
         rbf = jittor.stack([f(dist) for f in self.bessel_funcs], dim=1)
-        """
-        print(angle, phi)
-        print(jittor.zeros_like(angle).shape)
-        print(jittor.zeros_like(phi).shape)
-        tmp = jittor.zeros_like(angle) + jittor.zeros_like(phi)
-        """
-        #+ self.sph1(0,0)
+        # need to limit rbf
         cbf = jittor.stack([f(angle, phi) for f in self.sph_funcs], dim=1)
 
         n, k = self.num_spherical, self.num_radial
@@ -777,7 +465,6 @@ class init(jittor.nn.Module):
         rbf0 = self.act(self.lin_rbf_0(rbf))
         e1 = self.act(self.lin(jittor.concat([x[i], x[j], rbf0], dim=-1)))
         e2 = self.lin_rbf_1(rbf) * e1
-
         return e1, e2
 
 
@@ -868,7 +555,9 @@ class update_e(jittor.nn.Module):
         for layer in self.layers_after_skip:
             e1 = layer(e1)
         e2 = self.lin_rbf(rbf0) * e1
-
+        # fix in future
+        e1 = jittor.clamp(e1, -10.0, 10.0)
+        e2 = jittor.clamp(e2, -10.0 ,10.0)
         return e1, e2
 
 
@@ -1000,12 +689,16 @@ class SphereNet(jittor.nn.Module):
 
         #Initialize edge, node, graph features
         e = self.init_e(z, extra_node_feature, emb, i, j)
+
         v = self.init_v(e, i)
+
         u = self.init_u(jittor.zeros_like(scatter(v, batch, dim=0)), v, batch) #scatter(v, batch, dim=0)
 
         for update_e, update_v, update_u in zip(self.update_es, self.update_vs, self.update_us):
             e = update_e(e, emb, idx_kj, idx_ji)
+
             v = update_v(e, i)
+
             u = update_u(u, v, batch) #u += scatter(v, batch, dim=0)
 
         return u
@@ -1014,15 +707,15 @@ if __name__ == "__main__":
     # test data
     class Data:
         def __init__(self):
-            n = 40
-            z = jittor.randint(1, 10, shape=(n,))
-            pos = jittor.rand(n, 3)
+            n = 30
+            z = jittor.randint(1, 5, shape=(n,))
+            pos = jittor.rand(n, 3) * 30
             batch = jittor.zeros(n)
             batch[20:] = 1
             self.z = z
             self.pos = pos
             self.batch = batch
     data = Data()
-    model = SphereNet()
+    model = SphereNet(out_emb_channels=128, num_layers=2)
     result = model(data)
     print(result)

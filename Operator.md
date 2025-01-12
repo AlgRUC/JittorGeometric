@@ -46,3 +46,47 @@ out (Tensor, optional) – the output tensor.
 
 **Return**
 A tensor where each row contains num_samples indices sampled from the multinomial probability distribution located in the corresponding row of tensor input.
+
+
+
+#### 4. SparseTensor.from_nodes(input: Var) / SparseTensor.to_nodes(input: Var) 
+
+Initialize SarseTensor, input a Var containing node IDs (including duplicate nodes), and return the nodes (Var) with these nodes as targets/sources
+
+**Parameters**:
+input (Var) - The nodes to get the sources/targets. 
+
+**Return**
+Var: Return a Var containing all nodes that meet the requirements and correspond to the order of the original input nodes
+
+><strong><span style="color: #4B4B4B;">completed, please refer to  `jittor_geometric.ops.saparse_ops `
+<span></strong><br>
+><strong><span style="color: #4B4B4B;">liuyy 2025.1.12
+<span></strong>
+
+### 5. Jittor.repeat_interleave(input: Var, repeats: Var or int, dim=None)
+Repeat elements of a tensor, and repeating the elements of the tensor at different times. 
+
+
+**Parameters**:
+input (Var) – the input tensor.
+
+repeats (Var or int) – The number of repetitions for each element. repeats is broadcasted to fit the shape of the given axis.
+
+dim (int, optional) – The dimension along which to repeat values. By default, use the flattened input array, and return a flat output array.
+
+**Return**
+Var: Repeated tensor which has the same shape as input, except along the given axis. 
+
+**Example in torch.**
+import torch
+y = torch.tensor([[1, 2], [3, 4]])
+torch.repeat_interleave(y, torch.tensor([1, 2]), dim=0)
+
+tensor([[1, 2],
+        [3, 4],
+        [3, 4]])
+><strong><span style="color: #4B4B4B;">completed, please refer to  `jittor_geometric.ops.repeat_interleave `
+<span></strong><br>
+><strong><span style="color: #4B4B4B;">liuyy 2025.1.12
+<span></strong>
