@@ -112,36 +112,13 @@ class Dictionary:
         """
         if f == "default":
             # Default atom dictionary
-            default_atoms =  """[PAD]
-                                [CLS]
-                                [SEP]
-                                [UNK]
-                                C
-                                N
-                                O
-                                S
-                                H
-                                Cl
-                                F
-                                Br
-                                I
-                                Si
-                                P
-                                B
-                                Na
-                                K
-                                Al
-                                Ca
-                                Sn
-                                As
-                                Hg
-                                Fe
-                                Zn
-                                Cr
-                                Se
-                                Gd
-                                Au
-                                Li""".split('\n')
+            default_atoms = [
+                "[PAD]", "[CLS]", "[SEP]", "[UNK]",
+                "C", "N", "O", "S", "H", "Cl", "F", "Br", 
+                "I", "Si", "P", "B", "Na", "K", "Al", "Ca",
+                "Sn", "As", "Hg", "Fe", "Zn", "Cr", "Se",
+                "Gd", "Au", "Li"
+            ]
             
             for line_idx, word in enumerate(default_atoms):
                 count = len(default_atoms) - line_idx

@@ -12,7 +12,7 @@ from .dictionary import Dictionary
 from multiprocessing import Pool
 from tqdm import tqdm
 import logging
-
+import jittor as jt
 
 logger = logging.getLogger(__name__)
 
@@ -43,47 +43,52 @@ class ConformerGen(object):
         self.seed = params.get('seed', 42)
         self.max_atoms = params.get('max_atoms', 256)
         self.data_type = params.get('data_type', 'molecule')
-        self.method = params.get('method', 'rdkit_random')
+        self.method = params.get('method', 'processed')
         self.mode = params.get('mode', 'fast')
         self.remove_hs = params.get('remove_hs', False)
         self.dictionary = Dictionary.load('default')
         self.dictionary.add_symbol("[MASK]", is_special=True)
-
-    def single_process(self, smiles):
-        """
-        Processes a single SMILES string to generate conformers using the specified method.
-
-        :param smiles: (str) The SMILES string representing the molecule.
-        :return: A unimolecular data representation (dictionary) of the molecule.
-        :raises ValueError: If the conformer generation method is unrecognized.
-        """
-        if self.method == 'rdkit_random':
-            atoms, coordinates = inner_smi2coords(smiles, seed=self.seed, mode=self.mode, remove_hs=self.remove_hs)
-            return coords2unimol(atoms, coordinates, self.dictionary, self.max_atoms, remove_hs=self.remove_hs)
-        else:
-            raise ValueError('Unknown conformer generation method: {}'.format(self.method))
         
     def transform_raw(self, atoms_list, coordinates_list):
+        """
+        Transforms raw atomic data and coordinates into Uni-Mol input.
 
+        :param atoms_list: List of atomic symbols.
+        :param coordinates_list: List of atomic coordinates.
+        :return: List of Uni-Mol input.
+        """
         inputs = []
         for atoms, coordinates in zip(atoms_list, coordinates_list):
             inputs.append(coords2unimol(atoms, coordinates, self.dictionary, self.max_atoms, remove_hs=self.remove_hs))
         return inputs
 
-    def transform(self, smiles_list):
-        pool = Pool()
-        logger.info('Start generating conformers...')
-        inputs = [item for item in tqdm(pool.imap(self.single_process, smiles_list))]
-        pool.close()
-        failed_cnt = np.mean([(item['src_coord']==0.0).all() for item in inputs])
-        logger.info('Succeed to generate conformers for {:.2f}% of molecules.'.format((1-failed_cnt)*100))
-        failed_3d_cnt = np.mean([(item['src_coord'][:,2]==0.0).all() for item in inputs])
-        logger.info('Succeed to generate 3d conformers for {:.2f}% of molecules.'.format((1-failed_3d_cnt)*100))
-        return inputs
+    # def single_process(self, smiles):
+    #     """
+    #     Processes a single SMILES string to generate conformers using the specified method.
+
+    #     :param smiles: (str) The SMILES string representing the molecule.
+    #     :return: A unimolecular data representation (dictionary) of the molecule.
+    #     :raises ValueError: If the conformer generation method is unrecognized.
+    #     """
+    #     if self.method == 'rdkit_random':
+    #         atoms, coordinates = inner_smi2coords(smiles, seed=self.seed, mode=self.mode, remove_hs=self.remove_hs)
+    #         return coords2unimol(atoms, coordinates, self.dictionary, self.max_atoms, remove_hs=self.remove_hs)
+    #     else:
+    #         raise ValueError('Unknown conformer generation method: {}'.format(self.method))
+
+    # def transform(self, smiles_list):
+    #     pool = Pool()
+    #     logger.info('Start generating conformers...')
+    #     inputs = [item for item in tqdm(pool.imap(self.single_process, smiles_list))]
+    #     pool.close()
+    #     failed_cnt = np.mean([(item['src_coord']==0.0).all() for item in inputs])
+    #     logger.info('Succeed to generate conformers for {:.2f}% of molecules.'.format((1-failed_cnt)*100))
+    #     failed_3d_cnt = np.mean([(item['src_coord'][:,2]==0.0).all() for item in inputs])
+    #     logger.info('Succeed to generate 3d conformers for {:.2f}% of molecules.'.format((1-failed_3d_cnt)*100))
+    #     return inputs
 
 
-def inner_smi2coords(smi, seed=42, mode='fast', remove_hs=True):
-    pass
+# def inner_smi2coords(smi, seed=42, mode='fast', remove_hs=True):
 #     '''
 #     This function is responsible for converting a SMILES (Simplified Molecular Input Line Entry System) string into 3D coordinates for each atom in the molecule. It also allows for the generation of 2D coordinates if 3D conformation generation fails, and optionally removes hydrogen atoms and their coordinates from the resulting data.
 
@@ -198,8 +203,8 @@ def coords2unimol(atoms, coordinates, dictionary, max_atoms=256, remove_hs=True,
     src_edge_type = src_tokens.reshape(-1, 1) * len(dictionary) + src_tokens.reshape(1, -1)
 
     return {
-            'src_tokens': src_tokens.astype(int), 
-            'src_distance': src_distance.astype(np.float32), 
-            'src_coord': src_coord.astype(np.float32), 
-            'src_edge_type': src_edge_type.astype(int),
+            'src_tokens': jt.array(src_tokens.astype(int)), 
+            'src_distance': jt.array(src_distance.astype(np.float32)), 
+            'src_coord': jt.array(src_coord.astype(np.float32)), 
+            'src_edge_type': jt.array(src_edge_type.astype(int)),
             }
