@@ -1,7 +1,3 @@
-from rdkit import Chem, RDLogger
-from rdkit.Chem.rdchem import BondType as BT
-from rdkit.Chem.rdchem import HybridizationType
-RDLogger.DisableLog('rdApp.*')  # type: ignore
 import jittor as jt
 import os.path as osp
 import sys,os
@@ -14,9 +10,7 @@ from jittor_geometric.typing import Var
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T
 from jittor_geometric.jitgeo_loader import DataLoader
-import jittor_geometric.jitgeo_loader
 from tqdm import tqdm
-import numpy as np
 
 # helper functions
 
@@ -233,11 +227,12 @@ def train(model, loader, optimizer):
     loss_accum = 0
 
     for step, batch in enumerate(tqdm(loader, desc="Iteration")):
+        optimizer.zero_grad()
         batch.x = jt.concat([batch.pos, batch.x], dim=-1)
         pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
         loss = mae_loss(pred, batch.y)
         optimizer.step(loss)
-        loss_accum += loss
+        loss_accum += loss.detach()
 
     return float(loss_accum / (step + 1))
 

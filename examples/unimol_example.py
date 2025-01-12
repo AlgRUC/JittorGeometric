@@ -1,4 +1,3 @@
-from rdkit import Chem
 import jittor as jt
 import numpy as np
 from tqdm import tqdm
