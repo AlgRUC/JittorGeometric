@@ -1,3 +1,6 @@
+import sys
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 import jittor as jt
 from jittor import nn
 import numpy as np
@@ -111,6 +114,7 @@ if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDataset
+    path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
     dataset = JODIEDataset(path, name=dataset_name)
     data = dataset[0]
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
