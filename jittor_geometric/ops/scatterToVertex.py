@@ -42,7 +42,7 @@ class ScatterToVertexFunc(Function):
         dtype=self.dtype
         output_grad=jt.zeros(self.e_num,self.feature_dim)
         csc=self.csc
-        scatter_backward_op.scattertoedge(output_grad,grad_output,csc.row_indices,csc.column_offset,False,1,dtype).fetch_sync()
+        scatter_backward_op.scattertoedge(output_grad,grad_output,csc.row_indices,csc.column_offset,False,1).fetch_sync()
         return output_grad,None,None
     
 

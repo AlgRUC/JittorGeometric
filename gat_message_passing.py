@@ -54,7 +54,7 @@ parser.add_argument('--dataset', help='graph dataset')
 args = parser.parse_args()
 dataset=args.dataset
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
+path = osp.join( 'data')
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
 
@@ -69,7 +69,7 @@ if args.use_gdc:
 v_num = data.x.shape[0]
 e_num = data.edge_index.shape[1]
 edge_index, edge_weight=data.edge_index,data.edge_attr
-jt.flags.use_cuda = 0
+jt.flags.use_cuda = 1
 jt.flags.lazy_execution = 0
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
