@@ -1,4 +1,5 @@
 import sys
+import os.path as osp
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 import jittor as jt
