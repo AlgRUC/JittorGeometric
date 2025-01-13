@@ -18,9 +18,8 @@ struct EdgesoftmaxOp : Op {
     Var* indices;
     Var* offset;
     Var* edge_weight;
-    NanoString dtype;
     Var* output;
-    EdgesoftmaxOp(Var* outputVar_, Var* x_, Var* indices_,Var* offset_,NanoString dype_=ns_float32);
+    EdgesoftmaxOp(Var* outputVar_, Var* x_, Var* indices_,Var* offset_);
     const char* name() const override { return "edgesoftmax"; }
     DECLARE_jit_run;
 };

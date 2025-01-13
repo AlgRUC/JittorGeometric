@@ -32,21 +32,18 @@ class ScatterToEdgeFunc(Function):
         self.v_num=v_num
         self.feature_dim=feature_dim
         output=jt.zeros(e_num,feature_dim)
-        dtype=x.dtype
-        self.dtype=dtype
         flag=1
         if flow=="src":
             flag=0
         self.flag=flag
-        scatter_op.scattertoedge(output,x,csc.row_indices,csc.column_offset,False,flag,dtype).fetch_sync()
+        scatter_op.scattertoedge(output,x,csc.row_indices,csc.column_offset,False,flag).fetch_sync()
         
         return output
 
     def grad(self, grad_output):
-        dtype=self.dtype
         output_grad=jt.zeros(self.v_num,self.feature_dim)
         csc=self.csc
-        scatter_backward_op.edgetovertex(output_grad,grad_output,csc.row_indices,csc.column_offset,self.flag,dtype).fetch_sync()
+        scatter_backward_op.edgetovertex(output_grad,grad_output,csc.row_indices,csc.column_offset,self.flag).fetch_sync()
         return output_grad,None,None
     
 

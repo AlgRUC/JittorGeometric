@@ -8,7 +8,6 @@ import os
 import sys
 from jittor import nn
 from jittor import Function
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.data import CSC, CSR
 current_file_path = os.path.abspath(__file__)
 test_path = os.path.dirname(current_file_path)
@@ -28,7 +27,7 @@ class MyFunc(Function):
         offset=csc.column_offset
         dtype=edge_weight.dtype
         output=x
-        aggregate_op.aggregate(output,x,indices,offset,edge_weight,True,dtype).fetch_sync()
+        aggregate_op.aggregate(output,x,indices,offset,edge_weight,True).fetch_sync()
         return output
 
     def grad(self, grad_output):
@@ -37,11 +36,10 @@ class MyFunc(Function):
         offset=self.csr.row_offset
         dtype=edge_weight.dtype
         output_grad=grad_output
-        aggregate_op.aggregate(output_grad,grad_output,indices,offset,edge_weight,False,dtype).fetch_sync()
+        aggregate_op.aggregate(output_grad,grad_output,indices,offset,edge_weight,False).fetch_sync()
         return output_grad,None,None
     
 jt.flags.lazy_execution = 0
-# 3个顶点，4维度
 x=jt.array([[3.0, 2.0, 1.0],[3.0, 2.0, 1.0],[3.0, 2.0, 1.0],[3.0, 2.0, 1.0]])
 y=jt.array([[1.0, 1.0, 1.0],[1.0, 1.0, 1.0],[1.0, 1.0, 1.0],[1.0, 1.0, 1.0]])
 # csc

@@ -91,7 +91,7 @@ class JODIEDataset(InMemoryDataset):
         t = jt.array(df.iloc[:, 2].values).to(jt.int64)
         y = jt.array(df.iloc[:, 3].values).to(jt.int64)
         msg = jt.array(df.iloc[:, 4:].values).to(jt.float32)
-        edge_ids = jt.arange(0, len(src))+1
+        edge_ids = jt.arange(0, len(df))+1
         data = TemporalData(src=src, dst=dst, t=t, msg=msg, y=y, edge_ids=edge_ids)
 
         if self.pre_transform is not None:

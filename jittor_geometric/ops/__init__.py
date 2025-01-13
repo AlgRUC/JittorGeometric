@@ -12,3 +12,4 @@ from .edgesoftmax import EdgeSoftmax
 from .scatterToVertex import ScatterToVertex
 from .spmmcsr import SpmmCsr
 from .spmmcoo import SpmmCoo
+from .saparse_ops import from_nodes,to_nodes

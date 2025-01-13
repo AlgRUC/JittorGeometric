@@ -15,9 +15,9 @@ from pymetis import part_graph
 class ChunkManager:
     def __init__(self, output_dir : Optional[str]=None, graph_data=None):
         """
-        初始化 ChunkManager。
-        :param output_dir: 文件保存路径。
-        :param graph_data: 原始图数据，可选（仅在分区时需要）。
+        Initialize the ChunkManager.
+        :param output_dir: Path for saving files.
+        :param graph_data: Original graph data, optional (only needed for partitioning).
         """
         self.output_dir = output_dir
         self.graph_data = graph_data
@@ -26,17 +26,17 @@ class ChunkManager:
 
     def metis_partition(self, edge_index, num_nodes, num_parts):
         """
-        使用 Metis 对图进行划分，并保存分区文件。
-        :param edge_index: 图的边索引 (Var 或 np.ndarray)。
-        :param num_nodes: 图的节点数。
-        :param num_parts: 划分的子图数量。
-        :return: 分区信息。
+        Perform graph partitioning using Metis and save partition files.
+        :param edge_index: Edge indices of the graph (Var or np.ndarray).
+        :param num_nodes: Number of nodes in the graph.
+        :param num_parts: Number of subgraphs to partition into.
+        :return: Partition information.
         """
         adj_list = self._edge_index_to_adj_list(edge_index, num_nodes)
         _, partition = part_graph(nparts=num_parts, adjacency=adj_list)
         partition = np.array(partition)
 
-        # 保存分区文件
+        # Save partition file
         if self.output_dir is not None:
             partition_file = osp.join(self.output_dir, f"partition_{num_parts}.bin")
             with open(partition_file, 'wb') as f:
@@ -103,13 +103,13 @@ class ChunkManager:
     @staticmethod
     def _edge_index_to_adj_list(edge_index, num_nodes):
         """
-        将边索引转换为邻接表。
-        :param edge_index: 图的边索引。
-        :param num_nodes: 节点数量。
-        :return: 邻接表表示的图。
+        Convert edge indices to adjacency list.
+        :param edge_index: Edge indices of the graph.
+        :param num_nodes: Number of nodes in the graph.
+        :return: Graph represented as an adjacency list.
         """
         adj_list = [[] for _ in range(num_nodes)]
         for src, dst in zip(edge_index[0], edge_index[1]):
-            if src != dst:  # 忽略自环
+            if src != dst:  # Ignore self-loops
                 adj_list[src].append(dst)
         return adj_list

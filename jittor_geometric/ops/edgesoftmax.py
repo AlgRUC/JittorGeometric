@@ -26,7 +26,7 @@ class EdgeSoftmaxFunc(Function):
         self.csc=csc
         output=jt.zeros_like(x)
         self.dtype=x.dtype
-        edge_softmax_op.edgesoftmax(output,x,csc.row_indices,csc.column_offset,self.dtype)
+        edge_softmax_op.edgesoftmax(output,x,csc.row_indices,csc.column_offset)
         self.y=output
         return output
 

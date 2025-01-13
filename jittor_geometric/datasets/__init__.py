@@ -7,6 +7,7 @@ from .jodie import JODIEDataset, TemporalDataLoader
 from .linkx import LINKXDataset
 from .hetero import HeteroDataset
 from .reddit import Reddit
+from .qm9 import QM9
 
 __all__ = [
     'Planetoid',
@@ -19,6 +20,7 @@ __all__ = [
     'JODIEDataset',
     'Reddit',
     'TemporalDataLoader',
+    'QM9',
 ]
 
 classes = __all__

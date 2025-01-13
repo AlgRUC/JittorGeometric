@@ -6,7 +6,6 @@ Date: 2024-06-23 14:53:18
 import jittor as jt
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.ops import toUndirected
 
 jt.flags.lazy_execution = 0

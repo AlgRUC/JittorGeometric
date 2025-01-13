@@ -7,8 +7,6 @@ import jittor as jt
 import os
 import sys
 from jittor import nn
-from jittor import Function
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.ops import SpmmCoo
 
 def test_spmm_coo():

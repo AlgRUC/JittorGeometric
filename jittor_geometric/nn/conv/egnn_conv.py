@@ -7,6 +7,7 @@ from jittor_geometric.typing import Adj, OptVar
 from einops import rearrange
 import numpy as np
 from ..inits import xavier_normal, zeros
+from jittor_geometric.utils import degree, scatter
 # helper functions
 
 def fourier_encode_dist(x, num_encodings = 4, include_self = True):
@@ -51,27 +52,33 @@ class LayerNorm(nn.Module):
         self.mode = mode
         
         if self.affine:
-            self.weight = nn.Parameter(jt.zeros(in_channels))  # 可学习的缩放因子
-            self.bias = nn.Parameter(jt.zeros(in_channels))  # 可学习的偏移量
+            self.weight = nn.Parameter(jt.zeros(in_channels))
+            self.bias = nn.Parameter(jt.zeros(in_channels))
         else:
             self.weight = None
             self.bias = None
 
     def execute(self, x: jt.Var, batch: jt.Var = None, batch_size: int = None) -> jt.Var:
         if self.mode == 'graph':
-            # 图级别的归一化：计算整个图的均值和方差
+            # graph-level normalization: calculating the mean and std of the whole graph
             if batch is None:
                 mean = jt.mean(x, dim=0, keepdims=True)
                 std = jt.std(x, dim=0, unbiased=False, keepdims=True)
             else:
-                # 按照图的批次归一化
+                # normalization based on batch
                 if batch_size is None:
                     batch_size = batch.max() + 1
-                mean = jt.scatter(x, batch, dim=0, reduce='mean', dim_size=batch_size)
-                std = jt.scatter(x, batch, dim=0, reduce='std', unbiased=False, dim_size=batch_size)
-                
-            normed_x = (x - mean) / (std + self.eps).sqrt()
+                norm = degree(batch, int(batch_size), dtype=x.dtype).clamp_(min_v=1)
+                norm = norm.mul_(x.size(-1)).view(-1, 1)
+                mean = scatter(x, batch, dim=0, dim_size=int(batch_size),
+                            reduce='sum').sum(dim=-1, keepdim=True) / norm
+                x = x - mean.index_select(0, batch)
+                var = scatter(x * x, batch, dim=0, dim_size=int(batch_size),
+                            reduce='sum').sum(dim=-1, keepdim=True)
+                var = var / norm
 
+            normed_x = x / (var + self.eps).sqrt().index_select(0, batch)
+            
             if self.weight is not None and self.bias is not None:
                 normed_x = normed_x * self.weight + self.bias
 
@@ -197,8 +204,7 @@ class EGNNConv(MessagePassing):
         self.edge_weight = nn.Sequential(nn.Linear(m_dim, 1), 
                                         nn.Sigmoid()
         ) if soft_edge else None
-
-        # NODES - can't do identity in node_norm bc pyg expects 2 inputs, but identity expects 1. 
+ 
         self.node_norm = LayerNorm(feats_dim) if norm_feats else None
         self.coors_norm = CoorsNorm(scale_init = norm_coors_scale_init) if norm_coors else nn.Identity()
 
@@ -235,6 +241,7 @@ class EGNNConv(MessagePassing):
 
         if self.fourier_features > 0:
             rel_dist = fourier_encode_dist(rel_dist, num_encodings=self.fourier_features)
+            rel_dist = rearrange(rel_dist, 'n () d -> n d')
 
         if edge_attr is not None:
             edge_attr_feats = jt.concat([edge_attr, rel_dist], dim=-1)
@@ -251,14 +258,56 @@ class EGNNConv(MessagePassing):
         """Message function."""
         return self.edge_mlp(jt.concat([x_i, x_j, edge_attr], dim=-1))
 
-    def update(self, aggr_out: Var, coors_out: Var) -> Var:
-        """Update function."""
-        if self.update_feats:
-            hidden_out = self.node_mlp(jt.concat([aggr_out, coors_out], dim=-1))
-        else:
-            hidden_out = aggr_out
 
+    def propagate(self, edge_index: Adj, size = None, **kwargs):
+        """The initial call to start propagating messages.
+            Args:
+            `edge_index` holds the indices of a general (sparse)
+                assignment matrix of shape :obj:`[N, M]`.
+            size (tuple, optional) if none, the size will be inferred
+                and assumed to be quadratic.
+            **kwargs: Any additional data which is needed to construct and
+                aggregate messages, and to update node embeddings.
+        """
+        size = self.__check_input__(edge_index, size)
+        coll_dict = self.__collect__(self.__user_args__,
+                                     edge_index, size, kwargs)
+        msg_kwargs = self.inspector.distribute('message', coll_dict)
+        aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
+        update_kwargs = self.inspector.distribute('update', coll_dict)
+        
+        # get messages
+        m_ij = self.message(**msg_kwargs)
+
+        # update coors if specified
         if self.update_coors:
-            coors_out = self.coors_mlp(aggr_out)
+            coor_wij = self.coors_mlp(m_ij)
+            # clamp if arg is set
+            if self.coor_weights_clamp_value:
+                coor_weights_clamp_value = self.coor_weights_clamp_value
+                coor_weights.clamp_(min = -clamp_value, max = clamp_value)
 
-        return hidden_out, coors_out
+            # normalize if needed
+            kwargs["rel_coors"] = self.coors_norm(kwargs["rel_coors"])
+
+            mhat_i = self.aggregate(coor_wij * kwargs["rel_coors"], **aggr_kwargs)
+            coors_out = kwargs["coors"] + mhat_i
+        else:
+            coors_out = kwargs["coors"]
+
+        # update feats if specified
+        if self.update_feats:
+            # weight the edges if arg is passed
+            if self.soft_edge:
+                m_ij = m_ij * self.edge_weight(m_ij)
+            m_i = self.aggregate(m_ij, **aggr_kwargs)
+
+            hidden_feats = self.node_norm(kwargs["x"], kwargs["batch"]) if self.node_norm else kwargs["x"]
+            hidden_out = self.node_mlp( jt.cat([hidden_feats, m_i], dim = -1) )
+            hidden_out = kwargs["x"] + hidden_out
+        else: 
+            hidden_out = kwargs["x"]
+
+        # return tuple
+        return self.update((hidden_out, coors_out), **update_kwargs)
+

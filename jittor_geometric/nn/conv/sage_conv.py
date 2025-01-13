@@ -37,7 +37,7 @@ def sage_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
         deg = jt.scatter(deg, 0, col, src=edge_weight, reduce='add')
         deg_inv = deg.pow(-1)
         deg_inv.masked_fill(deg_inv == float('inf'), 0)
-        return edge_index, edge_weight * deg_inv[row]
+        return edge_index, edge_weight * deg_inv[col]
 
 
 class SAGEConv(MessagePassing):
@@ -71,7 +71,7 @@ class SAGEConv(MessagePassing):
                  add_self_loops: bool = True, 
                  normalize: bool = True,
                  project: bool = False,
-                 root_weight = True,
+                 root_weight: bool = True,
                  bias: bool = True, spmm: bool = True, **kwargs):
 
         kwargs.setdefault('aggr', 'add')
