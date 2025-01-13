@@ -6,6 +6,7 @@ from jittor import Var
 
 import jittor_geometric.typing
 from jittor_geometric.typing import jt_scatter
+import numpy as np
 
 major, minor, _ = jittor.__version__.split('.', maxsplit=2)
 major, minor = int(major), int(minor)
@@ -53,7 +54,14 @@ if True:  # pragma: no cover
                              f"{src.dim() - 1} (got {dim})")
 
         if dim_size is None:
-            dim_size = int(index.max()) + 1 if index.numel() > 0 else 0
+            
+            # dim_size = int(index.max()) + 1 if index.numel() > 0 else 0
+            if index.numel() > 0:  
+                # 先将tensor移到CPU计算max  
+                index_cpu = index.numpy()  
+                dim_size = int(np.max(index_cpu)) + 1  
+            else:  
+                dim_size = 0
 
         # For now, we maintain various different code paths, based on whether
         # the input requires gradients and whether it lays on the CPU/GPU.

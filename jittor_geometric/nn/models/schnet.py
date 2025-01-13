@@ -402,13 +402,15 @@ class SchNet(nn.Module):
         batch = jt.zeros_like(z) if batch is None else batch
 
         h = self.embedding(z)
+        
         edge_index, edge_weight = self.interaction_graph(pos, batch)
         edge_attr = self.distance_expansion(edge_weight)
 
         for interaction in self.interactions:
             h = h + interaction(h, edge_index, edge_weight, edge_attr)
-
+        print(jt.isnan(h).any())
         h = self.lin1(h)
+        print(jt.isnan(h).any())
         h = self.act(h)
         h = self.lin2(h)
 
@@ -418,14 +420,15 @@ class SchNet(nn.Module):
             M = self.sum_aggr(x=mass, batch=batch, dim=0)
             c = self.sum_aggr(x=mass * pos, index=batch, dim=0) / M
             h = h * (pos - c.index_select(0, batch))
-
+        
         if not self.dipole and self.mean is not None and self.std is not None:
             h = h * self.std + self.mean
-
+        
         if not self.dipole and self.atomref is not None:
             h = h + self.atomref(z)
-
+        
         out = self.readout(h, batch, dim=0)
+        
 
         if self.dipole:
             out = jt.norm(out, dim=-1, keepdim=True)
