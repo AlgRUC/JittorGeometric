@@ -1,4 +1,6 @@
 import sys
+import os.path as osp
+import os
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 import jittor as jt
@@ -14,8 +16,6 @@ from jittor_geometric.evaluate import MRR_Evaluator
 from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.nn.dense.merge_predictor import MergeLayer
-import os.path as osp
-import os
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
