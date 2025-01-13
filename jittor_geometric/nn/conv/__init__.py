@@ -1,7 +1,7 @@
 '''
 Description: 
 Author: lusz
-Date: 2024-06-22 19:16:51
+Date: 2025-01-10 13:52:59
 '''
 from .message_passing import MessagePassing
 from .gcn_conv import GCNConv

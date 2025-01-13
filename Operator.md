@@ -1,8 +1,3 @@
-<!--
- * @Description: 
- * @Author: lusz
- * @Date: 2024-06-22 20:01:47
--->
 ## JittorGeometric需要的算子，明确输入和输出
 
 #### 1.to_undirected(edge_index: Var, edge_attr: Union[Var,None,List[Var]], num_nodes: Optional[int])→ Union[Var,Tuple[Var,List[Var]]]
