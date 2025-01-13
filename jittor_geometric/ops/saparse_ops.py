@@ -35,9 +35,9 @@ def from_nodes(csc, nodes):
 
     # Flatten the list of neighbors and remove duplicates
     neighbors = jt.Var(jt.contrib.concat([n for n in neighbors]))
-    unique_neighbors = jt.unique(neighbors)
+    # unique_neighbors = jt.unique(neighbors)
 
-    return unique_neighbors
+    return neighbors
 
 
 def to_nodes(csr, nodes):
@@ -67,7 +67,7 @@ def to_nodes(csr, nodes):
 
     # Flatten the list of neighbors and remove duplicates
     neighbors = jt.Var(jt.contrib.concat([n for n in neighbors]))
-    unique_neighbors = jt.unique(neighbors)
+    # unique_neighbors = jt.unique(neighbors)
 
-    return unique_neighbors
+    return neighbors
 

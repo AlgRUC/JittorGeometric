@@ -27,7 +27,7 @@ def softmax_dropout(input, dropout_prob, is_training=True, mask=None, bias=None,
         input += mask
     if bias is not None:
         input += bias
-    return nn.dropout(nn.softmax(input, dim=-1), p=dropout_prob, training=is_training)
+    return nn.dropout(nn.softmax(input, dim=-1), p=dropout_prob, is_train=is_training)
 
 def get_activation_fn(activation):
     """ Returns the activation function corresponding to `activation` """
@@ -67,7 +67,7 @@ class SelfMultiheadAttention(nn.Module):
         self.in_proj = nn.Linear(embed_dim, embed_dim * 3, bias=bias)
         self.out_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
 
-    def forward(
+    def execute(
         self,
         query,
         key_padding_mask: Optional[Var] = None,
@@ -128,12 +128,12 @@ class SelfMultiheadAttention(nn.Module):
 
         if not return_attn:
             attn = softmax_dropout(
-                attn_weights, self.dropout, self.training, bias=attn_bias,
+                attn_weights, self.dropout, self.is_training, bias=attn_bias,
             )
         else:
             attn_weights += attn_bias
             attn = softmax_dropout(
-                attn_weights, self.dropout, self.training, inplace=False,
+                attn_weights, self.dropout, self.is_training, inplace=False,
             )
 
         o = jittor.bmm(attn, v)
@@ -192,7 +192,7 @@ class TransformerEncoderLayer(nn.Module):
         self.post_ln = post_ln
 
 
-    def forward(
+    def execute(
         self,
         x: jittor.Var,
         attn_bias: Optional[jittor.Var] = None,
@@ -215,7 +215,7 @@ class TransformerEncoderLayer(nn.Module):
         )
         if return_attn:
             x, attn_weights, attn_probs = x
-        x = nn.dropout(x, p=self.dropout, training=self.training)
+        x = nn.dropout(x, p=self.dropout, is_train=self.is_training)
         x = residual + x
         if self.post_ln:
             x = self.self_attn_layer_norm(x)
@@ -225,9 +225,9 @@ class TransformerEncoderLayer(nn.Module):
             x = self.final_layer_norm(x)
         x = self.fc1(x)
         x = self.activation_fn(x)
-        x = nn.dropout(x, p=self.activation_dropout, training=self.training)
+        x = nn.dropout(x, p=self.activation_dropout, is_train=self.is_training)
         x = self.fc2(x)
-        x = nn.dropout(x, p=self.dropout, training=self.training)
+        x = nn.dropout(x, p=self.dropout, is_train=self.is_training)
         x = residual + x
         if self.post_ln:
             x = self.final_layer_norm(x)
@@ -251,7 +251,7 @@ class TransformerEncoderWithPair(nn.Module):
         - layers: A list of transformer encoder layers.
 
     Methods:
-        forward: Performs the forward pass of the module.
+        execute: Performs the execute pass of the module.
     """
     
     def __init__(
@@ -318,14 +318,14 @@ class TransformerEncoderWithPair(nn.Module):
             ]
         )
 
-    def forward(
+    def execute(
         self,
         emb: jittor.Var,
         attn_mask: Optional[jittor.Var] = None,
         padding_mask: Optional[jittor.Var] = None,
     ) -> jittor.Var:
         """
-        Conducts the forward pass of the transformer encoder.
+        Conducts the execute pass of the transformer encoder.
 
         :param emb: (jittor.Var) The input Var of embeddings.
         :param attn_mask: (Optional[jittor.Var]) Attention mask to specify positions to attend to.
@@ -337,7 +337,7 @@ class TransformerEncoderWithPair(nn.Module):
         bsz = emb.size(0)
         seq_len = emb.size(1)
         x = self.emb_layer_norm(emb)
-        x = nn.dropout(x, p=self.emb_dropout, training=self.training)
+        x = nn.dropout(x, p=self.emb_dropout, is_train=self.is_training)
         # account for padding while computing the representation
         if padding_mask is not None:
             x = x * (1 - padding_mask.unsqueeze(-1).type_as(x))
@@ -367,19 +367,19 @@ class TransformerEncoderWithPair(nn.Module):
             x = x.float()
             max_norm = x.shape[-1] ** 0.5
             norm = jittor.sqrt(jittor.sum(x**2, dim=-1) + eps)
-            error = jittor.nn.functional.relu((norm - max_norm).abs() - tolerance)
+            error = jittor.nn.relu((norm - max_norm).abs() - tolerance)
             return error
 
         def masked_mean(mask, value, dim=-1, eps=1e-10):
             return (
-                jittor.sum(mask * value, dim=dim) / (eps + jittor.sum(mask, dim=dim))
+                jittor.sum(mask * value, dim) / (eps + jittor.sum(mask, dim))
             ).mean()
 
         x_norm = norm_loss(x)
         if input_padding_mask is not None:
             token_mask = 1.0 - input_padding_mask.float()
         else:
-            token_mask = jittor.ones_like(x_norm, device=x_norm.device)
+            token_mask = jittor.ones_like(x_norm)
         x_norm = masked_mean(token_mask, x_norm)
 
         if self.final_layer_norm is not None:

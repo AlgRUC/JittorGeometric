@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, List, Optional, Sequence, Union
+from typing import Any, List, Optional, Sequence, Union, Callable
 import jittor
 from jittor.dataset.utils import collate_batch
 from jittor_geometric.data import Batch, Dataset
@@ -69,6 +69,7 @@ class DataLoader:
         shuffle: bool = False,
         follow_batch: Optional[List[str]] = None,
         exclude_keys: Optional[List[str]] = None,
+        collate_fn: Optional[Callable] = None,
         **kwargs,
     ):
         self.dataset = dataset
@@ -76,7 +77,7 @@ class DataLoader:
         self.shuffle = shuffle
         self.follow_batch = follow_batch
         self.exclude_keys = exclude_keys
-        self.collate_fn = Collater(dataset, follow_batch, exclude_keys)
+        self.collate_fn = collate_fn if collate_fn is not None else Collater(dataset, follow_batch, exclude_keys)
 
         # Initialize indices
         self.indices = np.arange(len(dataset))

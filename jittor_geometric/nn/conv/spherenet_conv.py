@@ -23,8 +23,12 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 
 from jittor_geometric.utils import scatter
+from jittor_geometric.typing import jt_scatter
 from jittor_geometric.data import CSC, CSR
 from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
+from jittor_geometric.ops import cootocsr, cootocsc
+from jittor_geometric.ops import from_nodes,to_nodes
+from jittor_geometric.ops.repeat_interleave import repeat_interleave
 
 
 """
@@ -213,6 +217,7 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion=False):
     dist = dist + 0.001
 
 
+    """
     # （k -> j -> i）
     idx_i, idx_j, idx_k = [], [], []
     for tmp_index in range(i.shape[0]):
@@ -229,6 +234,22 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion=False):
     idx_j = jittor.concat(idx_j)
     idx_k = jittor.concat(idx_k)
 
+    """
+
+    v_num = pos.shape[0]
+    #edge_index = jt.array([[0, 0, 1, 1, 2], [1, 2, 2, 3, 3]])
+    #edge_weight = jt.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    edge_weight = jittor.ones(edge_index[0].shape)
+    #
+    from_nodes_num = scatter(edge_weight, i, dim=0, dim_size=v_num)
+    num_triplets = from_nodes_num[j].int()
+
+    csc = cootocsc(edge_index, edge_weight, v_num)
+    csr = cootocsr(edge_index, edge_weight, v_num)
+    idx_k = from_nodes(csc=csc, nodes=j)
+    idx_j = repeat_interleave(j, num_triplets, dim=0)
+    idx_i = repeat_interleave(i, num_triplets, dim=0)
+
     mask = idx_i != idx_k
     idx_i, idx_j, idx_k = idx_i[mask], idx_j[mask], idx_k[mask]
 
@@ -240,32 +261,39 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion=False):
     angle = jittor.atan2(b, a)
 
     # torsion
-    torsion = jittor.zeros_like(angle)
+    torsion = jittor.zeros_like(angle) + 2*PI
 
     return dist, angle, torsion, i, j, idx_k, idx_j
     # fix torsion
     if use_torsion:
-        idx_batch = jittor.arange(len(idx_i), device=pos.device)
-        idx_k_n = jittor.index_select(adj_t_row, 0, idx_j)
-        num_triplets_t = jittor.tile(num_triplets, num_triplets)[mask]
-        idx_i_t = jittor.misc.repeat_interleave(idx_i, num_triplets_t)
-        idx_j_t = jittor.misc.repeat_interleave(idx_j, num_triplets_t)
-        idx_k_t = jittor.misc.repeat_interleave(idx_k, num_triplets_t)
-        idx_batch_t = jittor.misc.repeat_interleave(idx_batch, num_triplets_t)
+        idx_batch = jittor.arange(len(idx_i))
+        idx_k_n = from_nodes(csc=csc, nodes=idx_j)
+        repeat = num_triplets
+        num_triplets_t = repeat_interleave(num_triplets, repeat, dim=0)[mask]
+        idx_i_t = repeat_interleave(idx_i, num_triplets_t, dim=0)
+        idx_j_t = repeat_interleave(idx_j, num_triplets_t, dim=0)
+        idx_k_t = repeat_interleave(idx_k, num_triplets_t, dim=0)
+        idx_batch_t = repeat_interleave(idx_batch, num_triplets_t, dim=0)
         mask = idx_i_t != idx_k_n
         idx_i_t, idx_j_t, idx_k_t, idx_k_n, idx_batch_t = idx_i_t[mask], idx_j_t[mask], idx_k_t[mask], idx_k_n[mask], idx_batch_t[mask]
 
+        # Calculate torsions.
         pos_j0 = pos[idx_k_t] - pos[idx_j_t]
         pos_ji = pos[idx_i_t] - pos[idx_j_t]
         pos_jk = pos[idx_k_n] - pos[idx_j_t]
-        dist_ji = jittor.norm(pos_ji, p=2, dim=-1)
+        dist_ji = pos_ji.pow(2).sum(dim=-1).sqrt()
         plane1 = jittor.cross(pos_ji, pos_j0)
         plane2 = jittor.cross(pos_ji, pos_jk)
-        a = jittor.sum(plane1 * plane2, dim=-1)  # cos_angle * |plane1| * |plane2|
-        b = jittor.sum(jittor.cross(plane1, plane2) * pos_ji, dim=-1) / dist_ji
-        torsion1 = jittor.atan2(b, a)  # -pi to pi
-        torsion1[torsion1 <= 0] += 2 * np.pi  # 0 to 2pi
-        torsion = jittor.scatter(torsion1, idx_batch_t, reduce='min')
+        a = (plane1 * plane2).sum(dim=-1) # cos_angle * |plane1| * |plane2|
+        b = (jittor.cross(plane1, plane2) * pos_ji).sum(dim=-1) / dist_ji
+        torsion1 = jittor.atan2(b, a) # -pi to pi
+        torsion1[torsion1<=0]+=2*PI # 0 to 2pi
+        # reduce min is not allowed now.
+        torsion = scatter(torsion1, idx_batch_t, dim=0, reduce='min')
+        #dim_size = int(idx_batch_t.max()) + 1 if idx_batch_t.numel() > 0 else 0
+        #torsion = jt_scatter.scatter(torsion1, idx_batch_t, dim=0, dim_size=dim_size,
+        #                                 reduce="min")
+
 
         return dist, angle, torsion, i, j, idx_k, idx_j
     else:

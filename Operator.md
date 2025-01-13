@@ -1,8 +1,3 @@
-<!--
- * @Description: 
- * @Author: lusz
- * @Date: 2024-06-22 20:01:47
--->
 ## JittorGeometric需要的算子，明确输入和输出
 
 #### 1.to_undirected(edge_index: Var, edge_attr: Union[Var,None,List[Var]], num_nodes: Optional[int])→ Union[Var,Tuple[Var,List[Var]]]
@@ -59,6 +54,11 @@ input (Var) - The nodes to get the sources/targets.
 **Return**
 Var: Return a Var containing all nodes that meet the requirements and correspond to the order of the original input nodes
 
+><strong><span style="color: #4B4B4B;">completed, please refer to  `jittor_geometric.ops.saparse_ops `
+<span></strong><br>
+><strong><span style="color: #4B4B4B;">liuyy 2025.1.12
+<span></strong>
+
 ### 5. Jittor.repeat_interleave(input: Var, repeats: Var or int, dim=None)
 Repeat elements of a tensor, and repeating the elements of the tensor at different times. 
 
@@ -81,3 +81,7 @@ torch.repeat_interleave(y, torch.tensor([1, 2]), dim=0)
 tensor([[1, 2],
         [3, 4],
         [3, 4]])
+><strong><span style="color: #4B4B4B;">completed, please refer to  `jittor_geometric.ops.repeat_interleave `
+<span></strong><br>
+><strong><span style="color: #4B4B4B;">liuyy 2025.1.12
+<span></strong>

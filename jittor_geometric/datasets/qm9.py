@@ -12,8 +12,8 @@ from jittor_geometric.data import (
     download_url,
     extract_zip,
 )
-# from jt_geometric.io import fs
 from jittor_geometric.utils import one_hot, scatter
+from huggingface_hub import hf_hub_download
 
 HAR2EV = 27.211386246
 KCALMOL2EV = 0.04336414
@@ -46,7 +46,12 @@ atomrefs = {
 
 
 class QM9(InMemoryDataset):
-    r"""The QM9 dataset from the `"MoleculeNet: A Benchmark for Molecular
+    r"""
+    #     ! IF YOU MEET NETWORK ERROR, PLEASE TRY TO RUN THE COMMAND BELOW:
+    # `export HF_ENDPOINT=https://hf-mirror.com`,
+    # TO USE THE MIRROR PROVIDED BY Hugging Face.
+
+    The QM9 dataset from the `"MoleculeNet: A Benchmark for Molecular
     Machine Learning" <https://arxiv.org/abs/1703.00564>`_ paper, consisting of
     about 130,000 molecules with 19 regression targets.
     Each molecule includes complete spatial information for the single low
@@ -135,9 +140,8 @@ class QM9(InMemoryDataset):
           - 19
     """  # noqa: E501
 
-    raw_url = 'https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/molnet_publish/qm9.zip'
-    raw_url2 = 'https://ndownloader.figshare.com/files/3195404'
-    # processed_url = 'https://data.pyg.org/datasets/qm9_v3.zip'
+    # raw_url = 'https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/molnet_publish/qm9.zip'
+    # raw_url2 = 'https://ndownloader.figshare.com/files/3195404'
 
     def __init__(
         self,
@@ -167,153 +171,149 @@ class QM9(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        try:
-            import rdkit  # noqa
-            return ['gdb9.sdf', 'gdb9.sdf.csv', 'uncharacterized.txt']
-        except ImportError:
-            return ['qm9.pkl']
+        # try:
+        #     import rdkit  # noqa
+        #     return ['gdb9.sdf', 'gdb9.sdf.csv', 'uncharacterized.txt']
+        # except ImportError:
+        return ['qm9.pkl']
 
     @property
     def processed_file_names(self) -> str:
         return 'data.pkl'
 
     def download(self) -> None:
-        try:
-            import rdkit  # noqa
-            file_path = download_url(self.raw_url, self.raw_dir)
-            extract_zip(file_path, self.raw_dir)
-            os.unlink(file_path)
+        # try:
+        #     import rdkit  # noqa
+        #     file_path = download_url(self.raw_url, self.raw_dir)
+        #     extract_zip(file_path, self.raw_dir)
+        #     os.unlink(file_path)
 
-            file_path = download_url(self.raw_url2, self.raw_dir)
-            os.rename(osp.join(self.raw_dir, '3195404'),
-                      osp.join(self.raw_dir, 'uncharacterized.txt'))
-        except ImportError:
-            path = download_url(self.processed_url, self.raw_dir)
-            extract_zip(path, self.raw_dir)
-            os.unlink(path)
+        #     file_path = download_url(self.raw_url2, self.raw_dir)
+        #     os.rename(osp.join(self.raw_dir, '3195404'),
+        #               osp.join(self.raw_dir, 'uncharacterized.txt'))
+        # except ImportError:
+        # path = download_url(self.processed_url, self.raw_dir)
+        # extract_zip(path, self.raw_dir)
+        # os.unlink(path)
+        hf_hub_download(repo_id=f"TGB-Seq/QM9", filename=f"qm9.pkl", local_dir=self.raw_dir, repo_type="dataset")
 
     def process(self) -> None:
-        try:
-            from rdkit import Chem, RDLogger
-            from rdkit.Chem.rdchem import BondType as BT
-            from rdkit.Chem.rdchem import HybridizationType
-            RDLogger.DisableLog('rdApp.*')  # type: ignore
-            WITH_RDKIT = True
+        # try:
+        #     from rdkit import Chem, RDLogger
+        #     from rdkit.Chem.rdchem import BondType as BT
+        #     from rdkit.Chem.rdchem import HybridizationType
+        #     RDLogger.DisableLog('rdApp.*')  # type: ignore
+        #     WITH_RDKIT = True
 
-        except ImportError:
-            WITH_RDKIT = False
+        # except ImportError:
+        WITH_RDKIT = False
 
-        # if not WITH_RDKIT:
-        #     print(("Using a pre-processed version of the dataset. Please "
-        #            "install 'rdkit' to alternatively process the raw data."),
-        #           file=sys.stderr)
+        if not WITH_RDKIT:
+            print(("Using a pre-processed version of the dataset."),
+                  file=sys.stderr)
+            data, slices = jt.load(self.raw_paths[0])
+            # if self.pre_filter is not None:
+            #     data_list = [d for d in data_list if self.pre_filter(d)]
 
-        #     data_list = fs.jt_load(self.raw_paths[0])
-        #     data_list = [Data(**data_dict) for data_dict in data_list]
-
-        #     if self.pre_filter is not None:
-        #         data_list = [d for d in data_list if self.pre_filter(d)]
-
-        #     if self.pre_transform is not None:
-        #         data_list = [self.pre_transform(d) for d in data_list]
-
-        #     self.save(data_list, self.processed_paths[0])
-        #     return
-
-        types = {'H': 0, 'C': 1, 'N': 2, 'O': 3, 'F': 4}
-        bonds = {BT.SINGLE: 0, BT.DOUBLE: 1, BT.TRIPLE: 2, BT.AROMATIC: 3}
-
-        with open(self.raw_paths[1]) as f:
-            target = [[float(x) for x in line.split(',')[1:20]]
-                      for line in f.read().split('\n')[1:-1]]
-            y = jt.array(target)
-            y = jt.cat([y[:, 3:], y[:, :3]], dim=-1)
-            y = y * conversion.view(1, -1)
-
-        with open(self.raw_paths[2]) as f:
-            skip = [int(x.split()[0]) - 1 for x in f.read().split('\n')[9:-2]]
-
-        suppl = Chem.SDMolSupplier(self.raw_paths[0], removeHs=False,
-                                   sanitize=False)
-
-        data_list = []
-        for i, mol in enumerate(tqdm(suppl)):
-            if i in skip:
-                continue
-            if i ==10000:
-                break
-            N = mol.GetNumAtoms()
-
-            conf = mol.GetConformer()
-            pos = conf.GetPositions()
-            pos = jt.Var(pos)
-
-            type_idx = []
-            atomic_number = []
-            aromatic = []
-            sp = []
-            sp2 = []
-            sp3 = []
-            num_hs = []
-            for atom in mol.GetAtoms():
-                type_idx.append(types[atom.GetSymbol()])
-                atomic_number.append(atom.GetAtomicNum())
-                aromatic.append(1 if atom.GetIsAromatic() else 0)
-                hybridization = atom.GetHybridization()
-                sp.append(1 if hybridization == HybridizationType.SP else 0)
-                sp2.append(1 if hybridization == HybridizationType.SP2 else 0)
-                sp3.append(1 if hybridization == HybridizationType.SP3 else 0)
-
-            z = jt.Var(atomic_number)
-
-            rows, cols, edge_types = [], [], []
-            for bond in mol.GetBonds():
-                start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
-                rows += [start, end]
-                cols += [end, start]
-                edge_types += 2 * [bonds[bond.GetBondType()]]
-
-            edge_index = jt.Var([rows, cols])
-            edge_type = jt.Var(edge_types)
-            edge_attr = one_hot(edge_type, num_classes=len(bonds))
-            perm = (edge_index[0] * N + edge_index[1]).argsort()[0]
-            edge_index = edge_index[:, perm]
+            # if self.pre_transform is not None:
+            #     data_list = [self.pre_transform(d) for d in data_list]
             
-            edge_type = edge_type[perm]
-            edge_attr = edge_attr[perm]
+            jt.save((data, slices), self.processed_paths[0])
+            return
 
-            row, col = edge_index
-            hs = (z == 1).to(jt.float)
-            num_hs = scatter(hs[row], col, dim_size=N, reduce='sum').tolist()
+        # types = {'H': 0, 'C': 1, 'N': 2, 'O': 3, 'F': 4}
+        # bonds = {BT.SINGLE: 0, BT.DOUBLE: 1, BT.TRIPLE: 2, BT.AROMATIC: 3}
 
-            x1 = one_hot(jt.Var(type_idx), num_classes=len(types))
-            x2 = jt.Var([atomic_number, aromatic, sp, sp2, sp3, num_hs],
-                              ).t().contiguous()
-            x = jt.cat([x1, x2], dim=-1)
+        # with open(self.raw_paths[1]) as f:
+        #     target = [[float(x) for x in line.split(',')[1:20]]
+        #               for line in f.read().split('\n')[1:-1]]
+        #     y = jt.array(target)
+        #     y = jt.cat([y[:, 3:], y[:, :3]], dim=-1)
+        #     y = y * conversion.view(1, -1)
 
-            name = mol.GetProp('_Name')
-            smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
+        # with open(self.raw_paths[2]) as f:
+        #     skip = [int(x.split()[0]) - 1 for x in f.read().split('\n')[9:-2]]
 
-            data = Data(
-                x=x,
-                z=z,
-                pos=pos,
-                edge_index=edge_index,
-                smiles=smiles,
-                edge_attr=edge_attr,
-                y=y[i].unsqueeze(0),
-                name=name,
-                idx=i,
-            )
+        # suppl = Chem.SDMolSupplier(self.raw_paths[0], removeHs=False,
+        #                            sanitize=False)
 
-            if self.pre_filter is not None and not self.pre_filter(data):
-                continue
-            if self.pre_transform is not None:
-                data = self.pre_transform(data)
+        # data_list = []
+        # for i, mol in enumerate(tqdm(suppl)):
+        #     if i in skip:
+        #         continue
 
-            data_list.append(data)
+        #     N = mol.GetNumAtoms()
 
-        jt.save(self.collate(data_list), self.processed_paths[0])
+        #     conf = mol.GetConformer()
+        #     pos = conf.GetPositions()
+        #     pos = jt.Var(pos)
+
+        #     type_idx = []
+        #     atomic_number = []
+        #     aromatic = []
+        #     sp = []
+        #     sp2 = []
+        #     sp3 = []
+        #     num_hs = []
+        #     for atom in mol.GetAtoms():
+        #         type_idx.append(types[atom.GetSymbol()])
+        #         atomic_number.append(atom.GetAtomicNum())
+        #         aromatic.append(1 if atom.GetIsAromatic() else 0)
+        #         hybridization = atom.GetHybridization()
+        #         sp.append(1 if hybridization == HybridizationType.SP else 0)
+        #         sp2.append(1 if hybridization == HybridizationType.SP2 else 0)
+        #         sp3.append(1 if hybridization == HybridizationType.SP3 else 0)
+
+        #     z = jt.Var(atomic_number)
+
+        #     rows, cols, edge_types = [], [], []
+        #     for bond in mol.GetBonds():
+        #         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+        #         rows += [start, end]
+        #         cols += [end, start]
+        #         edge_types += 2 * [bonds[bond.GetBondType()]]
+
+        #     edge_index = jt.Var([rows, cols])
+        #     edge_type = jt.Var(edge_types)
+        #     edge_attr = one_hot(edge_type, num_classes=len(bonds))
+        #     perm = (edge_index[0] * N + edge_index[1]).argsort()[0]
+        #     edge_index = edge_index[:, perm]
+            
+        #     edge_type = edge_type[perm]
+        #     edge_attr = edge_attr[perm]
+
+        #     row, col = edge_index
+        #     hs = (z == 1).to(jt.float)
+        #     num_hs = scatter(hs[row], col, dim_size=N, reduce='sum').tolist()
+
+        #     x1 = one_hot(jt.Var(type_idx), num_classes=len(types))
+        #     x2 = jt.Var([atomic_number, aromatic, sp, sp2, sp3, num_hs],
+        #                       ).t().contiguous()
+        #     x = jt.cat([x1, x2], dim=-1)
+
+        #     name = mol.GetProp('_Name')
+        #     smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
+
+        #     data = Data(
+        #         x=x,
+        #         z=z,
+        #         pos=pos,
+        #         edge_index=edge_index,
+        #         smiles=smiles,
+        #         edge_attr=edge_attr,
+        #         y=y[i].unsqueeze(0),
+        #         name=name,
+        #         idx=i,
+        #     )
+
+        #     if self.pre_filter is not None and not self.pre_filter(data):
+        #         continue
+        #     if self.pre_transform is not None:
+        #         data = self.pre_transform(data)
+
+        #     data_list.append(data)
+
+        # jt.save(self.collate(data_list), self.processed_paths[0])
 
     def get_idx_split(self, frac_train: float = 0.8, frac_valid: float = 0.1, frac_test: float = 0.1, seed: int = 42):
 
