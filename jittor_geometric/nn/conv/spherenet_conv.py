@@ -721,11 +721,6 @@ class SphereNet(jittor.nn.Module):
         v = self.init_v(e, i)
 
         #
-        print(v.shape, batch.shape)
-        print(scatter(v, batch, dim=0))
-        print(jittor.zeros_like(scatter(v, batch, dim=0)))
-        print(v)
-        print(batch)
         u = self.init_u(jittor.zeros_like(scatter(v, batch, dim=0)), v, batch) #scatter(v, batch, dim=0)
 
         for update_e, update_v, update_u in zip(self.update_es, self.update_vs, self.update_us):
