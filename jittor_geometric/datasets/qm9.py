@@ -140,8 +140,8 @@ class QM9(InMemoryDataset):
           - 19
     """  # noqa: E501
 
-    raw_url = 'https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/molnet_publish/qm9.zip'
-    raw_url2 = 'https://ndownloader.figshare.com/files/3195404'
+    # raw_url = 'https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/molnet_publish/qm9.zip'
+    # raw_url2 = 'https://ndownloader.figshare.com/files/3195404'
 
     def __init__(
         self,

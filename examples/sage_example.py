@@ -1,8 +1,3 @@
-'''
-Author: lusz
-Date: 2024-06-16 15:42:52
-Description: 
-'''
 import os.path as osp
 import argparse
 

@@ -1,8 +1,3 @@
-'''
-Description: 
-Author: lusz
-Date: 2024-11-16 09:41:10
-'''
 from typing import List
 from jittor_geometric.data import CSR
 import pickle
@@ -27,12 +22,18 @@ class GraphChunk:
         self.local_label = local_label 
 
     def set_csr(self, column_indices, row_offset, edge_weight=None):
+        """
+        Set the CSR (Compressed Sparse Row) representation of the graph.
+        :param column_indices: Column indices of the non-zero elements.
+        :param row_offset: Row offsets for the CSR format.
+        :param edge_weight: Optional edge weights.
+        """
         self.CSR = CSR(column_indices, row_offset, edge_weight)
         
     def save(self, file_path: str):
         """
-        保存 GraphChunk 实例为二进制文件
-        :param file_path: 保存文件路径
+        Save the GraphChunk instance as a binary file.
+        :param file_path: Path to the file where the instance will be saved.
         """
         with open(file_path, 'wb') as f:
             pickle.dump(self, f)
@@ -40,9 +41,9 @@ class GraphChunk:
     @staticmethod
     def load(file_path: str):
         """
-        从二进制文件加载 GraphChunk 实例
-        :param file_path: 保存的文件路径
-        :return: 加载的 GraphChunk 实例
+        Load a GraphChunk instance from a binary file.
+        :param file_path: Path to the file from which the instance will be loaded.
+        :return: Loaded GraphChunk instance.
         """
         with open(file_path, 'rb') as f:
             return pickle.load(f)

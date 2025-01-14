@@ -23,7 +23,6 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 
 from jittor_geometric.utils import scatter
-from jittor_geometric.typing import jt_scatter
 from jittor_geometric.data import CSC, CSR
 from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 from jittor_geometric.ops import cootocsr, cootocsc
@@ -54,7 +53,8 @@ def radius_graph(pos, batch, r):
     batch_expanded = batch.unsqueeze(1).expand(n, n)
     batch_pairs = batch_expanded == batch_expanded.t()
 
-    mask = batch_pairs & (distances < r)
+    not_self_loops = 1 - jittor.init.eye(n, dtype=jittor.bool)
+    mask = batch_pairs & (distances < r) & not_self_loops
 
     edge_index = jittor.nonzero(mask)
     edge_index = edge_index.t()
@@ -590,8 +590,8 @@ class update_e(jittor.nn.Module):
             e1 = layer(e1)
         e2 = self.lin_rbf(rbf0) * e1
         # fix in future
-        e1 = jittor.clamp(e1, -10.0, 10.0)
-        e2 = jittor.clamp(e2, -10.0 ,10.0)
+        #e1 = jittor.clamp(e1, -10.0, 10.0)
+        #e2 = jittor.clamp(e2, -10.0 ,10.0)
         return e1, e2
 
 
@@ -725,6 +725,7 @@ class SphereNet(jittor.nn.Module):
 
         v = self.init_v(e, i)
 
+        #
         u = self.init_u(jittor.zeros_like(scatter(v, batch, dim=0)), v, batch) #scatter(v, batch, dim=0)
 
         for update_e, update_v, update_u in zip(self.update_es, self.update_vs, self.update_us):
@@ -742,7 +743,7 @@ if __name__ == "__main__":
         def __init__(self):
             n = 30
             z = jittor.randint(1, 5, shape=(n,))
-            pos = jittor.rand(n, 3) * 30
+            pos = jittor.rand(n, 3) * 10
             batch = jittor.zeros(n)
             batch[20:] = 1
             self.z = z

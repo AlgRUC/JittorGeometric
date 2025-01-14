@@ -31,7 +31,7 @@ class MolDataset(jt.dataset.Dataset):
     """
     def __init__(self, data_dir):
         self.data_dir = data_dir
-        # self.download_data()
+        self.download_data()
         self.conformer_gen = ConformerGen(remove_hs=True)
         self.data, self.label = self.process_data(self.data_dir)
 
@@ -65,8 +65,12 @@ class MolDataset(jt.dataset.Dataset):
         return len(self.data)
     
     def download_data(self):
-        # hf_hub_download(repo_id=f"TGB-Seq/BACE", filename=f"bace.pkl", local_dir=self.data_dir, repo_type="dataset")
-        pass
+        """
+        #     ! IF YOU MEET NETWORK ERROR, PLEASE TRY TO RUN THE COMMAND BELOW:
+        # `export HF_ENDPOINT=https://hf-mirror.com`,
+        # TO USE THE MIRROR PROVIDED BY Hugging Face.
+        """
+        hf_hub_download(repo_id=f"TGB-Seq/bace", filename=f"bace.pkl", local_dir=self.data_dir, repo_type="dataset")
 
     def process_data(self, data_dir):
         """
@@ -159,18 +163,18 @@ def evaluate(model, data_loader, mode='val'):
     total_loss = 0
     correct = 0
     total = 0
-
-    for data, target in data_loader:
-        output = model(**data)
-        loss = compute_loss(output, target)
+    with jt.no_grad():
+        for data, target in data_loader:
+            output = model(**data)
+            loss = compute_loss(output, target)
         
-        total_loss += loss.item()
-        probs = jt.nn.softmax(output.float(), dim=-1).view(
-                -1, output.size(-1)
-        )
-        pred = probs.argmax(dim=1)[0]
-        correct += (pred == target).sum().item()
-        total += target.numel()
+            total_loss += loss.item()
+            probs = jt.nn.softmax(output.float(), dim=-1).view(
+                    -1, output.size(-1)
+            )
+            pred = probs.argmax(dim=1)[0]
+            correct += (pred == target).sum().item()
+            total += target.numel()
     
     acc = correct/total
     avg_loss = total_loss/len(data_loader)

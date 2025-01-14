@@ -4,12 +4,13 @@ import numpy as np
 
 
 class TemporalData(object):
-    def __init__(self, src=None, dst=None, t=None, msg=None, y=None, **kwargs):
+    def __init__(self, src=None, dst=None, t=None, msg=None, y=None, edge_ids=None, **kwargs):
         self.src = src
         self.dst = dst
         self.t = t
         self.msg = msg
         self.y = y
+        self.edge_ids = edge_ids
 
         for key, item in kwargs.items():
             self[key] = item

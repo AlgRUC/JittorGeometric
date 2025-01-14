@@ -3,7 +3,7 @@ import numpy as np
 import jittor as jt
 from jittor_geometric.nn.models.tgn import LastNeighborLoader
 import jittor.nn as nn
-from jittor_geometric.nn.models.modules import TimeEncoder
+from jittor_geometric.nn.dense.time_encoder import TimeEncoder
 
 class GraphMixer(Module):
     r"""The implementation of GraphMixer model from the

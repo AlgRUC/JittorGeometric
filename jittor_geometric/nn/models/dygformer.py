@@ -2,7 +2,7 @@ import numpy as np
 import jittor as jt
 import jittor.nn as nn
 from jittor.attention import MultiheadAttention
-from jittor_geometric.nn.models.modules import TimeEncoder
+from jittor_geometric.nn.dense.time_encoder import TimeEncoder
 
 
 class DyGFormer(nn.Module):

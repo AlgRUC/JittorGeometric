@@ -1,3 +1,8 @@
+import sys
+import os.path as osp
+import os
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 import jittor as jt
 from jittor import nn
 import numpy as np
@@ -7,12 +12,9 @@ from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 from jittor_geometric.nn.models.dygformer import DyGFormer
 from jittor_geometric.datasets import JODIEDataset
-from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoader
+from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
-from jittor_geometric.sampler.TemporalSampler import get_neighbor_sampler
-from jittor_geometric.nn.models.modules import MergeLayer
-import os.path as osp
-import os
+from jittor_geometric.nn.dense.merge_predictor import MergeLayer
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -112,6 +114,7 @@ if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDataset
+    path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
     dataset = JODIEDataset(path, name=dataset_name)
     data = dataset[0]
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
