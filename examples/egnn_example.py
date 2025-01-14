@@ -1,7 +1,3 @@
-from rdkit import Chem, RDLogger
-from rdkit.Chem.rdchem import BondType as BT
-from rdkit.Chem.rdchem import HybridizationType
-RDLogger.DisableLog('rdApp.*')  # type: ignore
 import jittor as jt
 import os.path as osp
 import sys,os
@@ -14,9 +10,7 @@ from jittor_geometric.typing import Var
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T
 from jittor_geometric.jitgeo_loader import DataLoader
-import jittor_geometric.jitgeo_loader
 from tqdm import tqdm
-import numpy as np
 
 # helper functions
 
@@ -228,16 +222,22 @@ def mae_loss(pred: Var, target: Var) -> Var:
 
 
 # Run training
-def train(model, loader, optimizer):
+def train(model, loader, optimizer, log_step=100):
     model.train()
     loss_accum = 0
+    total_steps = len(loader)
 
     for step, batch in enumerate(tqdm(loader, desc="Iteration")):
+        optimizer.zero_grad()
         batch.x = jt.concat([batch.pos, batch.x], dim=-1)
         pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
         loss = mae_loss(pred, batch.y)
         optimizer.step(loss)
-        loss_accum += loss
+        loss_accum += loss.item()
+
+        if (step + 1) % log_step == 0:
+            avg_loss = float(loss_accum / (step + 1))
+            print(f'Step [{step + 1}/{total_steps}], Loss: {avg_loss:.4f}')
 
     return float(loss_accum / (step + 1))
 
@@ -281,7 +281,7 @@ def main():
     for epoch in range(1, 3):
             print("=====Epoch {}".format(epoch))
             print('Training...')
-            train_mae = train(model, train_loader, optimizer)
+            train_mae = train(model, train_loader, optimizer, log_step=100)
 
             print('Evaluating...')
             valid_mae = eval(model, valid_loader)

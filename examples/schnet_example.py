@@ -2,7 +2,6 @@ import argparse
 import os.path as osp
 
 from tqdm import tqdm
-from rdkit import Chem, RDLogger
 import jittor as jt
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T

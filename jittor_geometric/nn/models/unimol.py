@@ -75,29 +75,35 @@ class UniMolModel(nn.Module):
         )
         if self.args.kernel == 'gaussian':
             self.gbf = GaussianLayer(K, n_edge_type)
-        self.mol_linear = nn.Linear(self.args.encoder_embed_dim, self.output_dim)
-        self.load_pretrained_weights(path=self.pretrain_path)
+        self.classification_head = ClassificationHead(
+            input_dim=self.args.encoder_embed_dim,
+            inner_dim=self.args.encoder_embed_dim,
+            num_classes=self.output_dim,
+            activation_fn=self.args.pooler_activation_fn,
+            pooler_dropout=self.args.pooler_dropout,
+        )
+    #     self.load_pretrained_weights(path=self.pretrain_path)
 
-    def load_pretrained_weights(self, path):
-        """
-        Loads pretrained weights into the model.
+    # def load_pretrained_weights(self, path):
+    #     """
+    #     Loads pretrained weights into the model.
 
-        :param path: (str) Path to the pretrained weight file.
-        """
-        if path is not None:
-            logger.info("Loading pretrained weights from {}".format(path))
-            state_dict = jittor.load(path, map_location=lambda storage, loc: storage)
-            errors = self.load_state_dict(state_dict['model'], strict=True)
-            if errors.missing_keys:
-                logger.warning(
-                    "Error in loading model state, missing_keys "
-                    + str(errors.missing_keys)
-                )
-            if errors.unexpected_keys:
-                logger.warning(
-                    "Error in loading model state, unexpected_keys "
-                    + str(errors.unexpected_keys)
-                )
+    #     :param path: (str) Path to the pretrained weight file.
+    #     """
+    #     if path is not None:
+    #         logger.info("Loading pretrained weights from {}".format(path))
+    #         state_dict = jittor.load(path, map_location=lambda storage, loc: storage)
+    #         errors = self.load_state_dict(state_dict['model'], strict=True)
+    #         if errors.missing_keys:
+    #             logger.warning(
+    #                 "Error in loading model state, missing_keys "
+    #                 + str(errors.missing_keys)
+    #             )
+    #         if errors.unexpected_keys:
+    #             logger.warning(
+    #                 "Error in loading model state, unexpected_keys "
+    #                 + str(errors.unexpected_keys)
+    #             )
 
     @classmethod
     def build_model(cls, args):
@@ -109,7 +115,7 @@ class UniMolModel(nn.Module):
         """
         return cls(args)
 
-    def forward(
+    def execute(
         self,
         src_tokens,
         src_distance,
@@ -135,7 +141,7 @@ class UniMolModel(nn.Module):
 
         :return: Output logits or requested intermediate representations.
         """
-        padding_mask = src_tokens.eq(self.padding_idx)
+        padding_mask = (src_tokens == self.padding_idx)
         if not padding_mask.any():
             padding_mask = None
         x = self.embed_tokens(src_tokens)
@@ -187,11 +193,8 @@ class UniMolModel(nn.Module):
         if return_repr and not return_atomic_reprs:
             return {'cls_repr': cls_repr}
         
-        mol_emb = cls_repr.squeeze(1)
-        mol_emb = self.mol_linear(mol_emb)
-        mol_norm = jittor.norm(mol_emb, p=2, dim=1, keepdim=True) + 1e-7
-        mol_emb = mol_emb / mol_norm
-        return mol_emb
+        logits = self.classification_head(cls_repr)
+        return logits
 
     def batch_collate_fn(self, samples):
         """
@@ -244,7 +247,7 @@ class ClassificationHead(nn.Module):
         self.dropout = nn.Dropout(p=pooler_dropout)
         self.out_proj = nn.Linear(inner_dim, num_classes)
 
-    def forward(self, features, **kwargs):
+    def execute(self, features, **kwargs):
         """
         Forward pass for the classification head.
 
@@ -291,7 +294,7 @@ class NonLinearHead(nn.Module):
         self.linear2 = nn.Linear(hidden, out_dim)
         self.activation_fn = get_activation_fn(activation_fn)
 
-    def forward(self, x):
+    def execute(self, x):
         """
         Forward pass of the NonLinearHead.
 
@@ -361,7 +364,7 @@ class GaussianLayer(nn.Module):
         nn.init.constant_(self.bias.weight, 0)
         nn.init.constant_(self.mul.weight, 1)
 
-    def forward(self, x, edge_type):
+    def execute(self, x, edge_type):
         """
         Forward pass of the GaussianLayer.
 
@@ -406,7 +409,7 @@ def pad_1d_tokens(
     left_pad=False,
     pad_to_length=None,
     pad_to_multiple=1,
-    ):
+):
     """
     padding one dimension tokens inputs.
 
@@ -423,15 +426,20 @@ def pad_1d_tokens(
     size = size if pad_to_length is None else max(size, pad_to_length)
     if pad_to_multiple != 1 and size % pad_to_multiple != 0:
         size = int(((size - 0.1) // pad_to_multiple + 1) * pad_to_multiple)
-    res = values[0].new(len(values), size).fill_(pad_idx)
-
-    def copy_Var(src, dst):
-        assert dst.numel() == src.numel()
-        dst.copy_(src)
-
-    for i, v in enumerate(values):
-        copy_Var(v, res[i][size - len(v) :] if left_pad else res[i][: len(v)])
-    return res
+    res = []
+    for v in values:
+        if left_pad:
+            padded = jittor.concat([
+                jittor.full((size - len(v),), pad_idx, dtype=v.dtype),
+                v
+            ])
+        else:
+            padded = jittor.concat([
+                v,
+                jittor.full((size - len(v),), pad_idx, dtype=v.dtype)
+            ])
+        res.append(padded)
+    return jittor.stack(res)
 
 
 def pad_2d(
@@ -440,7 +448,7 @@ def pad_2d(
     left_pad=False,
     pad_to_length=None,
     pad_to_multiple=1,
-    ):
+):
     """
     padding two dimension Var inputs.
 
@@ -457,15 +465,30 @@ def pad_2d(
     size = size if pad_to_length is None else max(size, pad_to_length)
     if pad_to_multiple != 1 and size % pad_to_multiple != 0:
         size = int(((size - 0.1) // pad_to_multiple + 1) * pad_to_multiple)
-    res = values[0].new(len(values), size, size).fill_(pad_idx)
+    
+    res = []
+    for v in values:
+        pad_size = size - v.size(0)
+        if left_pad:
 
-    def copy_Var(src, dst):
-        assert dst.numel() == src.numel()
-        dst.copy_(src)
-
-    for i, v in enumerate(values):
-        copy_Var(v, res[i][size - len(v) :, size - len(v) :] if left_pad else res[i][: len(v), : len(v)])
-    return res
+            padded = jittor.concat([
+                jittor.full((pad_size, size), pad_idx, dtype=v.dtype), 
+                jittor.concat([
+                    jittor.full((v.size(0), pad_size), pad_idx, dtype=v.dtype),
+                    v
+                ], dim=1)
+            ], dim=0)
+        else:
+            padded = jittor.concat([
+                jittor.concat([
+                    v,
+                    jittor.full((v.size(0), pad_size), pad_idx, dtype=v.dtype)
+                ], dim=1),
+                jittor.full((pad_size, size), pad_idx, dtype=v.dtype)
+            ], dim=0)
+        res.append(padded)
+    
+    return jittor.stack(res)
 
 
 def pad_coords(
@@ -474,7 +497,7 @@ def pad_coords(
     left_pad=False,
     pad_to_length=None,
     pad_to_multiple=1,
-    ):
+):
     """
     padding two dimension Var coords which the third dimension is 3.
 
@@ -490,12 +513,21 @@ def pad_coords(
     size = size if pad_to_length is None else max(size, pad_to_length)
     if pad_to_multiple != 1 and size % pad_to_multiple != 0:
         size = int(((size - 0.1) // pad_to_multiple + 1) * pad_to_multiple)
-    res = values[0].new(len(values), size, 3).fill_(pad_idx)
+    
+    res = []
+    for v in values:
+        pad_size = size - v.size(0)
+        if left_pad:
 
-    def copy_Var(src, dst):
-        assert dst.numel() == src.numel()
-        dst.copy_(src)
-
-    for i, v in enumerate(values):
-        copy_Var(v, res[i][size - len(v) :, :] if left_pad else res[i][: len(v),:])
-    return res
+            padded = jittor.concat([
+                jittor.full((pad_size, 3), pad_idx, dtype=v.dtype),
+                v
+            ], dim=0)
+        else:
+            padded = jittor.concat([
+                v,
+                jittor.full((pad_size, 3), pad_idx, dtype=v.dtype)
+            ], dim=0)
+        res.append(padded)
+    
+    return jittor.stack(res)

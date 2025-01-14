@@ -1,7 +1,3 @@
-from rdkit import Chem, RDLogger
-from rdkit.Chem.rdchem import BondType as BT
-from rdkit.Chem.rdchem import HybridizationType
-RDLogger.DisableLog('rdApp.*')  # type: ignore
 import jittor as jt
 import os.path as osp
 import sys,os
