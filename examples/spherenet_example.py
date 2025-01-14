@@ -43,11 +43,10 @@ def train(model, loader, optimizer):
 
 
 def eval(model, loader):
-    with jt.no_grad:
-        model.eval()
-        y_true = []
-        y_pred = []
-
+    model.eval()
+    y_true = []
+    y_pred = []
+    with jt.no_grad():
         # batch_data.z, batch_data.pos, batch_data.pos
         for step, batch_data in enumerate(tqdm(loader, desc="Iteration")):
             pred = model(batch_data)
