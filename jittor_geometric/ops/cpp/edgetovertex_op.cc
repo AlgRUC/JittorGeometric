@@ -75,7 +75,7 @@ void EdgetovertexOp::jit_prepare(JK& jk) {
      
 
     void EdgetovertexOp::jit_run() {
-        std::cout<<"e2v gpu"<<std::endl;
+        // std::cout<<"e2v gpu"<<std::endl;
         auto* __restrict__ out_ptr = outputVar->ptr<T>();
         auto* __restrict__ x_ptr = x->ptr<T>();
         auto* __restrict__ i_ptr = indices->ptr<Tint>();
