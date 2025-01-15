@@ -95,7 +95,6 @@ namespace jittor {
                     T_l batch_size_, T_l feature_size_){
                 int threadId = blockIdx.x *blockDim.x + threadIdx.x;        
                 for(long i=threadId;i<feature_size_*batch_size_;i+=blockDim.x*gridDim.x){
-                    if (i >= feature_size_ * batch_size_)return; 
                         T_l local_dst=i/feature_size_;
                         T_l rank=i%feature_size_;
                         for(int i_i=column_offset[local_dst];i_i<column_offset[local_dst+1];i_i++){
