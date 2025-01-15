@@ -5,7 +5,9 @@
  */
 #include "var.h"
 #include "scattertoedge_op.h"
-
+#ifdef HAS_CUDA
+#include "helper_cuda.h"
+#endif
 
 namespace jittor {
 #ifndef JIT
@@ -93,6 +95,7 @@ namespace jittor {
                     T_l batch_size_, T_l feature_size_){
                 int threadId = blockIdx.x *blockDim.x + threadIdx.x;        
                 for(long i=threadId;i<feature_size_*batch_size_;i+=blockDim.x*gridDim.x){
+                    if (i >= feature_size_ * batch_size_)return; 
                         T_l local_dst=i/feature_size_;
                         T_l rank=i%feature_size_;
                         for(int i_i=column_offset[local_dst];i_i<column_offset[local_dst+1];i_i++){
@@ -102,16 +105,20 @@ namespace jittor {
                 }
             }
             void ScattertoedgeOp::jit_run() {
+                // std::cout<<"v2e gpu"<<std::endl; 
                 auto* __restrict__ out_ptr = outputVar->ptr<T>();
                 auto* __restrict__ x_ptr = x->ptr<T>();
                 auto* __restrict__ i_ptr = indices->ptr<Tint>();
                 auto* __restrict__ o_ptr = offset->ptr<Tint>();
                 Tint v_num=x->shape[0];
                 Tint feature_dim=x->shape[1];
-                const int CUDA_NUM_THREADS = 512;
-                const int CUDA_NUM_BLOCKS = 128;
-                scatter_dst_to_msg<float,int><<<CUDA_NUM_BLOCKS,CUDA_NUM_THREADS>>>(out_ptr, x_ptr, i_ptr, o_ptr,v_num, feature_dim);
+                Tint blockSize = 256;
+            // int numBlocks = 128;
+            Tint numBlocks = (feature_dim * v_num + blockSize - 1) / blockSize;
+                scatter_dst_to_msg<T,Tint><<<numBlocks,blockSize>>>(out_ptr, x_ptr, i_ptr, o_ptr,v_num, feature_dim);
+                // checkCudaErrors(cudaDeviceSynchronize());
             }
+            
 
     #endif //cuda
 

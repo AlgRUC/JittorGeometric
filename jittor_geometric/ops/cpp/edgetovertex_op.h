@@ -16,10 +16,9 @@ struct EdgetovertexOp : Op {
     Var* outputVar;
     Var* indices;
     Var* offset;
-    NanoString dtype;
     Var* output;
     int flag;
-    EdgetovertexOp(Var* outputVar_, Var* x_, Var* indices_,Var* offset_, int flag_ ,NanoString dtype_=ns_float32);
+    EdgetovertexOp(Var* outputVar_, Var* x_, Var* indices_,Var* offset_, int flag_);
     const char* name() const override { return "edgetovertex"; }
     DECLARE_jit_run;
 };

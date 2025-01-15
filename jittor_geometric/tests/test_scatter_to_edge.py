@@ -26,7 +26,6 @@ csr=CSR(col_indices, row_offset, csr_weight)
 
 # output=ScatterToEdge(x,csc,"src")
 output=ScatterToEdge(x,csc,"dst")
-# 计算损失并进行反向传播
 print(x)
 print(output)
 # print(y.shape)

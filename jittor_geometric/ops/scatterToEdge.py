@@ -18,8 +18,7 @@ srcb = os.path.join(module_path, "cpp/edgetovertex_op.cc")
 headerb = os.path.join(module_path, "cpp/edgetovertex_op.h")
 scatter_op = jt.compile_custom_ops((src, header))
 scatter_backward_op = jt.compile_custom_ops((srcb, headerb))
-# Run the test
-jt.flags.use_cuda=0
+
 class ScatterToEdgeFunc(Function):
     def execute(self,x,csc,flow):
         self.flow=flow

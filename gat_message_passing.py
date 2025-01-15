@@ -17,7 +17,9 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 from jittor_geometric.data import CSC,CSR
 from jittor_geometric.ops import cootocsr,cootocsc
-
+jt.flags.use_cuda = 1
+jt.flags.lazy_execution = 0
+jt.cudnn.set_max_workspace_ratio(0.0)
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
 
@@ -44,9 +46,6 @@ def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
         deg_inv_sqrt.masked_fill(deg_inv_sqrt == float('inf'), 0)
         return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
 
-
-jt.flags.use_cuda = 0
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
@@ -69,8 +68,7 @@ if args.use_gdc:
 v_num = data.x.shape[0]
 e_num = data.edge_index.shape[1]
 edge_index, edge_weight=data.edge_index,data.edge_attr
-jt.flags.use_cuda = 1
-jt.flags.lazy_execution = 0
+
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         False, True)
@@ -93,7 +91,7 @@ class Net(nn.Module):
         x = nn.dropout(x)
         x = nn.relu(self.conv2(x,csc))
         return nn.log_softmax(x, dim=1)
-
+        
 
 model, data = Net(), data
 optimizer = nn.Adam([
@@ -133,3 +131,5 @@ for epoch in range(1, 201):
         test_acc = tmp_test_acc
     log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
     print(log.format(epoch, train_acc, best_val_acc, test_acc))
+    jt.sync_all()
+    jt.gc()
