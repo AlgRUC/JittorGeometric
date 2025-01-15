@@ -367,6 +367,7 @@ class angle_emb(jittor.nn.Module):
                 self.bessel_funcs.append(bessel)
 
     def execute(self, dist, angle, idx_kj):
+        breakpoint()
         dist = dist / self.cutoff
         rbf = jittor.stack([f(dist) for f in self.bessel_funcs], dim=1)
         # rbf = self.envelope(dist).unsqueeze(-1) * rbf
@@ -553,6 +554,7 @@ class update_e(jittor.nn.Module):
         glorot(self.lin_rbf.weight)
 
     def execute(self, x, emb, idx_kj, idx_ji):
+        breakpoint()
         rbf0, sbf, t = emb
         x1,_ = x
 
@@ -712,7 +714,6 @@ class SphereNet(jittor.nn.Module):
         edge_index = radius_graph(pos, batch=batch, r=self.cutoff)
         num_nodes = z.size(0)
         dist, angle, torsion, i, j, idx_kj, idx_ji = xyz_to_dat(pos, edge_index, num_nodes, use_torsion=True)
-
         emb = self.emb(dist, angle, torsion, idx_kj)
 
         #Initialize edge, node, graph features

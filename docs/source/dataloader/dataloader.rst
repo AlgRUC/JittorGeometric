@@ -1,7 +1,7 @@
-jittor_geometric.datasets
+jittor_geometric.dataloader
 =========================
 
-.. automodule:: jittor_geometric.datasets
+.. automodule:: jittor_geometric.dataloader
    :imported-members:
    :members:
    :undoc-members:
