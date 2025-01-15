@@ -217,11 +217,7 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion=False):
     dist = dist + 0.001
 
 
-<<<<<<< HEAD
-
-=======
     """
->>>>>>> 4870a32f47cccfe9fd7cbf193e266933a4601b62
     # （k -> j -> i）
     idx_i, idx_j, idx_k = [], [], []
     for tmp_index in range(i.shape[0]):
