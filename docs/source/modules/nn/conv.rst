@@ -1,4 +1,4 @@
-Convolution Layers
+jittor_geometric.nn.conv
 =========================
 
 .. automodule:: jittor_geometric.nn.conv

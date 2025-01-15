@@ -246,23 +246,23 @@ def eval(model, loader):
     model.eval()
     y_true = []
     y_pred = []
+    with jt.no_grad():
+        for step, batch in enumerate(tqdm(loader, desc="Iteration")):
+            batch.x = jt.concat([batch.pos, batch.x], dim=-1)
+            pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
+            y_true.append(batch.y)
+            y_pred.append(pred)
 
-    for step, batch in enumerate(tqdm(loader, desc="Iteration")):
-        batch.x = jt.concat([batch.pos, batch.x], dim=-1)
-        pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
-        y_true.append(batch.y)
-        y_pred.append(pred)
+        y_true = jt.cat(y_true, dim = 0)
+        y_pred = jt.cat(y_pred, dim = 0)
 
-    y_true = jt.cat(y_true, dim = 0)
-    y_pred = jt.cat(y_pred, dim = 0)
-
-    return float(mae_loss(y_pred, y_true))
+        return float(mae_loss(y_pred, y_true))
 
 
 def main():
     # data
     dataset_name = 'qm9'
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '../data/qm9')
+    path = osp.join(osp.dirname(osp.realpath(__file__)), '../data/QM9')
     qm9_dataset = QM9(path, transform=T.NormalizeFeatures())
     # random split train/val/test = 8/1/1
     split_dict = qm9_dataset.get_idx_split()

@@ -1,4 +1,4 @@
-Aggregation
+jittor_geometric.nn.aggr
 =========================
 
 .. automodule:: jittor_geometric.nn.aggr
