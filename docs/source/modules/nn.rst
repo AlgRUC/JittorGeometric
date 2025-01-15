@@ -10,3 +10,4 @@ Including models, convoluition layers and aggregation layers.
 
    nn/aggr
    nn/conv
+   nn/dense
