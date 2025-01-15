@@ -13,7 +13,7 @@ from jittor_geometric.typing import Var
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T
 from jittor_geometric.dataloader import DataLoader
-import jittor_geometric.jitgeo_loader
+import jittor_geometric.dataloader
 from tqdm import tqdm
 import numpy as np
 
