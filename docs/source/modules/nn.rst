@@ -3,6 +3,8 @@ Modules
 
 Modules for Jittor Geometric.
 
+Including models, convoluition layers and aggregation layers.
+
 .. toctree::
    :maxdepth: 1
 
