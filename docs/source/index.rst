@@ -8,7 +8,7 @@ Jittor Geometric is a library designed for machine learning on graph data based 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Install Jittor Geometric
+   :caption:  Jittor Geometric
 
    install/installation
 
@@ -22,6 +22,11 @@ Jittor Geometric is a library designed for machine learning on graph data based 
    :maxdepth: 2
    :caption: API References
 
-   datasets/datasets
    modules/nn
-   ops
+   data/data
+   datasets/datasets
+   dataloader/dataloader
+   io/io
+   transforms/transforms
+   ops/ops
+   utils/utils
