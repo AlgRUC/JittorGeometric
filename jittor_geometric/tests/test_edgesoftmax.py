@@ -14,7 +14,7 @@ from jittor_geometric.data import CSC, CSR
 from jittor_geometric.ops import EdgeSoftmax
 
 
-jt.flags.use_cuda=1
+jt.flags.use_cuda=0
 jt.flags.lazy_execution = 0
 x=jt.array([1.0,2.0,3.0,4.0])
 y=jt.array([1.0,1.0,1.0,1.0])

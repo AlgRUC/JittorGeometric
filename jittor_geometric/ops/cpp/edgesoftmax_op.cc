@@ -5,8 +5,13 @@
  */
 
 #include  "var.h"
-#include  "cub/cub.cuh"
+#include  <cuda.h>
 #include  "edgesoftmax_op.h"
+#ifdef JIT_cuda
+// #include <cub/device/device_segmented_radix_sort.cuh>
+#include <cub/cub.cuh>
+#endif
+
 typedef uint32_t VertexId_CUDA;
 const int CUDA_NUM_THREADS_SOFTMAX = 32;
 const int CUDA_NUM_BLOCKS_SOFTMAX = 512;
@@ -62,7 +67,7 @@ void EdgesoftmaxOp::jit_prepare(JK& jk) {
     #else //cuda
         template <typename T_v,typename T_l>
         __global__ void edge_softmax_forward_block( T_v* msg_output,  T_v* msg_input,
-                        T_v* msg_cached, const T_l *row_indices,const  T_l *column_offset,
+                         const T_l *row_indices,const  T_l *column_offset,
                 T_l batch_size_, T_l feature_size_){
                 int VtxPerBlock=1;
                 typedef ::cub::BlockReduce<T_v, CUDA_NUM_THREADS_SOFTMAX> BlockReduce;
@@ -95,24 +100,23 @@ void EdgesoftmaxOp::jit_prepare(JK& jk) {
         
                     for(VertexId_CUDA eid=rowIdxStart+threadIdx.x;eid<rowIdxEnd;eid+=CUDA_NUM_THREADS_SOFTMAX){   
                         msg_output[eid]=exp(msg_input[eid])/aggregate;
-                        msg_cached[eid]=msg_output[eid];
+                        // msg_cached[eid]=msg_output[eid];
                     }
             }      
         }
        void EdgesoftmaxOp::jit_run() {
-            std::cout<<"gpu"<<std::endl;
+            // std::cout<<"gpu"<<std::endl;
             auto* __restrict__ out_ptr = outputVar->ptr<T>();
             auto* __restrict__ x_ptr = x->ptr<T>();
             auto* __restrict__ i_ptr = indices->ptr<Tint>();
             auto* __restrict__ o_ptr = offset->ptr<Tint>();
-            Tint e_num=indices->shape[1];
-            Tint v_num=x->shape[0];
+            Tint e_num=indices->shape[0];
+            // std::cout<<e_num;
+            Tint v_num=offset->shape[0]-1;
             Tint size=x->shape[1];
-            output->set_shape(x->shape);
-            auto* __restrict__ y_ptr = output->ptr<T>();;
-            edge_softmax_forward_block<float,int><<<CUDA_NUM_BLOCKS_SOFTMAX,CUDA_NUM_THREADS_SOFTMAX>>>(
-            out_ptr, x_ptr, y_ptr, i_ptr, o_ptr,
-            v_num, size);  // cache y
+            edge_softmax_forward_block<T,Tint><<<CUDA_NUM_BLOCKS_SOFTMAX,CUDA_NUM_THREADS_SOFTMAX>>>(
+            out_ptr, x_ptr,  i_ptr, o_ptr,
+            v_num, size);  
         }
     #endif //cuda
 #endif // JIT

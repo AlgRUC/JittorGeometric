@@ -22,6 +22,7 @@ from jittor_geometric.data import CSC,CSR
 from jittor_geometric.ops import cootocsr,cootocsc
 jt.flags.use_cuda = 1
 jt.flags.lazy_execution = 0
+# jt.misc.set_global_seed(42)
 jt.cudnn.set_max_workspace_ratio(0.0)
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
@@ -83,9 +84,9 @@ with jt.no_grad():
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GATConv(dataset.num_features,64,e_num, cached=True,
+        self.conv1 = GATConv(dataset.num_features,128,e_num, cached=True,
                              normalize=not args.use_gdc)
-        self.conv2 = GATConv(64, dataset.num_classes,e_num, cached=True,
+        self.conv2 = GATConv(128, dataset.num_classes,e_num, cached=True,
                              normalize=not args.use_gdc)
 
     def execute(self):
