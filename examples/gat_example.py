@@ -8,6 +8,9 @@ import argparse
 
 import jittor as jt
 from jittor import nn
+import sys,os
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+sys.path.append(root)
 from jittor_geometric.datasets import Planetoid
 import jittor_geometric.transforms as T
 from jittor_geometric.nn import GATConv
@@ -53,7 +56,7 @@ parser.add_argument('--dataset', help='graph dataset')
 args = parser.parse_args()
 dataset=args.dataset
 
-path = osp.join( 'data')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
 

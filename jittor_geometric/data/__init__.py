@@ -12,7 +12,7 @@ from .temporal import TemporalData
 from .batch import Batch
 from .dictionary import Dictionary
 from .conformer import ConformerGen
-# from .graphchunk import GraphChunk
+from .graphchunk import GraphChunk
 __all__ = [
     'Data',
     'Dataset',
@@ -21,7 +21,8 @@ __all__ = [
     'decide_download',
     'extract_zip',
     'CSC',
-    'CSR'
+    'CSR',
+    'GraphChunk',
     'TemporalData',
     'Batch',
     'Dictionary',
