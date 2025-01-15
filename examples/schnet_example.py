@@ -5,7 +5,7 @@ from tqdm import tqdm
 import jittor as jt
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T
-from jittor_geometric.jitgeo_loader import DataLoader
+from jittor_geometric.dataloader import DataLoader
 from jittor import nn
 from jittor_geometric.nn import SchNet
 

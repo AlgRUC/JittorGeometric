@@ -16,10 +16,13 @@ import numpy as np
 import jittor
 from jittor.nn import Embedding, Linear
 
-from jittor_geometric.data import Dataset, download_url
+from jittor_geometric.data import Dataset, download_url, CSC, CSR
 from jittor_geometric.nn.inits import xavier_normal, glorot_orthogonal
 from jittor_geometric.typing import OptVar, SparseVar
 from jittor_geometric.utils import scatter
+from jittor_geometric.ops import cootocsr, cootocsc
+from jittor_geometric.ops import from_nodes,to_nodes
+from jittor_geometric.ops.repeat_interleave import repeat_interleave
 
 qm9_target_dict: Dict[int, str] = {
     0: 'mu',
@@ -513,65 +516,119 @@ class OutputPPBlock(jt.nn.Module):
             x = self.act(lin(x))
         return self.lin(x)
 
-
 def triplets(  
     edge_index: jt.Var,  
     num_nodes: int,  
 ) -> Tuple[jt.Var, jt.Var, jt.Var, jt.Var, jt.Var, jt.Var, jt.Var]:  
+    """  
+    使用CSR和CSC格式优化的triplets计算函数  
+    
+    Args:  
+        edge_index: 形状为[2, num_edges]的边索引张量  
+        num_nodes: 图中节点的数量  
+    
+    Returns:  
+        Tuple包含: col, row, idx_i, idx_j, idx_k, idx_kj, idx_ji  
+    """  
     row, col = edge_index  # j->i  
-
-    # 为每条边创建唯一的索引  
-    edge_index_with_id = jt.misc.stack([row, col, jt.misc.arange(row.size(0))], dim=0)  
     
-    # 对于每个节点j，找到所有与之相连的边  
-    # 创建一个字典存储每个节点的相邻边信息  
-    neighbors = {}  
-    for idx in range(edge_index_with_id.size(1)):  
-        j = edge_index_with_id[0, idx].item()  # 源节点  
-        i = edge_index_with_id[1, idx].item()  # 目标节点  
-        edge_id = edge_index_with_id[2, idx].item()  # 边的ID  
-        
-        if j not in neighbors:  
-            neighbors[j] = []  
-        neighbors[j].append((i, edge_id))  
+    # 创建边的权重（这里全为1，用于计算度数）  
+    edge_weight = jt.ones(edge_index.shape[1])  
     
-    # 计算每个节点参与的三元组数量  
-    num_triplets = []  
-    for j in row.numpy():  
-        num_triplets.append(len(neighbors.get(j.item(), [])))  
-    num_triplets = jt.array(num_triplets)  
+    # 构建CSR和CSC格式  
+    csr = cootocsr(edge_index, edge_weight, num_nodes)  
+    csc = cootocsc(edge_index, edge_weight, num_nodes)  
     
-    # 生成三元组的节点索引  
-    idx_i = []  # 目标节点  
-    idx_j = []  # 中间节点  
-    idx_k = []  # 源节点  
-    idx_kj = []  # k->j边的索引  
-    idx_ji = []  # j->i边的索引  
+    # 计算每个节点的出度（用于确定三元组数量）  
+    out_degrees = scatter(edge_weight, row, dim=0, dim_size=num_nodes)  
     
-    # 对每条边(j->i)  
-    for edge_idx in range(row.size(0)):  
-        j = row[edge_idx].item()  # 当前边的源节点  
-        i = col[edge_idx].item()  # 当前边的目标节点  
-        
-        # 找到所有与节点j相连的其他节点k  
-        if j in neighbors:  
-            for k, kj_idx in neighbors[j]:  
-                # 跳过i == k的情况  
-                if i != k:  
-                    idx_i.append(i)  
-                    idx_j.append(j)  
-                    idx_k.append(k)  
-                    idx_kj.append(kj_idx)  
-                    idx_ji.append(edge_idx)  
+    # 对于每条边，计算需要复制的次数（等于源节点的出度）  
+    num_triplets = out_degrees[row].int()  
     
-    # 转换为Jittor张量  
-    idx_i = jt.array(idx_i)  
-    idx_j = jt.array(idx_j)  
-    idx_k = jt.array(idx_k)  
-    idx_kj = jt.array(idx_kj)  
-    idx_ji = jt.array(idx_ji)  
+    # 生成基础的idx_j和idx_i  
+    idx_j = repeat_interleave(row, num_triplets, dim=0)  
+    idx_i = repeat_interleave(col, num_triplets, dim=0)  
+    
+    # 使用from_nodes获取所有可能的idx_k  
+    idx_k = from_nodes(csc=csc, nodes=row)  # 获取所有与j相连的k  
+    
+    # 创建edge_id  
+    edge_id = jt.arange(edge_index.shape[1])  
+    idx_ji = repeat_interleave(edge_id, num_triplets, dim=0)  
+    
+    # 为idx_kj创建映射  
+    edge_id_map = -jt.ones(num_nodes * num_nodes, dtype=jt.int64)  
+    edge_id_map[row * num_nodes + col] = edge_id  
+    idx_kj = edge_id_map[idx_k * num_nodes + idx_j]  
+    
+    # 移除i == k的情况  
+    mask = idx_i != idx_k  
+    idx_i = idx_i[mask]  
+    idx_j = idx_j[mask]  
+    idx_k = idx_k[mask]  
+    idx_kj = idx_kj[mask]  
+    idx_ji = idx_ji[mask]  
     
     return col, row, idx_i, idx_j, idx_k, idx_kj, idx_ji
+
+# def triplets(  
+#     edge_index: jt.Var,  
+#     num_nodes: int,  
+# ) -> Tuple[jt.Var, jt.Var, jt.Var, jt.Var, jt.Var, jt.Var, jt.Var]:  
+#     row, col = edge_index  # j->i  
+
+#     # 为每条边创建唯一的索引  
+#     edge_index_with_id = jt.misc.stack([row, col, jt.misc.arange(row.size(0))], dim=0)  
+    
+#     # 对于每个节点j，找到所有与之相连的边  
+#     # 创建一个字典存储每个节点的相邻边信息  
+#     neighbors = {}  
+#     for idx in range(edge_index_with_id.size(1)):  
+#         j = edge_index_with_id[0, idx].item()  # 源节点  
+#         i = edge_index_with_id[1, idx].item()  # 目标节点  
+#         edge_id = edge_index_with_id[2, idx].item()  # 边的ID  
+        
+#         if j not in neighbors:  
+#             neighbors[j] = []  
+#         neighbors[j].append((i, edge_id))  
+    
+#     # 计算每个节点参与的三元组数量  
+#     num_triplets = []  
+#     for j in row.numpy():  
+#         num_triplets.append(len(neighbors.get(j.item(), [])))  
+#     num_triplets = jt.array(num_triplets)  
+    
+#     # 生成三元组的节点索引  
+#     idx_i = []  # 目标节点  
+#     idx_j = []  # 中间节点  
+#     idx_k = []  # 源节点  
+#     idx_kj = []  # k->j边的索引  
+#     idx_ji = []  # j->i边的索引  
+    
+#     # 对每条边(j->i)  
+#     for edge_idx in range(row.size(0)):  
+#         j = row[edge_idx].item()  # 当前边的源节点  
+#         i = col[edge_idx].item()  # 当前边的目标节点  
+        
+#         # 找到所有与节点j相连的其他节点k  
+#         if j in neighbors:  
+#             for k, kj_idx in neighbors[j]:  
+#                 # 跳过i == k的情况  
+#                 if i != k:  
+#                     idx_i.append(i)  
+#                     idx_j.append(j)  
+#                     idx_k.append(k)  
+#                     idx_kj.append(kj_idx)  
+#                     idx_ji.append(edge_idx)  
+    
+#     # 转换为Jittor张量  
+#     idx_i = jt.array(idx_i)  
+#     idx_j = jt.array(idx_j)  
+#     idx_k = jt.array(idx_k)  
+#     idx_kj = jt.array(idx_kj)  
+#     idx_ji = jt.array(idx_ji)  
+    
+#     return col, row, idx_i, idx_j, idx_k, idx_kj, idx_ji
 
 
 class DimeNet(jt.nn.Module):

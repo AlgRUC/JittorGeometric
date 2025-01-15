@@ -23,36 +23,6 @@ def Jn_zeros(n, k):
 
     return zerosj
 
-# def spherical_bessel_formulas(n):  
-#     x = sym.symbols('x')  
-#     eps = sym.Symbol('eps')  # 引入阈值符号  
-    
-#     def get_limit_and_function(expr):  
-#         """获取函数在0处的极限和安全的表达式"""  
-#         limit_val = sym.limit(expr, x, 0)  
-#         # 创建分段函数  
-#         safe_expr = sym.Piecewise(  
-#             (limit_val, sym.Abs(x) < eps),  # x接近0时使用极限值  
-#             (expr, True)                     # 其他情况使用原表达式  
-#         )  
-#         return safe_expr, limit_val  
-
-#     # 零阶函数特殊处理  
-#     j0 = sym.sin(x) / x  
-#     j0_safe, j0_limit = get_limit_and_function(j0)  
-#     f = [j0_safe]  
-#     a = j0  
-    
-#     # 生成高阶函数  
-#     for i in range(1, n):  
-#         b = sym.diff(a, x) / x  
-#         expr = sym.simplify(b * (-x)**i)  
-#         safe_expr, _ = get_limit_and_function(expr)  
-#         f += [safe_expr]  
-#         a = sym.simplify(b)  
-    
-#     return f  
-
 def spherical_bessel_formulas(n):
     x = sym.symbols('x')
 
