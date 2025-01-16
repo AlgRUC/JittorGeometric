@@ -124,7 +124,7 @@ Follow these steps to install JittorGeometric:
    or by following the [Jittor official documentation](https://cg.cs.tsinghua.edu.cn/jittor/).
 2. Installing other dependencies:
    ```bash
-   pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 fairseq==0.12.2 Flask==3.1.0 jittor_offline==0.0.7 matplotlib==3.10.0 numpy==2.2.1 pandas==2.2.3 Pillow==11.0.0 pymetis==2023.1.1 pyparsing==3.2.0 pywebio==1.8.3 recommonmark==0.7.1 scikit_learn==1.6.0 scipy==1.14.1 setuptools==69.5.1 six==1.16.0 sphinx_rtd_theme==3.0.2 torch==2.5.1 torchvision==0.20.1 tqdm==4.66.4
+   pip install ase==3.24.0 astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 Flask==3.1.0 huggingface_hub==0.27.1 numpy==1.24.0 pandas==2.2.3 Pillow==11.1.0 PyMetis==2023.1.1 pyparsing==3.2.1 pywebio==1.8.3 recommonmark==0.7.1 schnetpack==2.0.0 scikit_learn==1.6.1 scipy==1.15.1 setuptools==69.5.1 six==1.16.0 sphinx_rtd_theme==3.0.2 sympy==1.13.3 tqdm==4.66.4
    ```
 3. Install the package:
    ```bash
