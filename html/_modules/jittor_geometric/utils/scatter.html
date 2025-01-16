@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.utils.scatter &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">JittorGeometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/nn.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.utils.scatter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jittor_geometric.utils.scatter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">jittor</span>
+<span class="kn">from</span> <span class="nn">jittor</span> <span class="kn">import</span> <span class="n">Var</span>
+
+<span class="kn">import</span> <span class="nn">jittor_geometric.typing</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.typing</span> <span class="kn">import</span> <span class="n">jt_scatter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jittor</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">major</span><span class="p">,</span> <span class="n">minor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">major</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">minor</span><span class="p">)</span>
+<span class="n">has_pyjittor112</span> <span class="o">=</span> <span class="n">major</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">major</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">12</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;.*is in beta and the API may change.*&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">broadcast</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ref</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+        <span class="n">size</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">src</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">scatter</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">dim_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reduce</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sum&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reduces all values from the :obj:`src` tensor at the indices</span>
+<span class="sd">        specified in the :obj:`index` tensor along a given dimension</span>
+<span class="sd">        :obj:`dim`. See the `documentation</span>
+<span class="sd">        &lt;https://pytorch-scatter.readthedocs.io/en/latest/functions/</span>
+<span class="sd">        scatter.html&gt;`__ of the :obj:`torch_scatter` package for more</span>
+<span class="sd">        information.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            src (torch.Var): The source tensor.</span>
+<span class="sd">            index (torch.Var): The index tensor.</span>
+<span class="sd">            dim (int, optional): The dimension along which to index.</span>
+<span class="sd">                (default: :obj:`0`)</span>
+<span class="sd">            dim_size (int, optional): The size of the output tensor at</span>
+<span class="sd">                dimension :obj:`dim`. If set to :obj:`None`, will create a</span>
+<span class="sd">                minimal-sized output tensor according to</span>
+<span class="sd">                :obj:`index.max() + 1`. (default: :obj:`None`)</span>
+<span class="sd">            reduce (str, optional): The reduce operation (:obj:`&quot;sum&quot;`,</span>
+<span class="sd">                :obj:`&quot;mean&quot;`, :obj:`&quot;mul&quot;`, :obj:`&quot;min&quot;` or :obj:`&quot;max&quot;`).</span>
+<span class="sd">                (default: :obj:`&quot;sum&quot;`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The `index` argument must be one-dimensional &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;(got </span><span class="si">{</span><span class="n">index</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span><span class="si">}</span><span class="s2"> dimensions)&quot;</span><span class="p">)</span>
+
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">+</span> <span class="n">dim</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">dim</span>
+
+        <span class="k">if</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">dim</span> <span class="o">&gt;=</span> <span class="n">src</span><span class="o">.</span><span class="n">dim</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The `dim` argument must lay between 0 and &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">src</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> (got </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dim_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            
+            <span class="c1"># dim_size = int(index.max()) + 1 if index.numel() &gt; 0 else 0</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  
+                <span class="c1"># 先将tensor移到CPU计算max  </span>
+                <span class="n">index_cpu</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>  
+                <span class="n">dim_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">index_cpu</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>  
+            <span class="k">else</span><span class="p">:</span>  
+                <span class="n">dim_size</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># For now, we maintain various different code paths, based on whether</span>
+        <span class="c1"># the input requires gradients and whether it lays on the CPU/GPU.</span>
+        <span class="c1"># For example, `torch_scatter` is usually faster than</span>
+        <span class="c1"># `torch.scatter_reduce` on GPU, while `torch.scatter_reduce` is faster</span>
+        <span class="c1"># on CPU.</span>
+        <span class="c1"># `torch.scatter_reduce` has a faster forward implementation for</span>
+        <span class="c1"># &quot;min&quot;/&quot;max&quot; reductions since it does not compute additional arg</span>
+        <span class="c1"># indices, but is therefore way slower in its backward implementation.</span>
+        <span class="c1"># More insights can be found in `test/utils/test_scatter.py`.</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+        <span class="n">size</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">dim_size</span>
+
+        <span class="c1"># For &quot;sum&quot; and &quot;mean&quot; reduction, we make use of `scatter_add_`:</span>
+        <span class="k">if</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s1">&#39;sum&#39;</span> <span class="ow">or</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">broadcast</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">jittor</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">new_zeros</span><span class="p">(</span><span class="n">size</span><span class="p">),</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="n">reduce</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">new_zeros</span><span class="p">(</span><span class="n">dim_size</span><span class="p">)</span>
+            <span class="n">count</span><span class="o">.</span><span class="n">scatter_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">new_ones</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">dim</span><span class="p">)))</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">count</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">index</span> <span class="o">=</span> <span class="n">broadcast</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">new_zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">scatter_add_</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="n">broadcast</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+
+        <span class="c1"># For &quot;min&quot; and &quot;max&quot; reduction, we prefer `scatter_reduce_` on CPU or</span>
+        <span class="c1"># in case the input does not require gradients:</span>
+        <span class="k">if</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s1">&#39;min&#39;</span> <span class="ow">or</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">jittor_geometric</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">WITH_TORCH_SCATTER</span>
+                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">is_cuda</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_cuda</span> <span class="ow">and</span> <span class="n">src</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The usage of `scatter(reduce=&#39;</span><span class="si">{</span><span class="n">reduce</span><span class="si">}</span><span class="s2">&#39;)` &quot;</span>
+                                  <span class="sa">f</span><span class="s2">&quot;can be accelerated via the &#39;torch-scatter&#39;&quot;</span>
+                                  <span class="sa">f</span><span class="s2">&quot; package, but it was not found&quot;</span><span class="p">)</span>
+
+                <span class="n">index</span> <span class="o">=</span> <span class="n">broadcast</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">src</span><span class="o">.</span><span class="n">new_zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">scatter_reduce_</span><span class="p">(</span>
+                    <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;a</span><span class="si">{</span><span class="n">reduce</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">jt_scatter</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">dim_size</span><span class="o">=</span><span class="n">dim_size</span><span class="p">,</span>
+                                         <span class="n">reduce</span><span class="o">=</span><span class="n">reduce</span><span class="p">)</span>
+
+        <span class="c1"># For &quot;mul&quot; reduction, we prefer `scatter_reduce_` on CPU:</span>
+        <span class="k">if</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s1">&#39;mul&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">jittor_geometric</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">WITH_TORCH_SCATTER</span>
+                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">is_cuda</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_cuda</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The usage of `scatter(reduce=&#39;</span><span class="si">{</span><span class="n">reduce</span><span class="si">}</span><span class="s2">&#39;)` &quot;</span>
+                                  <span class="sa">f</span><span class="s2">&quot;can be accelerated via the &#39;torch-scatter&#39;&quot;</span>
+                                  <span class="sa">f</span><span class="s2">&quot; package, but it was not found&quot;</span><span class="p">)</span>
+
+                <span class="n">index</span> <span class="o">=</span> <span class="n">broadcast</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+                <span class="c1"># We initialize with `one` here to match `scatter_mul` output:</span>
+                <span class="k">return</span> <span class="n">src</span><span class="o">.</span><span class="n">new_ones</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">scatter_reduce_</span><span class="p">(</span>
+                    <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="s1">&#39;prod&#39;</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">jt_scatter</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">dim_size</span><span class="o">=</span><span class="n">dim_size</span><span class="p">,</span>
+                                         <span class="n">reduce</span><span class="o">=</span><span class="s1">&#39;mul&#39;</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Encountered invalid `reduce` argument &#39;</span><span class="si">{</span><span class="n">reduce</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+<span class="k">else</span><span class="p">:</span>
+
+<div class="viewcode-block" id="scatter">
+<a class="viewcode-back" href="../../../utils/utils.html#jittor_geometric.utils.scatter">[docs]</a>
+    <span class="k">def</span> <span class="nf">scatter</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">dim_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reduce</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sum&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reduces all values from the :obj:`src` tensor at the indices</span>
+<span class="sd">        specified in the :obj:`index` tensor along a given dimension</span>
+<span class="sd">        :obj:`dim`. See the `documentation</span>
+<span class="sd">        &lt;https://pytorch-scatter.readthedocs.io/en/latest/functions/</span>
+<span class="sd">        scatter.html&gt;`_ of the :obj:`torch_scatter` package for more</span>
+<span class="sd">        information.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            src (torch.Var): The source tensor.</span>
+<span class="sd">            index (torch.Var): The index tensor.</span>
+<span class="sd">            dim (int, optional): The dimension along which to index.</span>
+<span class="sd">                (default: :obj:`0`)</span>
+<span class="sd">            dim_size (int, optional): The size of the output tensor at</span>
+<span class="sd">                dimension :obj:`dim`. If set to :obj:`None`, will create a</span>
+<span class="sd">                minimal-sized output tensor according to</span>
+<span class="sd">                :obj:`index.max() + 1`. (default: :obj:`None`)</span>
+<span class="sd">            reduce (str, optional): The reduce operation (:obj:`&quot;sum&quot;`,</span>
+<span class="sd">                :obj:`&quot;mean&quot;`, :obj:`&quot;mul&quot;`, :obj:`&quot;min&quot;` or :obj:`&quot;max&quot;`).</span>
+<span class="sd">                (default: :obj:`&quot;sum&quot;`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#if not jittor_geometric.typing.WITH_TORCH_SCATTER:</span>
+        <span class="c1">#    raise ImportError(&quot;&#39;scatter&#39; requires the &#39;torch-scatter&#39; package&quot;)</span>
+        <span class="k">return</span> <span class="n">jt_scatter</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">dim_size</span><span class="o">=</span><span class="n">dim_size</span><span class="p">,</span>
+                                     <span class="n">reduce</span><span class="o">=</span><span class="n">reduce</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
