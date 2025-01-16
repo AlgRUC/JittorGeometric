@@ -4,14 +4,14 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
+  apt_packages:
+    - python3.11-dev
 
 python:
   install:
     - requirements: docs/requirements.txt
     - method: setuptools
       path: .
-  system_packages:
-    - python3.11-dev
 
 sphinx:
   configuration: docs/source/conf.py
