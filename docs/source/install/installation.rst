@@ -13,7 +13,7 @@ System Requirements
 - **CUDA** (optional): 11.2 (for GPU support).
 - **cuDNN** (optional): Compatible with the installed CUDA version.
 
-Core Dependencies
+Dependencies
 -----------------
 
 - ase==3.24.0
