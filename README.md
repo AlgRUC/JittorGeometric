@@ -1,11 +1,12 @@
-# Jittor Geometric
+# JittorGeometric
 
-## Introduction
-Jittor Geometric is a graph machine learning library based on the Jittor framework. As a Chinese-developed library, it is tailored for research and applications in Graph Neural Networks (GNNs), aiming to provide an efficient and flexible GNN implementation for researchers and engineers working with graph-structured data.
+**[Documentation](https://jittorgeometric.readthedocs.io/en/latest/)** [![Documentation Status](https://readthedocs.org/projects/jittorgeometric/badge/?version=latest)](https://jittorgeometric.readthedocs.io/en/latest/)
+
+JittorGeometric is a graph machine learning library based on the Jittor framework. As a Chinese-developed library, it is tailored for research and applications in Graph Neural Networks (GNNs), aiming to provide an efficient and flexible GNN implementation for researchers and engineers working with graph-structured data.
 
 ## Highlights
-- **Easier Code Modification with JIT (Just-In-Time) Compilation**: Jittor Geometric leverages JIT compilation to enable easier code modification without any pre-compilation requirements.
-- **Optimized Sparse Matrix Computation**: Jittor Geometric provides a rich set of operators and utilizes CuSparse to accelerate sparse matrix computations.
+- **Easier Code Modification with JIT (Just-In-Time) Compilation**: JittorGeometric leverages JIT compilation to enable easier code modification without any pre-compilation requirements.
+- **Optimized Sparse Matrix Computation**: JittorGeometric provides a rich set of operators and utilizes CuSparse to accelerate sparse matrix computations.
 - **Comprehensive Domain Support**: Supports both basic and advanced GNNs, including spectral GNNs, dynamic GNNs, and molecular GNNs.
 
 ## Quick Tour
@@ -63,7 +64,7 @@ for epoch in range(200):
 ```
 
 ## Supported Models
-Jittor Geometric includes implementations of popular GNN models, such as:
+JittorGeometric includes implementations of popular GNN models, such as:
 
 ### Classic Graph Neural Networks
 
@@ -114,7 +115,7 @@ Jittor Geometric includes implementations of popular GNN models, such as:
 | [Uni-Mol](./examples/unimol_example.py)    | 2023 | ICLR   |
 
 ## Installation
-Follow these steps to install Jittor Geometric:
+Follow these steps to install JittorGeometric:
 
 1. Install the Jittor framework by following the [Jittor official documentation](https://cg.cs.tsinghua.edu.cn/jittor/).
 2. Clone this repository and navigate to the project directory:
@@ -126,7 +127,7 @@ Follow these steps to install Jittor Geometric:
    ```bash
    pip install -r requirements.txt
    ```
-4. Install Jittor Geometric from the source code:
+4. Install JittorGeometric from the source code:
    ```bash
    git clone https://github.com/AlgRUC/JittorGeometric.git
    cd "the project root directory that contains the setup.py file"
