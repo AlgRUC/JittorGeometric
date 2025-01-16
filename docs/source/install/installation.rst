@@ -1,52 +1,72 @@
+============
 Installation
 ============
 
-This guide will help you install `jittor_geometric`, a powerful library for graph neural networks.
-
-Prerequisites
--------------
-Before you start, ensure you have the following installed:
-
-- Python 3.9+
-- pip (Python package manager)
-- Jittor (the underlying deep learning framework)
-
-Install Jittor
---------------
-First, you need to install Jittor. You can install it using the following command:
-
-pip install jittor
-
-For more details on Jittor installation, please visit the official Jittor installation guide: https://github.com/Jittor/jittor#installation
-
-Install jittor_geometric
--------------------------
-Once Jittor is installed, you can install `jittor_geometric` using pip. To install the latest release from PyPI, run:
-
-pip install jittor-geometric
-
-Alternatively, you can install the development version directly from GitHub by running:
-
-pip install git+https://github.com/Jittor/jittor_geometric.git
+This document provides the installation instructions for jittor_geometric
 
 System Requirements
 -------------------
-Ensure your system has the following dependencies installed:
 
-- Linux, macOS, or Windows (with WSL2 for Windows)
-- CUDA (for GPU support, optional)
+- **Python**: 3.7 or higher.
+- **GCC** (Linux only): 5.4 or higher.
+- **CMake**: 3.10 or higher.
+- **CUDA** (optional): 11.2 (for GPU support).
+- **cuDNN** (optional): Compatible with the installed CUDA version.
 
-For GPU support, ensure that the correct version of CUDA is installed, and your system supports CUDA-based operations.
+Core Dependencies
+-----------------
 
-Testing the Installation
--------------------------
-Once the installation is complete, you can verify the installation by importing `jittor_geometric` in Python:
+- astunparse==1.6.3
+- autograd==1.7.0
+- cupy==13.3.0
+- fairseq==0.12.2
+- Flask==3.1.0
+- jittor==1.3.9.13
+- jittor_offline==0.0.7
+- matplotlib==3.10.0
+- numpy==2.2.1
+- pandas==2.2.3
+- Pillow==11.0.0
+- pymetis==2023.1.1
+- pyparsing==3.2.0
+- pywebio==1.8.3
+- recommonmark==0.7.1
+- scikit_learn==1.6.0
+- scipy==1.14.1
+- setuptools==69.5.1
+- six==1.16.0
+- sphinx_rtd_theme==3.0.2
+- torch==2.5.1
+- torchvision==0.20.1
+- tqdm==4.66.4
 
-import jittor_geometric
-print(jittor_geometric.__version__)
 
-If no errors appear and the version prints correctly, the installation was successful.
+Installation Steps
+------------------
+
+1. Install Jittor::
+
+    python -m pip install git+https://github.com/Jittor/jittor.git
+
+2. Installing other dependencies, such as::
+
+    pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 fairseq==0.12.2 Flask==3.1.0 jittor_offline==0.0.7 matplotlib==3.10.0 numpy==2.2.1 pandas==2.2.3 Pillow==11.0.0 pymetis==2023.1.1 pyparsing==3.2.0 pywebio==1.8.3 recommonmark==0.7.1 scikit_learn==1.6.0 scipy==1.14.1 setuptools==69.5.1 six==1.16.0 sphinx_rtd_theme==3.0.2 torch==2.5.1 torchvision==0.20.1 tqdm==4.66.4
+
+3. Install the package::
+
+    git clone https://github.com/lyyisbored/JittorGeometric.git
+    cd "the project root directory that contains the setup.py file"
+    pip install .
+
+4. Verify the installation
+      Run the gcn_example.py to check if jittor_geometric is installed correctly
+
 
 Troubleshooting
 ---------------
-If you encounter issues, please refer to the Jittor documentation for troubleshooting steps: https://github.com/Jittor/jittor
+
+- Higher versions of cuda may not have been adapted, version 11.2 is recommended.
+- On Linux, ensure that GCC 5.4 or higher is installed.
+- Ensure that CMake 3.10 or higher is installed and accessible in your environment.
+
+For more bugs you can contact us at the project homepage https://github.com/lyyisbored/JittorGeometric
