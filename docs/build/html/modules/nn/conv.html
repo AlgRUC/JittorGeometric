@@ -1,0 +1,1306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.nn.conv &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="jittor_geometric.nn.dense" href="dense.html" />
+    <link rel="prev" title="jittor_geometric.nn.aggr" href="aggr.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">JittorGeometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../nn.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aggr.html">jittor_geometric.nn.aggr</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">jittor_geometric.nn.conv</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.APPNP"><code class="docutils literal notranslate"><span class="pre">APPNP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.APPNP.execute"><code class="docutils literal notranslate"><span class="pre">APPNP.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.APPNP.propagate_msg"><code class="docutils literal notranslate"><span class="pre">APPNP.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.APPNP.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">APPNP.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.APPNP.reset_parameters"><code class="docutils literal notranslate"><span class="pre">APPNP.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.BernNet"><code class="docutils literal notranslate"><span class="pre">BernNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.BernNet.execute"><code class="docutils literal notranslate"><span class="pre">BernNet.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.BernNet.propagate_msg"><code class="docutils literal notranslate"><span class="pre">BernNet.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.BernNet.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">BernNet.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.BernNet.reset_parameters"><code class="docutils literal notranslate"><span class="pre">BernNet.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebConv"><code class="docutils literal notranslate"><span class="pre">ChebConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebConv.execute"><code class="docutils literal notranslate"><span class="pre">ChebConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebConv.message"><code class="docutils literal notranslate"><span class="pre">ChebConv.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">ChebConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebNetII"><code class="docutils literal notranslate"><span class="pre">ChebNetII</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebNetII.execute"><code class="docutils literal notranslate"><span class="pre">ChebNetII.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebNetII.propagate_msg"><code class="docutils literal notranslate"><span class="pre">ChebNetII.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebNetII.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">ChebNetII.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ChebNetII.reset_parameters"><code class="docutils literal notranslate"><span class="pre">ChebNetII.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.ClusterGCNConv"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ClusterGCNConv.execute"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ClusterGCNConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ClusterGCNConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.ClusterGCNConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.EGNNConv"><code class="docutils literal notranslate"><span class="pre">EGNNConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EGNNConv.execute"><code class="docutils literal notranslate"><span class="pre">EGNNConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EGNNConv.init_weights"><code class="docutils literal notranslate"><span class="pre">EGNNConv.init_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EGNNConv.message"><code class="docutils literal notranslate"><span class="pre">EGNNConv.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EGNNConv.propagate"><code class="docutils literal notranslate"><span class="pre">EGNNConv.propagate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.EvenNet"><code class="docutils literal notranslate"><span class="pre">EvenNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EvenNet.execute"><code class="docutils literal notranslate"><span class="pre">EvenNet.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EvenNet.propagate_msg"><code class="docutils literal notranslate"><span class="pre">EvenNet.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EvenNet.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">EvenNet.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.EvenNet.reset_parameters"><code class="docutils literal notranslate"><span class="pre">EvenNet.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv"><code class="docutils literal notranslate"><span class="pre">GATConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.edge_forward"><code class="docutils literal notranslate"><span class="pre">GATConv.edge_forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.execute"><code class="docutils literal notranslate"><span class="pre">GATConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.propagate"><code class="docutils literal notranslate"><span class="pre">GATConv.propagate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GATConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.scatter_to_edge"><code class="docutils literal notranslate"><span class="pre">GATConv.scatter_to_edge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.scatter_to_vertex"><code class="docutils literal notranslate"><span class="pre">GATConv.scatter_to_vertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GATConv.vertex_forward"><code class="docutils literal notranslate"><span class="pre">GATConv.vertex_forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.GCN2Conv"><code class="docutils literal notranslate"><span class="pre">GCN2Conv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCN2Conv.execute"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCN2Conv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCN2Conv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCN2Conv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.GCNConv"><code class="docutils literal notranslate"><span class="pre">GCNConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCNConv.execute"><code class="docutils literal notranslate"><span class="pre">GCNConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCNConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">GCNConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCNConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">GCNConv.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GCNConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GCNConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.GPRGNN"><code class="docutils literal notranslate"><span class="pre">GPRGNN</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GPRGNN.execute"><code class="docutils literal notranslate"><span class="pre">GPRGNN.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GPRGNN.propagate_msg"><code class="docutils literal notranslate"><span class="pre">GPRGNN.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GPRGNN.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">GPRGNN.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.GPRGNN.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GPRGNN.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing"><code class="docutils literal notranslate"><span class="pre">MessagePassing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.aggregate"><code class="docutils literal notranslate"><span class="pre">MessagePassing.aggregate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.message"><code class="docutils literal notranslate"><span class="pre">MessagePassing.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.propagate"><code class="docutils literal notranslate"><span class="pre">MessagePassing.propagate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.special_args"><code class="docutils literal notranslate"><span class="pre">MessagePassing.special_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.update"><code class="docutils literal notranslate"><span class="pre">MessagePassing.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.aggregate_with_weight"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.aggregate_with_weight()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.edge_forward"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.edge_forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.propagate"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.propagate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.scatter_to_edge"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.scatter_to_edge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.scatter_to_vertex"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.scatter_to_vertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.special_args"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.special_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts.vertex_forward"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.vertex_forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.OptBasisConv"><code class="docutils literal notranslate"><span class="pre">OptBasisConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.OptBasisConv.execute"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.OptBasisConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.OptBasisConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.OptBasisConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.OptBasisConv.three_term_prop"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.three_term_prop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.SAGEConv"><code class="docutils literal notranslate"><span class="pre">SAGEConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SAGEConv.execute"><code class="docutils literal notranslate"><span class="pre">SAGEConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SAGEConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">SAGEConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SAGEConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">SAGEConv.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SAGEConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">SAGEConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.SGConv"><code class="docutils literal notranslate"><span class="pre">SGConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SGConv.execute"><code class="docutils literal notranslate"><span class="pre">SGConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SGConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">SGConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SGConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">SGConv.propagate_spmm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.SGConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">SGConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.conv.TransformerConv"><code class="docutils literal notranslate"><span class="pre">TransformerConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.TransformerConv.execute"><code class="docutils literal notranslate"><span class="pre">TransformerConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.TransformerConv.forward"><code class="docutils literal notranslate"><span class="pre">TransformerConv.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.TransformerConv.message"><code class="docutils literal notranslate"><span class="pre">TransformerConv.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.conv.TransformerConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">TransformerConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dense.html">jittor_geometric.nn.dense</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../nn.html">Modules</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.nn.conv</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/nn/conv.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jittor-geometric-nn-conv">
+<h1>jittor_geometric.nn.conv<a class="headerlink" href="#jittor-geometric-nn-conv" title="Link to this heading"></a></h1>
+<p>Convolutional layers used in Graph Neural Networks.</p>
+<p id="module-jittor_geometric.nn.conv">Description:
+Author: lusz
+Date: 2025-01-10 13:52:59</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.APPNP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">APPNP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/appnp_conv.html#APPNP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.APPNP" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>The graph propagation operator from the <a class="reference external" href="https://arxiv.org/abs/1810.05997">“Predict then Propagate:
+Graph Neural Networks meet Personalized PageRank”</a> paper</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.APPNP.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/appnp_conv.html#APPNP.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.APPNP.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.APPNP.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/appnp_conv.html#APPNP.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.APPNP.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.APPNP.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/appnp_conv.html#APPNP.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.APPNP.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.APPNP.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/appnp_conv.html#APPNP.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.APPNP.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.BernNet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">BernNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/bernnet_conv.html#BernNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.BernNet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>The graph propagation operator from the <a class="reference external" href="https://arxiv.org/abs/2106.10994">“BernNet: Learning Arbitrary
+Graph Spectral Filters via Bernstein Approximation”</a> paper</p>
+<p>Mathematical Formulation:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mathbf</span><span class="p">{</span><span class="n">Z</span><span class="p">}</span> <span class="o">=</span> \<span class="n">sum_</span><span class="p">{</span><span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">}</span><span class="o">^</span><span class="p">{</span><span class="n">K</span><span class="p">}</span> \<span class="n">alpha_k</span> \<span class="n">mathrm</span><span class="p">{</span><span class="n">Bern</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">k</span><span class="p">}(</span>\<span class="n">tilde</span><span class="p">{</span><span class="n">L</span><span class="p">})</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">X</span><span class="p">}</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>where:</dt><dd><p><span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the input node feature matrix.
+<span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> is the output node feature matrix.
+<span class="math notranslate nohighlight">\(\mathrm{Bern}_{k}\)</span> is the Bernstein polynomial of order <span class="math notranslate nohighlight">\(k\)</span>.
+<span class="math notranslate nohighlight">\(\tilde{\mathbf{L}}\)</span> is the normalized Laplacian matrix of the graph, translated to the interval <span class="math notranslate nohighlight">\([-1,1]\)</span>.
+<span class="math notranslate nohighlight">\(\alpha_k\)</span> is the parameter for the <span class="math notranslate nohighlight">\(k\)</span>-th order Bernstein polynomial.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> (<em>int</em>) – Order of polynomial, or maximum number of hops considered for message passing.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the <cite>MessagePassing</cite> class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.BernNet.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/bernnet_conv.html#BernNet.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.BernNet.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.BernNet.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/bernnet_conv.html#BernNet.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.BernNet.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.BernNet.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/bernnet_conv.html#BernNet.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.BernNet.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.BernNet.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/bernnet_conv.html#BernNet.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.BernNet.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">ChebConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sym'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/cheb_conv.html#ChebConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>The chebyshev spectral graph convolutional operator from the
+<a class="reference external" href="https://arxiv.org/abs/1606.09375">“Convolutional Neural Networks on Graphs with Fast Localized Spectral
+Filtering”</a> paper</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{X}^{\prime} = \sum_{k=1}^{K} \mathbf{Z}^{(k)} \cdot
+\mathbf{\Theta}^{(k)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{Z}^{(k)}\)</span> is computed recursively by</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\mathbf{Z}^{(1)} &amp;= \mathbf{X}\\\mathbf{Z}^{(2)} &amp;= \mathbf{\hat{L}} \cdot \mathbf{X}\\\mathbf{Z}^{(k)} &amp;= 2 \cdot \mathbf{\hat{L}} \cdot
+\mathbf{Z}^{(k-1)} - \mathbf{Z}^{(k-2)}\end{aligned}\end{align} \]</div>
+<p>and <span class="math notranslate nohighlight">\(\mathbf{\hat{L}}\)</span> denotes the scaled and normalized Laplacian
+<span class="math notranslate nohighlight">\(\frac{2\mathbf{L}}{\lambda_{\max}} - \mathbf{I}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em>) – Number of input features per node.</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Number of output features per node.</p></li>
+<li><p><strong>K</strong> (<em>int</em>) – Order of Chebyshev polynomials used in the layer.</p></li>
+<li><p><strong>normalization</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of Laplacian normalization.
+Options are: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;sym&quot;</span></code> (symmetric), <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;rw&quot;</span></code> (random walk), or <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> (no normalization).
+Default is <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;sym&quot;</span></code>.</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include a learnable bias term. Default is <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the <cite>MessagePassing</cite> class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/cheb_conv.html#ChebConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebConv.execute" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebConv.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/cheb_conv.html#ChebConv.message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebConv.message" title="Link to this definition"></a></dt>
+<dd><p>Constructs messages from node <span class="math notranslate nohighlight">\(j\)</span> to node <span class="math notranslate nohighlight">\(i\)</span>
+in analogy to <span class="math notranslate nohighlight">\(\phi_{\mathbf{\Theta}}\)</span> for each edge in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_index</span></code>.
+This function can take any argument as input which was initially
+passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code>.
+Furthermore, Var passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code> can be mapped to the
+respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> by appending <code class="xref py py-obj docutils literal notranslate"><span class="pre">_i</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">_j</span></code> to the variable name, <em>.e.g.</em> <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_i</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_j</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/cheb_conv.html#ChebConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebNetII">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">ChebNetII</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/chebnet2_conv.html#ChebNetII"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebNetII" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="simple">
+<dt>The graph propagation operator from the <a href="#id1"><span class="problematic" id="id2">`</span></a>”Convolutional Neural Networks</dt><dd><p>on Graphs with Chebyshev Approximation, Revisited”</p>
+</dd>
+</dl>
+<p>&lt;<a class="reference external" href="https://arxiv.org/abs/2202.03580">https://arxiv.org/abs/2202.03580</a>&gt;`_ paper</p>
+<p>Mathematical Formulation:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mathbf</span><span class="p">{</span><span class="n">Z</span><span class="p">}</span> <span class="o">=</span> \<span class="n">sum_</span><span class="p">{</span><span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">}</span><span class="o">^</span><span class="p">{</span><span class="n">K</span><span class="p">}</span> \<span class="n">alpha_k</span> \<span class="n">mathrm</span><span class="p">{</span><span class="n">cheb</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">k</span><span class="p">}(</span>\<span class="n">tilde</span><span class="p">{</span>\<span class="n">mathbf</span><span class="p">{</span><span class="n">L</span><span class="p">}})</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">X</span><span class="p">}</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>where:</dt><dd><p><span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the input node feature matrix.
+<span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> is the output node feature matrix.
+<span class="math notranslate nohighlight">\(\mathrm{cheb}_{k}\)</span> is the Chebyshev polynomial of order <span class="math notranslate nohighlight">\(k\)</span>.
+<span class="math notranslate nohighlight">\(\alpha_k\)</span> is the parameter for the <span class="math notranslate nohighlight">\(k\)</span>-th order Chebyshev polynomial, they are further derived via learnable values on the Chebyshev nodes.
+<span class="math notranslate nohighlight">\(\tilde{L}\)</span> is the normalized Laplacian matrix of the graph, translated to the interval <span class="math notranslate nohighlight">\([-1,1]\)</span>.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> (<em>int</em>) – Order of polynomial, or maximum number of hops considered for message passing.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the <cite>MessagePassing</cite> class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebNetII.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/chebnet2_conv.html#ChebNetII.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebNetII.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebNetII.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/chebnet2_conv.html#ChebNetII.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebNetII.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebNetII.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/chebnet2_conv.html#ChebNetII.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebNetII.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ChebNetII.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/chebnet2_conv.html#ChebNetII.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ChebNetII.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ClusterGCNConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">ClusterGCNConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag_lambda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">improved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cached</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/clustergcn_conv.html#ClusterGCNConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ClusterGCNConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>The ClusterGCN graph convolutional operator from the
+<a class="reference external" href="https://arxiv.org/abs/1905.07953">“Cluster-GCN: An Efficient Algorithm for Training Deep and Large Graph
+Convolutional Networks”</a> paper.</p>
+<p>This class implements the ClusterGCN layer, which updates node representations by aggregating information from neighboring nodes,
+adding lambda times of embedding itself, taking the graph structure into account.
+It supports both message-passing and sparse matrix multiplication (SPMM) for propagation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em>) – Size of each input sample (number of input features per node).</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Size of each output sample (number of output features per node).</p></li>
+<li><p><strong>diag_lambda</strong> (<em>float</em>) – Diagonal enhancement value.</p></li>
+<li><p><strong>improved</strong> (<em>bool</em><em>, </em><em>optional</em>) – Improved self loop value (can be ignored, similar function as diag_lambda)</p></li>
+<li><p><strong>cached</strong> (<em>bool</em><em>, </em><em>optional</em>) – Caching the processed csr, csc and edge_weight.</p></li>
+<li><p><strong>add_self_loops</strong> (<em>bool optional</em>) – Whether to add self-loops to the input graph.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – SET TO TRUE FOR NORMALLY FUNCTION.</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, adds a learnable bias to the output. Default is <cite>True</cite>.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the base <cite>Module</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ClusterGCNConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/clustergcn_conv.html#ClusterGCNConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ClusterGCNConv.execute" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ClusterGCNConv.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/clustergcn_conv.html#ClusterGCNConv.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ClusterGCNConv.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ClusterGCNConv.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/clustergcn_conv.html#ClusterGCNConv.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ClusterGCNConv.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.ClusterGCNConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/clustergcn_conv.html#ClusterGCNConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.ClusterGCNConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EGNNConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">EGNNConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feats_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fourier_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">soft_edge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_feats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_coors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_coors_scale_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_feats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_coors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coor_weights_clamp_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/egnn_conv.html#EGNNConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EGNNConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>EGNN implementation using Jittor and Jittor Geometric.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EGNNConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/egnn_conv.html#EGNNConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EGNNConv.execute" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EGNNConv.init_weights">
+<span class="sig-name descname"><span class="pre">init_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/egnn_conv.html#EGNNConv.init_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EGNNConv.init_weights" title="Link to this definition"></a></dt>
+<dd><p>Initialize weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EGNNConv.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/egnn_conv.html#EGNNConv.message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EGNNConv.message" title="Link to this definition"></a></dt>
+<dd><p>Message function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EGNNConv.propagate">
+<span class="sig-name descname"><span class="pre">propagate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/egnn_conv.html#EGNNConv.propagate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EGNNConv.propagate" title="Link to this definition"></a></dt>
+<dd><p>The initial call to start propagating messages.
+Args:
+<cite>edge_index</cite> holds the indices of a general (sparse)</p>
+<blockquote>
+<div><p>assignment matrix of shape <code class="xref py py-obj docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">M]</span></code>.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>size (tuple, optional) if none, the size will be inferred</dt><dd><p>and assumed to be quadratic.</p>
+</dd>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Any additional data which is needed to construct and</dt><dd><p>aggregate messages, and to update node embeddings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EvenNet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">EvenNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/even_conv.html#EvenNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EvenNet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>EvenNet: Ignoring Odd-Hop Neighbors Improves
+Robustness of Graph Neural Networks
+&lt;<a class="reference external" href="https://arxiv.org/pdf/2205.13892">https://arxiv.org/pdf/2205.13892</a>&gt;`_ paper.</p>
+<p>This class implements the EvenNet architecture, which improves the robustness of graph neural networks by focusing on even-hop neighbors while ignoring odd-hop neighbors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> (<em>int</em>) – Maximum number of hops considered for message passing.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Parameter controlling the weighting of different hops.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the base <cite>Module</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EvenNet.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/even_conv.html#EvenNet.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EvenNet.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EvenNet.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/even_conv.html#EvenNet.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EvenNet.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EvenNet.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/even_conv.html#EvenNet.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EvenNet.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.EvenNet.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/even_conv.html#EvenNet.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.EvenNet.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">GATConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">improved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cached</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassingNts" title="jittor_geometric.nn.conv.message_passiong_nts.MessagePassingNts"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassingNts</span></code></a></p>
+<p>The graph convolutional operator from the <a href="#id5"><span class="problematic" id="id6">`</span></a>”Graph Attention Networks”
+2018 ICLR _ paper</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.edge_forward">
+<span class="sig-name descname"><span class="pre">edge_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.edge_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.edge_forward" title="Link to this definition"></a></dt>
+<dd><p>EdgeForward is a parameterized function defined on each
+edge to generate an output message by combining the edge
+representation with the representations of source and destination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.execute" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.propagate">
+<span class="sig-name descname"><span class="pre">propagate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.propagate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.propagate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.scatter_to_edge">
+<span class="sig-name descname"><span class="pre">scatter_to_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.scatter_to_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.scatter_to_edge" title="Link to this definition"></a></dt>
+<dd><p>ScatterToEdge is an edge message generating operation t
+hat scatters the source and destination representations
+to edges for the EdgeForward computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.scatter_to_vertex">
+<span class="sig-name descname"><span class="pre">scatter_to_vertex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.scatter_to_vertex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.scatter_to_vertex" title="Link to this definition"></a></dt>
+<dd><p>Scatter_to_vertex takes incoming edge-associated Vars as input
+and outputs a new vertex representation for next layer’s computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GATConv.vertex_forward">
+<span class="sig-name descname"><span class="pre">vertex_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gat_conv.html#GATConv.vertex_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GATConv.vertex_forward" title="Link to this definition"></a></dt>
+<dd><p>VertexForward is a parameterized function defined on each vertex
+to generate new vertex representation by applying zero or several
+NN models on aggregated neighborhood representations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCN2Conv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">GCN2Conv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cached</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn2_conv.html#GCN2Conv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCN2Conv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>The graph convolutional operator with initial residual connections and
+identity mapping (GCNII) from the <a class="reference external" href="https://arxiv.org/abs/2007.02133">“Simple and Deep Graph Convolutional
+Networks”</a> paper.</p>
+<p>This class implements the GCNII layer, which combines initial residual connections and identity mapping
+to enable deeper graph convolutional networks without oversmoothing. The layer supports both message-passing
+and sparse matrix multiplication (SPMM) for efficient propagation.</p>
+<p>Mathematical Formulation:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mathbf</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="o">^</span><span class="p">{(</span><span class="n">l</span><span class="p">)}</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> \<span class="n">beta</span><span class="p">)</span> \<span class="n">big</span><span class="p">(</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> \<span class="n">alpha</span><span class="p">)</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="o">^</span><span class="p">{(</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span> <span class="o">+</span> \<span class="n">alpha</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="o">^</span><span class="p">{(</span><span class="mi">0</span><span class="p">)}</span> \<span class="n">big</span><span class="p">)</span> <span class="o">+</span>
+\<span class="n">beta</span> \<span class="n">big</span><span class="p">(</span> \<span class="n">mathbf</span><span class="p">{</span>\<span class="n">Theta</span><span class="p">}</span><span class="n">_1</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="o">^</span><span class="p">{(</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span> <span class="o">+</span> \<span class="n">mathbf</span><span class="p">{</span>\<span class="n">Theta</span><span class="p">}</span><span class="n">_2</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="o">^</span><span class="p">{(</span><span class="mi">0</span><span class="p">)}</span> \<span class="n">big</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where:
+- <span class="math notranslate nohighlight">\(\mathbf{H}^{(l)}\)</span> is the node feature matrix at layer <span class="math notranslate nohighlight">\(l\)</span>.
+- <span class="math notranslate nohighlight">\(\mathbf{H}^{(0)}\)</span> is the initial node feature matrix.
+- <span class="math notranslate nohighlight">\(\mathbf{\Theta}_1\)</span> and <span class="math notranslate nohighlight">\(\mathbf{\Theta}_2\)</span> are learnable weight matrices.
+- <span class="math notranslate nohighlight">\(\alpha\)</span> controls the strength of the initial residual connection.
+- <span class="math notranslate nohighlight">\(\beta\)</span> balances feature aggregation and transformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em>) – Number of input features per node.</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Number of output features per node.</p></li>
+<li><p><strong>cached</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, caches the normalized edge indices. Default is <cite>False</cite>.</p></li>
+<li><p><strong>add_self_loops</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, adds self-loops to the input graph. Default is <cite>True</cite>.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>False</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the base <cite>MessagePassing</cite> class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCN2Conv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn2_conv.html#GCN2Conv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCN2Conv.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCN2Conv.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn2_conv.html#GCN2Conv.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCN2Conv.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCN2Conv.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn2_conv.html#GCN2Conv.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCN2Conv.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCN2Conv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn2_conv.html#GCN2Conv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCN2Conv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCNConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">GCNConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn_conv.html#GCNConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCNConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>The graph convolutional operator from the <a class="reference external" href="https://arxiv.org/abs/1609.02907">“Semi-supervised
+Classification with Graph Convolutional Networks”</a> paper.</p>
+<p>This class implements the Graph Convolutional Network (GCN) layer, which updates node representations by aggregating information from neighboring nodes, taking the graph structure into account.
+It supports both message-passing and sparse matrix multiplication (SPMM) for propagation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em>) – Size of each input sample (number of input features per node).</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Size of each output sample (number of output features per node).</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, adds a learnable bias to the output. Default is <cite>True</cite>.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the base <cite>Module</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">MyGraphDataset</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;/path/to/dataset&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Access the first graph object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv</span> <span class="o">=</span> <span class="n">GCNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spmm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v_num</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Number of nodes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span> <span class="o">=</span> <span class="n">gcn_norm</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">v_num</span><span class="p">,</span>
+<span class="gp">... </span>                                   <span class="n">improved</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_self_loops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">jt</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">csc</span> <span class="o">=</span> <span class="n">cootocsc</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">v_num</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">csr</span> <span class="o">=</span> <span class="n">cootocsr</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">v_num</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="n">v_num</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>  <span class="c1"># Randomly initialize node features</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">csc</span><span class="p">,</span> <span class="n">csr</span><span class="p">)</span>  <span class="c1"># Apply GCN layer</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCNConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn_conv.html#GCNConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCNConv.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCNConv.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn_conv.html#GCNConv.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCNConv.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCNConv.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn_conv.html#GCNConv.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCNConv.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GCNConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gcn_conv.html#GCNConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GCNConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GPRGNN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">GPRGNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gpr_conv.html#GPRGNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GPRGNN" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>The graph propagation operator from the <a class="reference external" href="https://arxiv.org/abs/2006.07988">“Adaptive Universal
+Generalized PageRank Graph Neural Network”</a> paper</p>
+<p>Mathematical Formulation:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mathbf</span><span class="p">{</span><span class="n">Z</span><span class="p">}</span> <span class="o">=</span> \<span class="n">sum_</span><span class="p">{</span><span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">}</span><span class="o">^</span><span class="p">{</span><span class="n">K</span><span class="p">}</span> \<span class="n">alpha_k</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">P</span><span class="p">}</span><span class="o">^</span><span class="p">{</span><span class="n">k</span><span class="p">}</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">X</span><span class="p">}</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>where:</dt><dd><p><span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the input node feature matrix.
+<span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> is the output node feature matrix.
+<span class="math notranslate nohighlight">\(\mathbf{P}\)</span> is the normalized adjacency matrix of the graph.
+<span class="math notranslate nohighlight">\(\alpha_k\)</span> is the parameter for the <span class="math notranslate nohighlight">\(k\)</span>-th order polynomial.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> (<em>int</em>) – Order of polynomial, or maximum number of hops considered for message passing.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Parameter controlling the weighting of different hops.</p></li>
+<li><p><strong>Init</strong> (<em>str</em>) – Initialization method for the propagation weights. Possible values are ‘SGC’, ‘PPR’, ‘NPPR’, ‘Random’, ‘WS’.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GPRGNN.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gpr_conv.html#GPRGNN.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GPRGNN.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GPRGNN.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gpr_conv.html#GPRGNN.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GPRGNN.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GPRGNN.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gpr_conv.html#GPRGNN.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GPRGNN.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.GPRGNN.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/gpr_conv.html#GPRGNN.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.GPRGNN.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassing">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">MessagePassing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'source_to_target'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passing.html#MessagePassing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassing" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassing.aggregate">
+<span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passing.html#MessagePassing.aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassing.aggregate" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassing.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_j</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passing.html#MessagePassing.message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassing.message" title="Link to this definition"></a></dt>
+<dd><p>Constructs messages from node <span class="math notranslate nohighlight">\(j\)</span> to node <span class="math notranslate nohighlight">\(i\)</span>
+in analogy to <span class="math notranslate nohighlight">\(\phi_{\mathbf{\Theta}}\)</span> for each edge in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_index</span></code>.
+This function can take any argument as input which was initially
+passed to <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.propagate" title="jittor_geometric.nn.conv.MessagePassing.propagate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code></a>.
+Furthermore, Var passed to <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.propagate" title="jittor_geometric.nn.conv.MessagePassing.propagate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code></a> can be mapped to the
+respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> by appending <code class="xref py py-obj docutils literal notranslate"><span class="pre">_i</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">_j</span></code> to the variable name, <em>.e.g.</em> <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_i</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_j</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassing.propagate">
+<span class="sig-name descname"><span class="pre">propagate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passing.html#MessagePassing.propagate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassing.propagate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassing.special_args">
+<span class="sig-name descname"><span class="pre">special_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'adj_t',</span> <span class="pre">'dim_size',</span> <span class="pre">'edge_index',</span> <span class="pre">'edge_index_i',</span> <span class="pre">'edge_index_j',</span> <span class="pre">'index',</span> <span class="pre">'ptr',</span> <span class="pre">'size',</span> <span class="pre">'size_i',</span> <span class="pre">'size_j'}</span></em><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassing.special_args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassing.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passing.html#MessagePassing.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassing.update" title="Link to this definition"></a></dt>
+<dd><p>Updates node embeddings in analogy to
+<span class="math notranslate nohighlight">\(\gamma_{\mathbf{\Theta}}\)</span> for each node
+<span class="math notranslate nohighlight">\(i \in \mathcal{V}\)</span>.
+Takes in the output of aggregation as first argument and any argument
+which was initially passed to <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing.propagate" title="jittor_geometric.nn.conv.MessagePassing.propagate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">MessagePassingNts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'source_to_target'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.aggregate_with_weight">
+<span class="sig-name descname"><span class="pre">aggregate_with_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts.aggregate_with_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.aggregate_with_weight" title="Link to this definition"></a></dt>
+<dd><p>Used for GCN demo ,combine  ‘scatter_to_edge’ with  ‘scatter_to_vertex’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.edge_forward">
+<span class="sig-name descname"><span class="pre">edge_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts.edge_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.edge_forward" title="Link to this definition"></a></dt>
+<dd><p>EdgeForward is a parameterized function defined on each
+edge to generate an output message by combining the edge
+representation with the representations of source and destination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.propagate">
+<span class="sig-name descname"><span class="pre">propagate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts.propagate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.propagate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.scatter_to_edge">
+<span class="sig-name descname"><span class="pre">scatter_to_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts.scatter_to_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.scatter_to_edge" title="Link to this definition"></a></dt>
+<dd><p>ScatterToEdge is an edge message generating operation t
+hat scatters the source and destination representations
+to edges for the EdgeForward computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.scatter_to_vertex">
+<span class="sig-name descname"><span class="pre">scatter_to_vertex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts.scatter_to_vertex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.scatter_to_vertex" title="Link to this definition"></a></dt>
+<dd><p>Scatter_to_vertex takes incoming edge-associated Vars as input
+and outputs a new vertex representation for next layer’s computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.special_args">
+<span class="sig-name descname"><span class="pre">special_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'adj_t',</span> <span class="pre">'dim_size',</span> <span class="pre">'edge_index',</span> <span class="pre">'edge_index_i',</span> <span class="pre">'edge_index_j',</span> <span class="pre">'index',</span> <span class="pre">'ptr',</span> <span class="pre">'size',</span> <span class="pre">'size_i',</span> <span class="pre">'size_j'}</span></em><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.special_args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.MessagePassingNts.vertex_forward">
+<span class="sig-name descname"><span class="pre">vertex_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/message_passiong_nts.html#MessagePassingNts.vertex_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.MessagePassingNts.vertex_forward" title="Link to this definition"></a></dt>
+<dd><p>VertexForward is a parameterized function defined on each vertex
+to generate new vertex representation by applying zero or several
+NN models on aggregated neighborhood representations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.OptBasisConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">OptBasisConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/optbasis_conv.html#OptBasisConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.OptBasisConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Graph Neural Networks with Learnable and Optimal Polynomial Bases
+&lt;<a class="reference external" href="https://openreview.net/pdf?id=UjQIoJv927">https://openreview.net/pdf?id=UjQIoJv927</a>&gt;`_ paper.</p>
+<p>This class implements the OptBasisConv architecture, which implicitly utilize the optimal polynomial bases on each channel via three term recurrence propagation.
+Check Algorithm 4 and Algorithm 5 in the paper for more details.</p>
+<dl class="simple">
+<dt>Mathematical Formulation:</dt><dd><p>Please refer to Algorithm 2, 4 and 5 in paper for more details.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> (<em>int</em>) – Order of polynomial bases.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>n_channels</strong> (<em>int</em>) – Number of signal channels to be filtered.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the base <cite>Module</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.OptBasisConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/optbasis_conv.html#OptBasisConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.OptBasisConv.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.OptBasisConv.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/optbasis_conv.html#OptBasisConv.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.OptBasisConv.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.OptBasisConv.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/optbasis_conv.html#OptBasisConv.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.OptBasisConv.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.OptBasisConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/optbasis_conv.html#OptBasisConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.OptBasisConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.OptBasisConv.three_term_prop">
+<span class="sig-name descname"><span class="pre">three_term_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_last_h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/optbasis_conv.html#OptBasisConv.three_term_prop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.OptBasisConv.three_term_prop" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SAGEConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">SAGEConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">improved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cached</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sage_conv.html#SAGEConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SAGEConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>The GraphSAGE operator from the <a class="reference external" href="https://arxiv.org/abs/1706.02216">“Inductive
+Representation Learning on Large Graphs”</a> paper.</p>
+<p>This class implements the GraphSAGE layer, which updates node representations by aggregating information from neighboring nodes,
+concatenating the transformed embedding itself, taking the graph structure into account.
+It supports both message-passing and sparse matrix multiplication (SPMM) for propagation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em>) – Size of each input sample (number of input features per node).</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Size of each output sample (number of output features per node).</p></li>
+<li><p><strong>improved</strong> (<em>bool</em><em>, </em><em>optional</em>) – Improved self loop value (can be ignored, similar function as diag_lambda)</p></li>
+<li><p><strong>cached</strong> (<em>bool</em><em>, </em><em>optional</em>) – Caching the processed csr, csc and edge_weight.</p></li>
+<li><p><strong>add_self_loops</strong> (<em>bool optional</em>) – Whether to add self-loops to the input graph.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – SET TO TRUE FOR NORMALLY FUNCTION.</p></li>
+<li><p><strong>project</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to ‘True’, the node feature will be transformed first.</p></li>
+<li><p><strong>root_weight</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to ‘True’, adding the transformed node features to result.</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, adds a learnable bias to the output. Default is <cite>True</cite>.</p></li>
+<li><p><strong>spmm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <cite>True</cite>, uses sparse matrix multiplication (SPMM) for propagation. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the base <cite>Module</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SAGEConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sage_conv.html#SAGEConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SAGEConv.execute" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SAGEConv.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sage_conv.html#SAGEConv.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SAGEConv.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SAGEConv.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sage_conv.html#SAGEConv.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SAGEConv.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SAGEConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sage_conv.html#SAGEConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SAGEConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SGConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">SGConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spmm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sg_conv.html#SGConv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SGConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>The simple graph convolutional operator from the <a class="reference external" href="https://arxiv.org/abs/1902.07153">“Simplifying Graph
+Convolutional Networks”</a> paper.</p>
+<p>This class implements the Simplified Graph Convolution (SGC) layer, which removes nonlinearities and collapses weight
+matrices across layers to achieve a simplified and computationally efficient graph convolution.</p>
+<p>Mathematical Formulation:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mathbf</span><span class="p">{</span><span class="n">X</span><span class="p">}</span><span class="o">^</span><span class="p">{</span>\<span class="n">prime</span><span class="p">}</span> <span class="o">=</span> <span class="p">{</span>\<span class="n">left</span><span class="p">(</span>\<span class="n">mathbf</span><span class="p">{</span>\<span class="n">hat</span><span class="p">{</span><span class="n">D</span><span class="p">}}</span><span class="o">^</span><span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span> \<span class="n">mathbf</span><span class="p">{</span>\<span class="n">hat</span><span class="p">{</span><span class="n">A</span><span class="p">}}</span>
+\<span class="n">mathbf</span><span class="p">{</span>\<span class="n">hat</span><span class="p">{</span><span class="n">D</span><span class="p">}}</span><span class="o">^</span><span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span> \<span class="n">right</span><span class="p">)}</span><span class="o">^</span><span class="n">K</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">X</span><span class="p">}</span> \<span class="n">mathbf</span><span class="p">{</span>\<span class="n">Theta</span><span class="p">},</span>
+</pre></div>
+</div>
+<p>where:
+- <span class="math notranslate nohighlight">\(\mathbf{\hat{A}} = \mathbf{A} + \mathbf{I}\)</span> denotes the adjacency matrix with added self-loops.
+- <span class="math notranslate nohighlight">\(\hat{D}_{ii} = \sum_{j=0} \hat{A}_{ij}\)</span> is its diagonal degree matrix.
+- <span class="math notranslate nohighlight">\(K\)</span> controls the number of propagation steps.
+- The adjacency matrix can include other values than <code class="xref py py-obj docutils literal notranslate"><span class="pre">1</span></code>, representing edge weights via the optional <cite>edge_weight</cite> variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em>) – Number of input features per node.</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Number of output features per node.</p></li>
+<li><p><strong>K</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of propagation steps. Default is <cite>1</cite>.</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include a learnable bias term. Default is <cite>True</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments for the <cite>MessagePassing</cite> class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SGConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sg_conv.html#SGConv.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SGConv.execute" title="Link to this definition"></a></dt>
+<dd><p>Perform forward propagation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SGConv.propagate_msg">
+<span class="sig-name descname"><span class="pre">propagate_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sg_conv.html#SGConv.propagate_msg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SGConv.propagate_msg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SGConv.propagate_spmm">
+<span class="sig-name descname"><span class="pre">propagate_spmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sg_conv.html#SGConv.propagate_spmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SGConv.propagate_spmm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.SGConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/conv/sg_conv.html#SGConv.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.conv.SGConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.TransformerConv">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.conv.</span></span><span class="sig-name descname"><span class="pre">TransformerConv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jittor_geometric.nn.conv.TransformerConv" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.message_passing.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">MessagePassing</span></code></a></p>
+<p>The graph transformer operator from the <a class="reference external" href="https://arxiv.org/abs/2009.03509">“Masked Label Prediction:
+Unified Message Passing Model for Semi-Supervised Classification”</a> paper</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}^{\prime}_i = \mathbf{W}_1 \mathbf{x}_i +
+\sum_{j \in \mathcal{N}(i)} \alpha_{i,j} \mathbf{W}_2 \mathbf{x}_{j},\]</div>
+<p>where the attention coefficients <span class="math notranslate nohighlight">\(\alpha_{i,j}\)</span> are computed via
+multi-head dot product attention:</p>
+<div class="math notranslate nohighlight">
+\[\alpha_{i,j} = \textrm{softmax} \left(
+\frac{(\mathbf{W}_3\mathbf{x}_i)^{\top} (\mathbf{W}_4\mathbf{x}_j)}
+{\sqrt{d}} \right)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_channels</strong> (<em>int</em><em> or </em><em>tuple</em>) – Size of each input sample, or <code class="xref py py-obj docutils literal notranslate"><span class="pre">-1</span></code> to
+derive the size from the first input(s) to the forward method.
+A tuple corresponds to the sizes of source and target
+dimensionalities.</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Size of each output sample.</p></li>
+<li><p><strong>heads</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of multi-head-attentions.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+<li><p><strong>concat</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>, the multi-head
+attentions are averaged instead of concatenated.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>beta</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>If set, will combine aggregation and
+skip information via</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}^{\prime}_i = \beta_i \mathbf{W}_1 \mathbf{x}_i +
+(1 - \beta_i) \underbrace{\left(\sum_{j \in \mathcal{N}(i)}
+\alpha_{i,j} \mathbf{W}_2 \vec{x}_j \right)}_{=\mathbf{m}_i}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\beta_i = \textrm{sigmoid}(\mathbf{w}_5^{\top}
+[ \mathbf{W}_1 \mathbf{x}_i, \mathbf{m}_i, \mathbf{W}_1
+\mathbf{x}_i - \mathbf{m}_i ])\)</span> (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>)</p>
+</p></li>
+<li><p><strong>dropout</strong> (<em>float</em><em>, </em><em>optional</em>) – Dropout probability of the normalized
+attention coefficients which exposes each node to a stochastically
+sampled neighborhood during training. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
+<li><p><strong>edge_dim</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>Edge feature dimensionality (in case
+there are any). Edge features are added to the keys after
+linear transformation, that is, prior to computing the
+attention dot product. They are also added to final values
+after the same linear transformation. The model is:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}^{\prime}_i = \mathbf{W}_1 \mathbf{x}_i +
+\sum_{j \in \mathcal{N}(i)} \alpha_{i,j} \left(
+\mathbf{W}_2 \mathbf{x}_{j} + \mathbf{W}_6 \mathbf{e}_{ij}
+\right),\]</div>
+<p>where the attention coefficients <span class="math notranslate nohighlight">\(\alpha_{i,j}\)</span> are now
+computed via:</p>
+<div class="math notranslate nohighlight">
+\[\alpha_{i,j} = \textrm{softmax} \left(
+\frac{(\mathbf{W}_3\mathbf{x}_i)^{\top}
+(\mathbf{W}_4\mathbf{x}_j + \mathbf{W}_6 \mathbf{e}_{ij})}
+{\sqrt{d}} \right)\]</div>
+<p>(default <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p>
+</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>, the layer will not learn
+an additive bias. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>root_weight</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>, the layer will
+not add the transformed root node features to the output and the
+option  <code class="xref py py-attr docutils literal notranslate"><span class="pre">beta</span></code> is set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>**kwargs</strong> (<em>optional</em>) – Additional arguments of
+<a class="reference internal" href="#jittor_geometric.nn.conv.MessagePassing" title="jittor_geometric.nn.conv.MessagePassing"><code class="xref py py-class docutils literal notranslate"><span class="pre">jittor_geometric.nn.conv.MessagePassing</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.TransformerConv.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_attention_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jittor_geometric.nn.conv.TransformerConv.execute" title="Link to this definition"></a></dt>
+<dd><p>Runs the forward pass of the module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_attention_weights</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>,
+will additionally return the tuple
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">(edge_index,</span> <span class="pre">attention_weights)</span></code>, holding the computed
+attention weights for each edge. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.TransformerConv.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_attention_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jittor_geometric.nn.conv.TransformerConv.forward" title="Link to this definition"></a></dt>
+<dd><p>Runs the forward pass of the module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_attention_weights</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>,
+will additionally return the tuple
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">(edge_index,</span> <span class="pre">attention_weights)</span></code>, holding the computed
+attention weights for each edge. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.TransformerConv.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jittor_geometric.nn.conv.TransformerConv.message" title="Link to this definition"></a></dt>
+<dd><p>Constructs messages from node <span class="math notranslate nohighlight">\(j\)</span> to node <span class="math notranslate nohighlight">\(i\)</span>
+in analogy to <span class="math notranslate nohighlight">\(\phi_{\mathbf{\Theta}}\)</span> for each edge in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_index</span></code>.
+This function can take any argument as input which was initially
+passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code>.
+Furthermore, Var passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code> can be mapped to the
+respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> by appending <code class="xref py py-obj docutils literal notranslate"><span class="pre">_i</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">_j</span></code> to the variable name, <em>.e.g.</em> <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_i</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_j</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.conv.TransformerConv.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#jittor_geometric.nn.conv.TransformerConv.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aggr.html" class="btn btn-neutral float-left" title="jittor_geometric.nn.aggr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dense.html" class="btn btn-neutral float-right" title="jittor_geometric.nn.dense" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

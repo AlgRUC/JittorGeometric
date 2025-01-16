@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.nn.aggr &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="jittor_geometric.nn.conv" href="conv.html" />
+    <link rel="prev" title="Modules" href="../nn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">JittorGeometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../nn.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">jittor_geometric.nn.aggr</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation"><code class="docutils literal notranslate"><span class="pre">Aggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.assert_index_present"><code class="docutils literal notranslate"><span class="pre">Aggregation.assert_index_present()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.assert_sorted_index"><code class="docutils literal notranslate"><span class="pre">Aggregation.assert_sorted_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.assert_two_dimensional_input"><code class="docutils literal notranslate"><span class="pre">Aggregation.assert_two_dimensional_input()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.execute"><code class="docutils literal notranslate"><span class="pre">Aggregation.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.reduce"><code class="docutils literal notranslate"><span class="pre">Aggregation.reduce()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.reset_parameters"><code class="docutils literal notranslate"><span class="pre">Aggregation.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.segment"><code class="docutils literal notranslate"><span class="pre">Aggregation.segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.to_dense_batch"><code class="docutils literal notranslate"><span class="pre">Aggregation.to_dense_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation.to_dense_batch_helper"><code class="docutils literal notranslate"><span class="pre">Aggregation.to_dense_batch_helper()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.aggr.MaxAggregation"><code class="docutils literal notranslate"><span class="pre">MaxAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MaxAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MaxAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.aggr.MeanAggregation"><code class="docutils literal notranslate"><span class="pre">MeanAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MeanAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MeanAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.aggr.MinAggregation"><code class="docutils literal notranslate"><span class="pre">MinAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MinAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MinAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.aggr.MultiAggregation"><code class="docutils literal notranslate"><span class="pre">MultiAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MultiAggregation.combine"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.combine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MultiAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MultiAggregation.get_out_channels"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.get_out_channels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.MultiAggregation.reset_parameters"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jittor_geometric.nn.aggr.SumAggregation"><code class="docutils literal notranslate"><span class="pre">SumAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jittor_geometric.nn.aggr.SumAggregation.execute"><code class="docutils literal notranslate"><span class="pre">SumAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="conv.html">jittor_geometric.nn.conv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dense.html">jittor_geometric.nn.dense</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../nn.html">Modules</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.nn.aggr</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/nn/aggr.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jittor-geometric-nn-aggr">
+<h1>jittor_geometric.nn.aggr<a class="headerlink" href="#jittor-geometric-nn-aggr" title="Link to this heading"></a></h1>
+<p>Aggregation layers used in Graph Neural Networks.</p>
+<dl class="py class" id="module-jittor_geometric.nn.aggr">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.aggr.</span></span><span class="sig-name descname"><span class="pre">Aggregation</span></span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.assert_index_present">
+<span class="sig-name descname"><span class="pre">assert_index_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.assert_index_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.assert_index_present" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.assert_sorted_index">
+<span class="sig-name descname"><span class="pre">assert_sorted_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.assert_sorted_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.assert_sorted_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.assert_two_dimensional_input">
+<span class="sig-name descname"><span class="pre">assert_two_dimensional_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.assert_two_dimensional_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.assert_two_dimensional_input" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.reduce" title="Link to this definition"></a></dt>
+<dd><p>Perform the aggregation (sum, max, mean, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.reset_parameters" title="Link to this definition"></a></dt>
+<dd><p>Resets all learnable parameters of the module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.segment">
+<span class="sig-name descname"><span class="pre">segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.segment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.segment" title="Link to this definition"></a></dt>
+<dd><p>Segment operation using ptr, similar to <cite>torch_scatter.segment</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.to_dense_batch">
+<span class="sig-name descname"><span class="pre">to_dense_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.to_dense_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.to_dense_batch" title="Link to this definition"></a></dt>
+<dd><p>Converts the aggregation input into a dense batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.Aggregation.to_dense_batch_helper">
+<span class="sig-name descname"><span class="pre">to_dense_batch_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/base.html#Aggregation.to_dense_batch_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.Aggregation.to_dense_batch_helper" title="Link to this definition"></a></dt>
+<dd><p>Helper function for creating dense batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MaxAggregation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.aggr.</span></span><span class="sig-name descname"><span class="pre">MaxAggregation</span></span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#MaxAggregation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MaxAggregation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation" title="jittor_geometric.nn.aggr.base.Aggregation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Aggregation</span></code></a></p>
+<p>An aggregation operator that takes the feature-wise maximum across a set of elements.</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{max}(\mathcal{X}) = \max_{\mathbf{x}_i \in \mathcal{X}}
+\mathbf{x}_i.\]</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MaxAggregation.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#MaxAggregation.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MaxAggregation.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MeanAggregation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.aggr.</span></span><span class="sig-name descname"><span class="pre">MeanAggregation</span></span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#MeanAggregation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MeanAggregation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation" title="jittor_geometric.nn.aggr.base.Aggregation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Aggregation</span></code></a></p>
+<p>An aggregation operator that averages features across a set of elements.</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{mean}(\mathcal{X}) = \frac{1}{|\mathcal{X}|}
+\sum_{\mathbf{x}_i \in \mathcal{X}} \mathbf{x}_i.\]</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MeanAggregation.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#MeanAggregation.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MeanAggregation.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MinAggregation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.aggr.</span></span><span class="sig-name descname"><span class="pre">MinAggregation</span></span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#MinAggregation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MinAggregation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation" title="jittor_geometric.nn.aggr.base.Aggregation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Aggregation</span></code></a></p>
+<p>An aggregation operator that takes the feature-wise minimum across a set of elements.</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{min}(\mathcal{X}) = \min_{\mathbf{x}_i \in \mathcal{X}}
+\mathbf{x}_i.\]</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MinAggregation.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#MinAggregation.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MinAggregation.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MultiAggregation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.aggr.</span></span><span class="sig-name descname"><span class="pre">MultiAggregation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggrs_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/multi.html#MultiAggregation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MultiAggregation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Performs aggregations with one or more aggregators and combines
+aggregated results, as described in the <a class="reference external" href="https://arxiv.org/abs/2004.05718">“Principal Neighbourhood
+Aggregation for Graph Nets”</a> and
+<a class="reference external" href="https://arxiv.org/abs/2104.01481">“Adaptive Filters and Aggregator Fusion for Efficient Graph Convolutions”</a> papers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>aggrs</strong> (<em>list</em>) – The list of aggregation schemes to use.</p></li>
+<li><p><strong>aggrs_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Arguments passed to the
+respective aggregation function in case it gets automatically
+resolved. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The combine mode to use for combining
+aggregated results from multiple aggregations. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cat&quot;</span></code>).</p></li>
+<li><p><strong>mode_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Arguments passed for the combine
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MultiAggregation.combine">
+<span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/multi.html#MultiAggregation.combine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MultiAggregation.combine" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MultiAggregation.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/multi.html#MultiAggregation.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MultiAggregation.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MultiAggregation.get_out_channels">
+<span class="sig-name descname"><span class="pre">get_out_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/multi.html#MultiAggregation.get_out_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MultiAggregation.get_out_channels" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.MultiAggregation.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/multi.html#MultiAggregation.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.MultiAggregation.reset_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.SumAggregation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jittor_geometric.nn.aggr.</span></span><span class="sig-name descname"><span class="pre">SumAggregation</span></span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#SumAggregation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.SumAggregation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jittor_geometric.nn.aggr.Aggregation" title="jittor_geometric.nn.aggr.base.Aggregation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Aggregation</span></code></a></p>
+<p>An aggregation operator that sums up features across a set of elements.</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{sum}(\mathcal{X}) = \sum_{\mathbf{x}_i \in \mathcal{X}}
+\mathbf{x}_i.\]</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jittor_geometric.nn.aggr.SumAggregation.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jittor_geometric/nn/aggr/basic.html#SumAggregation.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.nn.aggr.SumAggregation.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes the module computation.</p>
+<p>Raises NotImplementedError if the subclass does not override the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../nn.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conv.html" class="btn btn-neutral float-right" title="jittor_geometric.nn.conv" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

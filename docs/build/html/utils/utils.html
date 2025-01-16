@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.utils &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="jittor_geometric.ops" href="../ops/ops.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">JittorGeometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules/nn.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">jittor_geometric.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.add_remaining_self_loops"><code class="docutils literal notranslate"><span class="pre">add_remaining_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.add_self_loops"><code class="docutils literal notranslate"><span class="pre">add_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.coalesce"><code class="docutils literal notranslate"><span class="pre">coalesce()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.contains_isolated_nodes"><code class="docutils literal notranslate"><span class="pre">contains_isolated_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.contains_self_loops"><code class="docutils literal notranslate"><span class="pre">contains_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.degree"><code class="docutils literal notranslate"><span class="pre">degree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.get_laplacian"><code class="docutils literal notranslate"><span class="pre">get_laplacian()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.induced_graph"><code class="docutils literal notranslate"><span class="pre">induced_graph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.is_jittor_sparse_tensor"><code class="docutils literal notranslate"><span class="pre">is_jittor_sparse_tensor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.maybe_num_nodes"><code class="docutils literal notranslate"><span class="pre">maybe_num_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.neighbor_sampler"><code class="docutils literal notranslate"><span class="pre">neighbor_sampler()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.one_hot"><code class="docutils literal notranslate"><span class="pre">one_hot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.randomwalk_sampler"><code class="docutils literal notranslate"><span class="pre">randomwalk_sampler()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.remove_isolated_nodes"><code class="docutils literal notranslate"><span class="pre">remove_isolated_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.remove_self_loops"><code class="docutils literal notranslate"><span class="pre">remove_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.scatter"><code class="docutils literal notranslate"><span class="pre">scatter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.segregate_self_loops"><code class="docutils literal notranslate"><span class="pre">segregate_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jittor_geometric.utils.unique"><code class="docutils literal notranslate"><span class="pre">unique()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">jittor_geometric.utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/utils/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-jittor_geometric.utils">
+<span id="jittor-geometric-utils"></span><h1>jittor_geometric.utils<a class="headerlink" href="#module-jittor_geometric.utils" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.add_remaining_self_loops">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">add_remaining_self_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/loop.html#add_remaining_self_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.add_remaining_self_loops" title="Link to this definition"></a></dt>
+<dd><p>Adds remaining self-loop <span class="math notranslate nohighlight">\((i,i) \in \mathcal{E}\)</span> to every node
+<span class="math notranslate nohighlight">\(i \in \mathcal{V}\)</span> in the graph given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>.
+In case the graph is weighted and already contains a few self-loops, only
+non-existent self-loops will be added with edge weights denoted by
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">fill_value</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>edge_weight</strong> (<em>Var</em><em>, </em><em>optional</em>) – One-dimensional edge weights.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>fill_value</strong> (<em>float</em><em>, </em><em>optional</em>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_weight</span></code> is not <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>,
+will add self-loops with edge weights of <code class="xref py py-obj docutils literal notranslate"><span class="pre">fill_value</span></code> to the
+graph. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">1.</span></code>)</p></li>
+<li><p><strong>num_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nodes, <em>i.e.</em>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_val</span> <span class="pre">+</span> <span class="pre">1</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span> <span class="pre">int32</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.add_self_loops">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">add_self_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/loop.html#add_self_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.add_self_loops" title="Link to this definition"></a></dt>
+<dd><p>Adds a self-loop <span class="math notranslate nohighlight">\((i,i) \in \mathcal{E}\)</span> to every node
+<span class="math notranslate nohighlight">\(i \in \mathcal{V}\)</span> in the graph given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>.
+In case the graph is weighted, self-loops will be added with edge weights
+denoted by <code class="xref py py-obj docutils literal notranslate"><span class="pre">fill_value</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>edge_weight</strong> (<em>Var</em><em>, </em><em>optional</em>) – One-dimensional edge weights.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>fill_value</strong> (<em>float</em><em>, </em><em>optional</em>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_weight</span></code> is not <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>,
+will add self-loops with edge weights of <code class="xref py py-obj docutils literal notranslate"><span class="pre">fill_value</span></code> to the
+graph. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">1.</span></code>)</p></li>
+<li><p><strong>num_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nodes, <em>i.e.</em>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_val</span> <span class="pre">+</span> <span class="pre">1</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span> <span class="pre">int32</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.coalesce">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">coalesce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sum'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sorted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/coalesce.html#coalesce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.coalesce" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.contains_isolated_nodes">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">contains_isolated_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/isolated.html#contains_isolated_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.contains_isolated_nodes" title="Link to this definition"></a></dt>
+<dd><p>Returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code> if the graph given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code> contains
+isolated nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>num_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nodes, <em>i.e.</em>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_val</span> <span class="pre">+</span> <span class="pre">1</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.contains_self_loops">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">contains_self_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/loop.html#contains_self_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.contains_self_loops" title="Link to this definition"></a></dt>
+<dd><p>Returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code> if the graph given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code> contains
+self-loops.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.degree">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">degree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/degree.html#degree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.degree" title="Link to this definition"></a></dt>
+<dd><p>Computes the (unweighted) degree of a given one-dimensional index
+Var.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.get_laplacian">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">get_laplacian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/get_laplacian.html#get_laplacian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.get_laplacian" title="Link to this definition"></a></dt>
+<dd><p>Computes the graph Laplacian of the graph given by <code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_index</span></code>
+and optional <code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_weight</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>edge_weight</strong> (<em>Var</em><em>, </em><em>optional</em>) – One-dimensional edge weights.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>normalization</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>The normalization scheme for the graph
+Laplacian (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>):</p>
+<p>1. <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>: No normalization
+<span class="math notranslate nohighlight">\(\mathbf{L} = \mathbf{D} - \mathbf{A}\)</span></p>
+<p>2. <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;sym&quot;</span></code>: Symmetric normalization
+<span class="math notranslate nohighlight">\(\mathbf{L} = \mathbf{I} - \mathbf{D}^{-1/2} \mathbf{A}
+\mathbf{D}^{-1/2}\)</span></p>
+<p>3. <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;rw&quot;</span></code>: Random-walk normalization
+<span class="math notranslate nohighlight">\(\mathbf{L} = \mathbf{I} - \mathbf{D}^{-1} \mathbf{A}\)</span></p>
+</p></li>
+<li><p><strong>dtype</strong> (<em>Var.dtype</em><em>, </em><em>optional</em>) – The desired data type of returned Var
+in case <code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_weight=None</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>num_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nodes, <em>i.e.</em>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_val</span> <span class="pre">+</span> <span class="pre">1</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.induced_graph">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">induced_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_selected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/induced_graph.html#induced_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.induced_graph" title="Link to this definition"></a></dt>
+<dd><p>Generate the node-induced graph of the original graph described by
+‘edge_index’. It is expected that max_nodes is larger than, or equal to
+the real max node index in edge_index, or may cause errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>jittor.Var</em>) – The edge list describing the whole graph.</p></li>
+<li><p><strong>node_selected</strong> (<em>jittor.Var</em>) – The node list of the expected induced
+graph.</p></li>
+<li><p><strong>max_nodes</strong> (<em>int</em>) – The maximum node index in edge_index.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.is_jittor_sparse_tensor">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">is_jittor_sparse_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/sparse.html#is_jittor_sparse_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.is_jittor_sparse_tensor" title="Link to this definition"></a></dt>
+<dd><p>Returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code> if the input <code class="xref py py-obj docutils literal notranslate"><span class="pre">src</span></code> is a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">jittor.sparse.Tensor</span></code> (in any sparse layout).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>src</strong> (<em>Any</em>) – The input object to be checked.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.maybe_num_nodes">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">maybe_num_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/num_nodes.html#maybe_num_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.maybe_num_nodes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.neighbor_sampler">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">neighbor_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neighbor_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_offs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_nums</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/neighbor_sampler.html#neighbor_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.neighbor_sampler" title="Link to this definition"></a></dt>
+<dd><p>Samples the neighbor of all the source nodes, in the given graph
+described by neighbor_list, neighbor_hook, and neighbor_offs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>neighbor_list</strong> (<em>jittor.Var</em>) – An ordered list of neighbors.</p></li>
+<li><p><strong>neighbor_offs</strong> (<em>jittor.Var</em>) – For each node i, the neighbors of i
+are neighbor_list[neighbor_offs[i], neighbor_offs[i+1]]. There is
+neighbor_offs[max_nodes], which should equals to negihbor_list.size(0).</p></li>
+<li><p><strong>neighbor_nums</strong> (<em>jittor.Var</em>) – For each node i, the number of its
+neighbors is neighbor_nums[i] == neighbor_offs[i+1] -
+neighbor_offs[i].For neighbor_nums[i] == 0, should be preprocessed
+(usually assigned max_edges).</p></li>
+<li><p><strong>source_node</strong> (<em>jittor</em><em>,</em><em>Var</em>) – The source node of sampling.</p></li>
+<li><p><strong>max_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of nodes, assert to be (the
+length of neighbor_offs) - 1 and (the length of neighbor_nums) .</p></li>
+<li><p><strong>max_edges</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of edges, assert to be the
+length of neighbor_list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.one_hot">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">one_hot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/one_hot.html#one_hot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.one_hot" title="Link to this definition"></a></dt>
+<dd><p>Taskes a one-dimensional <code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code> var and returns a one-hot
+encoded representation of it with shape <code class="xref py py-obj docutils literal notranslate"><span class="pre">[*,</span> <span class="pre">num_classes]</span></code> that has
+zeros everywhere except where the index of last dimension matches the
+corresponding value of the input var, in which case it will be <code class="xref py py-obj docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>jittor.Var</em>) – The one-dimensional input var.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of classes. If set to
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, the number of classes will be inferred as one greater
+than the largest class value in the input var.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>dtype</strong> (<em>jittor.dtype</em><em>, </em><em>optional</em>) – The <code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype</span></code> of the output var.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.randomwalk_sampler">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">randomwalk_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neighbor_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_offs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_nums</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walk_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/neighbor_sampler.html#randomwalk_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.randomwalk_sampler" title="Link to this definition"></a></dt>
+<dd><p>Samples the random_walk of all the source nodes with length ‘walk_length’,
+in the given graph described by neighbor_list, neighbor_hook, and neighbor_offs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>neighbor_list</strong> (<em>jittor.Var</em>) – An ordered list of neighbors.</p></li>
+<li><p><strong>neighbor_offs</strong> (<em>jittor.Var</em>) – For each node i, the neighbors of i
+are neighbor_list[neighbor_offs[i], neighbor_offs[i+1]]. There is
+neighbor_offs[max_nodes], which should equals to negihbor_list.size(0).</p></li>
+<li><p><strong>neighbor_nums</strong> (<em>jittor.Var</em>) – For each node i, the number of its
+neighbors is neighbor_nums[i] == neighbor_offs[i+1] -
+neighbor_offs[i].For neighbor_nums[i] == 0, should be preprocessed
+(usually assigned max_edges).</p></li>
+<li><p><strong>source_node</strong> (<em>jittor</em><em>,</em><em>Var</em>) – The source node of sampling.</p></li>
+<li><p><strong>walk_length</strong> (<em>int</em>) – The length of random walk.</p></li>
+<li><p><strong>max_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of nodes, assert to be (the
+length of neighbor_offs) - 1 and (the length of neighbor_nums) .</p></li>
+<li><p><strong>max_edges</strong> (<em>int</em><em>, </em><em>optional</em>) – The total number of edges, assert to be the
+length of neighbor_list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.remove_isolated_nodes">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">remove_isolated_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/isolated.html#remove_isolated_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.remove_isolated_nodes" title="Link to this definition"></a></dt>
+<dd><p>Removes the isolated nodes from the graph given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>
+with optional edge attributes <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_attr</span></code>.
+In addition, returns a mask of shape <code class="xref py py-obj docutils literal notranslate"><span class="pre">[num_nodes]</span></code> to manually filter
+out isolated node features later on.
+Self-loops are preserved for non-isolated nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>edge_attr</strong> (<em>Var</em><em>, </em><em>optional</em>) – Edge weights or multi-dimensional
+edge features. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>num_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nodes, <em>i.e.</em>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">max_val</span> <span class="pre">+</span> <span class="pre">1</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(Var int32, Var, Var bool)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.remove_self_loops">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">remove_self_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/loop.html#remove_self_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.remove_self_loops" title="Link to this definition"></a></dt>
+<dd><p>Removes every self-loop in the graph given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_index</span></code>, so
+that <span class="math notranslate nohighlight">\((i,i) \not\in \mathcal{E}\)</span> for every <span class="math notranslate nohighlight">\(i \in \mathcal{V}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>edge_attr</strong> (<em>Var</em><em>, </em><em>optional</em>) – Edge weights or multi-dimensional
+edge features. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span> <span class="pre">int32</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.scatter">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/scatter.html#scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.scatter" title="Link to this definition"></a></dt>
+<dd><p>Reduces all values from the <code class="xref py py-obj docutils literal notranslate"><span class="pre">src</span></code> tensor at the indices
+specified in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code> tensor along a given dimension
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code>. See the <a class="reference external" href="https://pytorch-scatter.readthedocs.io/en/latest/functions/scatter.html">documentation</a> of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch_scatter</span></code> package for more
+information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> (<em>torch.Var</em>) – The source tensor.</p></li>
+<li><p><strong>index</strong> (<em>torch.Var</em>) – The index tensor.</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – The dimension along which to index.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
+<li><p><strong>dim_size</strong> (<em>int</em><em>, </em><em>optional</em>) – The size of the output tensor at
+dimension <code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code>. If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, will create a
+minimal-sized output tensor according to
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">index.max()</span> <span class="pre">+</span> <span class="pre">1</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>reduce</strong> (<em>str</em><em>, </em><em>optional</em>) – The reduce operation (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;sum&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;mul&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>).
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;sum&quot;</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.segregate_self_loops">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">segregate_self_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/loop.html#segregate_self_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.segregate_self_loops" title="Link to this definition"></a></dt>
+<dd><p>Segregates self-loops from the graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>Var int32</em>) – The edge indices.</p></li>
+<li><p><strong>edge_attr</strong> (<em>Var</em><em>, </em><em>optional</em>) – Edge weights or multi-dimensional
+edge features. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span> <span class="pre">int32</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span> <span class="pre">int32</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jittor_geometric.utils.unique">
+<span class="sig-prename descclassname"><span class="pre">jittor_geometric.utils.</span></span><span class="sig-name descname"><span class="pre">unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jittor_geometric/utils/sort.html#unique"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jittor_geometric.utils.unique" title="Link to this definition"></a></dt>
+<dd><p>Sorts the elements of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs</span></code> tensor in ascending order,
+and then delete the duplicated values.
+It is expected that <code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs</span></code> is one-dimensional and that it only
+contains positive integer values. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">max_value</span></code> is given, it can
+be used by the underlying algorithm for better performance (well this
+is fake because the index_sort() above cannot be directly called).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<em>jittor.Var</em>) – A vector with positive integer values.</p></li>
+<li><p><strong>max_value</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum value stored inside
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs</span></code>. This value can be an estimation, but needs to be
+greater than or equal to the real maximum.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Var</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../ops/ops.html" class="btn btn-neutral float-left" title="jittor_geometric.ops" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
