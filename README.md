@@ -128,8 +128,8 @@ Follow these steps to install JittorGeometric:
    ```
 3. Install the package:
    ```bash
-   git clone https://github.com/lyyisbored/JittorGeometric.git
-   cd "the project root directory that contains the setup.py file"
+   git clone https://github.com/AlgRUC/JittorGeometric.git
+   cd JittorGeometric
    pip install .
    ```
 4. Verify the installation by running the gcn_example.py
