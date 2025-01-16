@@ -11,7 +11,7 @@ python:
       - method: setuptools
         path: .
 
-spinx:
+sphinx:
    configuration: docs/source/conf.py
 
 formats: []
