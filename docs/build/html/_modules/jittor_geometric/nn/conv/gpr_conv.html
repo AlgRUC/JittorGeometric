@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.nn.conv.gpr_conv &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Jittor Geometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/nn.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.nn.conv.gpr_conv</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jittor_geometric.nn.conv.gpr_conv</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Description: </span>
+<span class="sd">Author: ivam</span>
+<span class="sd">Date: 2024-12-13</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.typing</span> <span class="kn">import</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">OptVar</span>
+<span class="kn">import</span> <span class="nn">jittor</span> <span class="k">as</span> <span class="nn">jt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">jittor</span> <span class="kn">import</span> <span class="n">Var</span><span class="p">,</span><span class="n">nn</span><span class="p">,</span><span class="n">Module</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.utils</span> <span class="kn">import</span> <span class="n">add_remaining_self_loops</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.utils.num_nodes</span> <span class="kn">import</span> <span class="n">maybe_num_nodes</span>
+
+<span class="kn">from</span> <span class="nn">..inits</span> <span class="kn">import</span> <span class="n">glorot</span><span class="p">,</span> <span class="n">zeros</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.data</span> <span class="kn">import</span> <span class="n">CSC</span><span class="p">,</span> <span class="n">CSR</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.ops</span> <span class="kn">import</span> <span class="n">SpmmCsr</span><span class="p">,</span> <span class="n">aggregateWithWeight</span>
+
+<div class="viewcode-block" id="GPRGNN">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN">[docs]</a>
+<span class="k">class</span> <span class="nc">GPRGNN</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The graph propagation operator from the `&quot;Adaptive Universal </span>
+<span class="sd">    Generalized PageRank Graph Neural Network&quot;</span>
+<span class="sd">    &lt;https://arxiv.org/abs/2006.07988&gt;`_ paper</span>
+
+<span class="sd">    Mathematical Formulation:</span>
+<span class="sd">    .. math::</span>
+<span class="sd">        \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathbf{P}^{k} \mathbf{X}.</span>
+<span class="sd">    where:  </span>
+<span class="sd">        :math:`\mathbf{X}` is the input node feature matrix.</span>
+<span class="sd">        :math:`\mathbf{Z}` is the output node feature matrix.</span>
+<span class="sd">        :math:`\mathbf{P}` is the normalized adjacency matrix of the graph.</span>
+<span class="sd">        :math:`\alpha_k` is the parameter for the :math:`k`-th order polynomial.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        K (int): Order of polynomial, or maximum number of hops considered for message passing. </span>
+<span class="sd">        alpha (float): Parameter controlling the weighting of different hops.</span>
+<span class="sd">        Init (str): Initialization method for the propagation weights. Possible values are &#39;SGC&#39;, &#39;PPR&#39;, &#39;NPPR&#39;, &#39;Random&#39;, &#39;WS&#39;.</span>
+<span class="sd">        spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Init</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">spmm</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;aggr&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GPRGNN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="n">K</span>
+
+        <span class="k">assert</span> <span class="n">Init</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SGC&#39;</span><span class="p">,</span> <span class="s1">&#39;PPR&#39;</span><span class="p">,</span> <span class="s1">&#39;NPPR&#39;</span><span class="p">,</span> <span class="s1">&#39;Random&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">Init</span> <span class="o">==</span> <span class="s1">&#39;SGC&#39;</span><span class="p">:</span>
+            <span class="c1"># SGC-like</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="mf">0.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">TEMP</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="n">Init</span> <span class="o">==</span> <span class="s1">&#39;PPR&#39;</span><span class="p">:</span>
+            <span class="c1"># PPR-like</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">TEMP</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">**</span><span class="n">K</span>
+        <span class="k">elif</span> <span class="n">Init</span> <span class="o">==</span> <span class="s1">&#39;NPPR&#39;</span><span class="p">:</span>
+            <span class="c1"># Negative PPR</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span><span class="p">)</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="n">TEMP</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">TEMP</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">Init</span> <span class="o">==</span> <span class="s1">&#39;Random&#39;</span><span class="p">:</span>
+            <span class="c1"># Random</span>
+            <span class="n">bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">bound</span><span class="p">,</span> <span class="n">bound</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="n">TEMP</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">TEMP</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">Init</span> <span class="o">==</span> <span class="s1">&#39;WS&#39;</span><span class="p">:</span>
+            <span class="c1"># Specify Gamma</span>
+            <span class="n">TEMP</span> <span class="o">=</span> <span class="n">Gamma</span>
+
+        <span class="n">TEMP_jt</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">TEMP</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">TEMP_jt</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spmm</span> <span class="o">=</span> <span class="n">spmm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_parameters</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GPRGNN.reset_parameters">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.reset_parameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    	<span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GPRGNN.execute">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.execute">[docs]</a>
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">csc</span><span class="p">:</span> <span class="n">OptVar</span><span class="p">,</span> <span class="n">csr</span><span class="p">:</span> <span class="n">OptVar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spmm</span> <span class="ow">and</span> <span class="n">jt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">use_cuda</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_spmm</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">csr</span><span class="o">=</span><span class="n">csr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_msg</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">csc</span><span class="o">=</span><span class="n">csc</span><span class="p">,</span> <span class="n">csr</span><span class="o">=</span><span class="n">csr</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">x</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+    <span class="c1"># propagate by message passing</span>
+<div class="viewcode-block" id="GPRGNN.propagate_msg">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.propagate_msg">[docs]</a>
+    <span class="k">def</span> <span class="nf">propagate_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span> <span class="n">csc</span><span class="p">:</span> <span class="n">CSC</span><span class="p">,</span> <span class="n">csr</span><span class="p">:</span><span class="n">CSR</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aggregateWithWeight</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">csc</span><span class="p">,</span><span class="n">csr</span><span class="p">)</span>  
+        <span class="k">return</span> <span class="n">out</span></div>
+
+    
+    <span class="c1"># propagate by spmm</span>
+<div class="viewcode-block" id="GPRGNN.propagate_spmm">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.propagate_spmm">[docs]</a>
+    <span class="k">def</span> <span class="nf">propagate_spmm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">csr</span><span class="p">:</span><span class="n">CSR</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SpmmCsr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">csr</span><span class="p">)</span>  
+        <span class="k">return</span> <span class="n">out</span></div>
+
+    
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">out_channels</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,776 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.io.ogb_raw &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Jittor Geometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/nn.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.io.ogb_raw</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jittor_geometric.io.ogb_raw</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">osp</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.data</span> <span class="kn">import</span> <span class="n">download_url</span><span class="p">,</span> <span class="n">decide_download</span><span class="p">,</span> <span class="n">extract_zip</span>
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<span class="c1">### reading raw files from a directory.</span>
+<span class="c1">### for homogeneous graph</span>
+<span class="k">def</span> <span class="nf">read_csv_graph_raw</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">add_inverse_edge</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">additional_node_files</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">additional_edge_files</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    raw_dir: path to the raw directory</span>
+<span class="sd">    add_inverse_edge (bool): whether to add inverse edge or not</span>
+
+<span class="sd">    return: graph_list, which is a list of graphs.</span>
+<span class="sd">    Each graph is a dictionary, containing edge_index, edge_feat, node_feat, and num_nodes</span>
+<span class="sd">    edge_feat and node_feat are optional: if a graph does not contain it, we will have None.</span>
+
+<span class="sd">    additional_node_files and additional_edge_files must be in the raw directory.</span>
+<span class="sd">    - The name should be {additional_node_file, additional_edge_file}.csv.gz</span>
+<span class="sd">    - The length should be num_nodes or num_edges</span>
+
+<span class="sd">    additional_node_files must start from &#39;node_&#39;</span>
+<span class="sd">    additional_edge_files must start from &#39;edge_&#39;</span>
+
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading necessary files...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This might take a while.&#39;</span><span class="p">)</span>
+    <span class="c1"># loading necessary files</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;edge.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="c1"># (2, num_edge) numpy array</span>
+        <span class="n">num_node_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;num-node-list.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># (num_graph, ) python list</span>
+        <span class="n">num_edge_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;num-edge-list.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># (num_edge, ) python list</span>
+
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No necessary file&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">node_feat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;node-feat.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+            <span class="n">node_feat</span> <span class="o">=</span> <span class="n">node_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># float</span>
+            <span class="n">node_feat</span> <span class="o">=</span> <span class="n">node_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">node_feat</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;edge-feat.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge_feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+            <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#float</span>
+            <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">edge_feat</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="n">additional_node_info</span> <span class="o">=</span> <span class="p">{}</span>   
+    <span class="k">for</span> <span class="n">additional_file</span> <span class="ow">in</span> <span class="n">additional_node_files</span><span class="p">:</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">additional_file</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;node_&#39;</span><span class="p">)</span>
+
+        <span class="c1"># hack for ogbn-proteins</span>
+        <span class="k">if</span> <span class="n">additional_file</span> <span class="o">==</span> <span class="s1">&#39;node_species&#39;</span> <span class="ow">and</span> <span class="n">osp</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;species.csv.gz&#39;</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;species.csv.gz&#39;</span><span class="p">),</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;node_species.csv.gz&#39;</span><span class="p">))</span>
+
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">additional_file</span> <span class="o">+</span> <span class="s1">&#39;.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+            <span class="n">additional_node_info</span><span class="p">[</span><span class="n">additional_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># float</span>
+            <span class="n">additional_node_info</span><span class="p">[</span><span class="n">additional_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">additional_edge_info</span> <span class="o">=</span> <span class="p">{}</span>   
+    <span class="k">for</span> <span class="n">additional_file</span> <span class="ow">in</span> <span class="n">additional_edge_files</span><span class="p">:</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">additional_file</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;edge_&#39;</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">additional_file</span> <span class="o">+</span> <span class="s1">&#39;.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+            <span class="n">additional_edge_info</span><span class="p">[</span><span class="n">additional_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># float</span>
+            <span class="n">additional_edge_info</span><span class="p">[</span><span class="n">additional_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+
+    <span class="n">graph_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">num_node_accum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">num_edge_accum</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing graphs...&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">num_node</span><span class="p">,</span> <span class="n">num_edge</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">num_node_list</span><span class="p">,</span> <span class="n">num_edge_list</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">num_node_list</span><span class="p">)):</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1">### handling edge</span>
+        <span class="k">if</span> <span class="n">add_inverse_edge</span><span class="p">:</span>
+            <span class="c1">### duplicate edge</span>
+            <span class="n">duplicated_edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">edge</span><span class="p">[:,</span> <span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicated_edge</span>
+
+            <span class="k">if</span> <span class="n">edge_feat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">edge_feat</span><span class="p">[</span><span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">additional_edge_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[:,</span> <span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">edge_feat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="p">[</span><span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">additional_edge_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">]</span>
+
+        <span class="n">num_edge_accum</span> <span class="o">+=</span> <span class="n">num_edge</span>
+
+        <span class="c1">### handling node</span>
+        <span class="k">if</span> <span class="n">node_feat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_feat</span><span class="p">[</span><span class="n">num_node_accum</span><span class="p">:</span><span class="n">num_node_accum</span><span class="o">+</span><span class="n">num_node</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">additional_node_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">num_node_accum</span><span class="p">:</span><span class="n">num_node_accum</span><span class="o">+</span><span class="n">num_node</span><span class="p">]</span>
+
+
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;num_nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_node</span>
+        <span class="n">num_node_accum</span> <span class="o">+=</span> <span class="n">num_node</span>
+
+        <span class="n">graph_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">graph_list</span>
+
+
+<span class="c1">### reading raw files from a directory.</span>
+<span class="c1">### npz ver</span>
+<span class="c1">### for homogeneous graph</span>
+<span class="k">def</span> <span class="nf">read_binary_graph_raw</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">add_inverse_edge</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    raw_dir: path to the raw directory</span>
+<span class="sd">    add_inverse_edge (bool): whether to add inverse edge or not</span>
+
+<span class="sd">    return: graph_list, which is a list of graphs.</span>
+<span class="sd">    Each graph is a dictionary, containing edge_index, edge_feat, node_feat, and num_nodes</span>
+<span class="sd">    edge_feat and node_feat are optional: if a graph does not contain it, we will have None.</span>
+
+<span class="sd">    raw_dir must contain data.npz</span>
+<span class="sd">    - edge_index</span>
+<span class="sd">    - num_nodes_list</span>
+<span class="sd">    - num_edges_list</span>
+<span class="sd">    - node_** (optional, node_feat is the default node features)</span>
+<span class="sd">    - edge_** (optional, edge_feat is the default edge features)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">add_inverse_edge</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;add_inverse_edge is depreciated in read_binary&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading necessary files...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This might take a while.&#39;</span><span class="p">)</span>
+    <span class="n">data_dict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;data.npz&#39;</span><span class="p">))</span>
+
+    <span class="n">edge_index</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;edge_index&#39;</span><span class="p">]</span>
+    <span class="n">num_nodes_list</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;num_nodes_list&#39;</span><span class="p">]</span>
+    <span class="n">num_edges_list</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;num_edges_list&#39;</span><span class="p">]</span>
+
+    <span class="c1"># storing node and edge features</span>
+    <span class="n">node_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">edge_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;edge_index&#39;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;num_nodes_list&#39;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;num_edges_list&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;node_&#39;</span><span class="p">:</span>
+            <span class="n">node_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;edge_&#39;</span><span class="p">:</span>
+            <span class="n">edge_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keys in graph object should start from either </span><span class="se">\&#39;</span><span class="s2">node_</span><span class="se">\&#39;</span><span class="s2"> or </span><span class="se">\&#39;</span><span class="s2">edge_</span><span class="se">\&#39;</span><span class="s2">, but found </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="se">\&#39;</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">graph_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">num_nodes_accum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">num_edges_accum</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing graphs...&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">num_nodes_list</span><span class="p">,</span> <span class="n">num_edges_list</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">num_nodes_list</span><span class="p">)):</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_index</span><span class="p">[:,</span> <span class="n">num_edges_accum</span><span class="p">:</span><span class="n">num_edges_accum</span><span class="o">+</span><span class="n">num_edges</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">edge_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat</span><span class="p">[</span><span class="n">num_edges_accum</span><span class="p">:</span><span class="n">num_edges_accum</span><span class="o">+</span><span class="n">num_edges</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;edge_feat&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">node_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat</span><span class="p">[</span><span class="n">num_nodes_accum</span><span class="p">:</span><span class="n">num_nodes_accum</span><span class="o">+</span><span class="n">num_nodes</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;node_feat&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;num_nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_nodes</span>
+
+        <span class="n">num_edges_accum</span> <span class="o">+=</span> <span class="n">num_edges</span>
+        <span class="n">num_nodes_accum</span> <span class="o">+=</span> <span class="n">num_nodes</span>
+
+        <span class="n">graph_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">graph_list</span>
+
+
+<span class="c1">### reading raw files from a directory.</span>
+<span class="c1">### for heterogeneous graph</span>
+<span class="k">def</span> <span class="nf">read_csv_heterograph_raw</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">add_inverse_edge</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">additional_node_files</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">additional_edge_files</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    raw_dir: path to the raw directory</span>
+<span class="sd">    add_inverse_edge (bool): whether to add inverse edge or not</span>
+
+<span class="sd">    return: graph_list, which is a list of heterogeneous graphs.</span>
+<span class="sd">    Each graph is a dictionary, containing the following keys:</span>
+<span class="sd">    - edge_index_dict</span>
+<span class="sd">        edge_index_dict[(head, rel, tail)] = edge_index for (head, rel, tail)</span>
+
+<span class="sd">    - edge_feat_dict</span>
+<span class="sd">        edge_feat_dict[(head, rel, tail)] = edge_feat for (head, rel, tail)</span>
+
+<span class="sd">    - node_feat_dict</span>
+<span class="sd">        node_feat_dict[nodetype] = node_feat for nodetype</span>
+<span class="sd">    </span>
+<span class="sd">    - num_nodes_dict</span>
+<span class="sd">        num_nodes_dict[nodetype] = num_nodes for nodetype</span>
+<span class="sd">    </span>
+<span class="sd">    * edge_feat_dict and node_feat_dict are optional: if a graph does not contain it, we will simply have None.</span>
+
+<span class="sd">    We can also have additional node/edge features. For example,</span>
+<span class="sd">    - edge_reltype_dict</span>
+<span class="sd">        edge_reltype_dict[(head, rel, tail)] = edge_reltype for (head, rel, tail)</span>
+
+<span class="sd">    - node_year_dict</span>
+<span class="sd">        node_year_dict[nodetype] = node_year</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading necessary files...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This might take a while.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># loading necessary files</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_node_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;num-node-dict.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+        <span class="n">num_node_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">nodetype</span><span class="p">:</span> <span class="n">num_node_df</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">num_node_df</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="n">nodetype_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">num_node_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="c1">## read edge_dict, num_edge_dict</span>
+        <span class="n">triplet_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;triplet-type-list.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">triplet_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([(</span><span class="n">head</span><span class="p">,</span> <span class="n">relation</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">relation</span><span class="p">,</span> <span class="n">tail</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">triplet_df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">triplet_df</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">triplet_df</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())])</span>
+
+        <span class="n">edge_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">num_edge_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_list</span><span class="p">:</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;relations&#39;</span><span class="p">,</span> <span class="s1">&#39;___&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">triplet</span><span class="p">))</span>
+
+            <span class="n">edge_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="s1">&#39;edge.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">num_edge_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="s1">&#39;num-edge-list.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="c1"># check the number of graphs coincide</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">num_node_dict</span><span class="p">[</span><span class="n">nodetype_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_edge_dict</span><span class="p">[</span><span class="n">triplet_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
+
+        <span class="n">num_graphs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_node_dict</span><span class="p">[</span><span class="n">nodetype_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No necessary file&#39;</span><span class="p">)</span>
+
+    <span class="n">node_feat_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">nodetype_list</span><span class="p">:</span>
+        <span class="n">subdir</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;node-feat&#39;</span><span class="p">,</span> <span class="n">nodetype</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">node_feat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="s1">&#39;node-feat.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+                <span class="n">node_feat</span> <span class="o">=</span> <span class="n">node_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># float</span>
+                <span class="n">node_feat</span> <span class="o">=</span> <span class="n">node_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+            <span class="n">node_feat_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_feat</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="n">edge_feat_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_list</span><span class="p">:</span>
+        <span class="n">subdir</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;relations&#39;</span><span class="p">,</span> <span class="s1">&#39;___&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">triplet</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="s1">&#39;edge-feat.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge_feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+                <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#float</span>
+                <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+            <span class="n">edge_feat_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_feat</span>
+
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+
+    <span class="n">additional_node_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># e.g., additional_node_info[&#39;node_year&#39;] = node_feature_dict for node_year</span>
+    <span class="k">for</span> <span class="n">additional_file</span> <span class="ow">in</span> <span class="n">additional_node_files</span><span class="p">:</span>
+        <span class="n">additional_feat_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">additional_file</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;node_&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">nodetype_list</span><span class="p">:</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;node-feat&#39;</span><span class="p">,</span> <span class="n">nodetype</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">node_feat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">additional_file</span> <span class="o">+</span> <span class="s1">&#39;.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+                    <span class="n">node_feat</span> <span class="o">=</span> <span class="n">node_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># float</span>
+                    <span class="n">node_feat</span> <span class="o">=</span> <span class="n">node_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+                <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">node_feat</span><span class="p">)</span> <span class="o">==</span> <span class="nb">sum</span><span class="p">(</span><span class="n">num_node_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]))</span>
+
+                <span class="n">additional_feat_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_feat</span>
+
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="n">additional_node_info</span><span class="p">[</span><span class="n">additional_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_feat_dict</span>
+
+    <span class="n">additional_edge_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># e.g., additional_edge_info[&#39;edge_reltype&#39;] = edge_feat_dict for edge_reltype</span>
+    <span class="k">for</span> <span class="n">additional_file</span> <span class="ow">in</span> <span class="n">additional_edge_files</span><span class="p">:</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">additional_file</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;edge_&#39;</span><span class="p">)</span>
+        <span class="n">additional_feat_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_list</span><span class="p">:</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;relations&#39;</span><span class="p">,</span> <span class="s1">&#39;___&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">triplet</span><span class="p">))</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">additional_file</span> <span class="o">+</span> <span class="s1">&#39;.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge_feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+                    <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># float</span>
+                    <span class="n">edge_feat</span> <span class="o">=</span> <span class="n">edge_feat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+                <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edge_feat</span><span class="p">)</span> <span class="o">==</span> <span class="nb">sum</span><span class="p">(</span><span class="n">num_edge_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]))</span>
+
+                <span class="n">additional_feat_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_feat</span>
+
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="n">additional_edge_info</span><span class="p">[</span><span class="n">additional_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_feat_dict</span>
+
+    <span class="n">graph_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">num_node_accum_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">nodetype</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">nodetype_list</span><span class="p">}</span>
+    <span class="n">num_edge_accum_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">triplet</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_list</span><span class="p">}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing graphs...&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_graphs</span><span class="p">)):</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1">### set up default atribute</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;num_nodes_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1">### set up additional node/edge attributes</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">additional_node_info</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">additional_edge_info</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1">### handling edge</span>
+        <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_list</span><span class="p">:</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="n">edge_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span>
+            <span class="n">num_edge</span> <span class="o">=</span> <span class="n">num_edge_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">num_edge_accum</span> <span class="o">=</span> <span class="n">num_edge_accum_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">add_inverse_edge</span><span class="p">:</span>
+                <span class="c1">### add edge_index</span>
+                <span class="c1"># duplicate edge</span>
+                <span class="n">duplicated_edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">edge</span><span class="p">[:,</span> <span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span> <span class="o">+</span> <span class="n">num_edge</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicated_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index_dict&#39;</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicated_edge</span>
+
+                <span class="c1">### add default edge feature</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge_feat_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># if edge_feat exists for some triplet</span>
+                    <span class="k">if</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">edge_feat_dict</span><span class="p">:</span>
+                        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat_dict&#39;</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">edge_feat_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">][</span><span class="n">num_edge</span><span class="p">:</span><span class="n">num_edge</span> <span class="o">+</span> <span class="n">num_edge</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># if edge_feat is not given for any triplet</span>
+                    <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="c1">### add additional edge feature</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">additional_edge_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">triplet</span><span class="p">][</span><span class="n">num_edge_accum</span> <span class="p">:</span> <span class="n">num_edge_accum</span> <span class="o">+</span> <span class="n">num_edge</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">### add edge_index</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index_dict&#39;</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[:,</span> <span class="n">num_edge_accum</span><span class="p">:</span><span class="n">num_edge_accum</span><span class="o">+</span><span class="n">num_edge</span><span class="p">]</span>
+
+                <span class="c1">### add default edge feature</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge_feat_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># if edge_feat exists for some triplet</span>
+                    <span class="k">if</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">edge_feat_dict</span><span class="p">:</span>
+                        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat_dict&#39;</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_feat_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">][</span><span class="n">num_edge</span><span class="p">:</span><span class="n">num_edge</span> <span class="o">+</span> <span class="n">num_edge</span><span class="p">]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># if edge_feat is not given for any triplet</span>
+                    <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="c1">### add additional edge feature</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">additional_edge_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">triplet</span><span class="p">][</span><span class="n">num_edge_accum</span> <span class="p">:</span> <span class="n">num_edge_accum</span> <span class="o">+</span> <span class="n">num_edge</span><span class="p">]</span>
+
+            <span class="n">num_edge_accum_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span> <span class="o">+=</span> <span class="n">num_edge</span>
+
+        <span class="c1">### handling node</span>
+        <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">nodetype_list</span><span class="p">:</span>
+            <span class="n">num_node</span> <span class="o">=</span> <span class="n">num_node_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">num_node_accum</span> <span class="o">=</span> <span class="n">num_node_accum_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span>
+
+            <span class="c1">### add default node feature</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_feat_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># if node_feat exists for some node type</span>
+                <span class="k">if</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">node_feat_dict</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat_dict&#39;</span><span class="p">][</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_feat_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">][</span><span class="n">num_node_accum</span><span class="p">:</span><span class="n">num_node_accum</span> <span class="o">+</span> <span class="n">num_node</span><span class="p">]</span>
+            
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> 
+
+            <span class="c1">### add additional node feature</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">additional_node_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">nodetype</span><span class="p">][</span><span class="n">num_node_accum</span> <span class="p">:</span> <span class="n">num_node_accum</span> <span class="o">+</span> <span class="n">num_node</span><span class="p">]</span>
+
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;num_nodes_dict&#39;</span><span class="p">][</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_node</span>
+            <span class="n">num_node_accum_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">+=</span> <span class="n">num_node</span>
+
+        <span class="n">graph_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">graph_list</span>
+
+
+<span class="k">def</span> <span class="nf">read_binary_heterograph_raw</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">add_inverse_edge</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    raw_dir: path to the raw directory</span>
+<span class="sd">    add_inverse_edge (bool): whether to add inverse edge or not</span>
+
+<span class="sd">    return: graph_list, which is a list of heterogeneous graphs.</span>
+<span class="sd">    Each graph is a dictionary, containing the following keys:</span>
+<span class="sd">    - edge_index_dict</span>
+<span class="sd">        edge_index_dict[(head, rel, tail)] = edge_index for (head, rel, tail)</span>
+
+<span class="sd">    - edge_feat_dict</span>
+<span class="sd">        edge_feat_dict[(head, rel, tail)] = edge_feat for (head, rel, tail)</span>
+
+<span class="sd">    - node_feat_dict</span>
+<span class="sd">        node_feat_dict[nodetype] = node_feat for nodetype</span>
+<span class="sd">    </span>
+<span class="sd">    - num_nodes_dict</span>
+<span class="sd">        num_nodes_dict[nodetype] = num_nodes for nodetype</span>
+<span class="sd">    </span>
+<span class="sd">    * edge_feat_dict and node_feat_dict are optional: if a graph does not contain it, we will simply have None.</span>
+
+<span class="sd">    We can also have additional node/edge features. For example,</span>
+<span class="sd">    - edge_**</span>
+<span class="sd">    - node_**</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">add_inverse_edge</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;add_inverse_edge is depreciated in read_binary&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading necessary files...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This might take a while.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># loading necessary files</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_nodes_dict</span> <span class="o">=</span> <span class="n">read_npz_dict</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;num_nodes_dict.npz&#39;</span><span class="p">))</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">read_npz_dict</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;num_edges_dict.npz&#39;</span><span class="p">))</span>
+        <span class="n">num_edges_dict</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;___&#39;</span><span class="p">)):</span> <span class="n">tmp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="k">del</span> <span class="n">tmp</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">read_npz_dict</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;edge_index_dict.npz&#39;</span><span class="p">))</span>
+        <span class="n">edge_index_dict</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;___&#39;</span><span class="p">)):</span> <span class="n">tmp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="k">del</span> <span class="n">tmp</span>
+        
+        <span class="n">ent_type_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">num_nodes_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">triplet_type_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">num_edges_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="n">num_graphs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_nodes_dict</span><span class="p">[</span><span class="n">ent_type_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No necessary file&#39;</span><span class="p">)</span>
+
+    <span class="c1"># storing node and edge features</span>
+    <span class="c1"># mapping from the name of the features to feat_dict</span>
+    <span class="n">node_feat_dict_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">edge_feat_dict_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;.npz&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;num_nodes_dict.npz&#39;</span><span class="p">,</span> <span class="s1">&#39;num_edges_dict.npz&#39;</span><span class="p">,</span> <span class="s1">&#39;edge_index_dict.npz&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># do not read target label information here</span>
+        <span class="k">if</span> <span class="s1">&#39;-label.npz&#39;</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">feat_name</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;node_&#39;</span> <span class="ow">in</span> <span class="n">feat_name</span><span class="p">:</span>
+            <span class="n">feat_dict</span> <span class="o">=</span> <span class="n">read_npz_dict</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+            <span class="n">node_feat_dict_dict</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat_dict</span>
+        <span class="k">elif</span> <span class="s1">&#39;edge_&#39;</span> <span class="ow">in</span> <span class="n">feat_name</span><span class="p">:</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">read_npz_dict</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+            <span class="n">feat_dict</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;___&#39;</span><span class="p">)):</span> <span class="n">tmp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+            <span class="k">del</span> <span class="n">tmp</span>
+            <span class="n">edge_feat_dict_dict</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keys in graph object should start from either </span><span class="se">\&#39;</span><span class="s2">node_</span><span class="se">\&#39;</span><span class="s2"> or </span><span class="se">\&#39;</span><span class="s2">edge_</span><span class="se">\&#39;</span><span class="s2">, but found </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">feat_name</span><span class="si">}</span><span class="se">\&#39;</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">graph_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">num_nodes_accum_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">ent_type</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">ent_type</span> <span class="ow">in</span> <span class="n">ent_type_list</span><span class="p">}</span>
+    <span class="n">num_edges_accum_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">triplet</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_type_list</span><span class="p">}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing graphs...&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_graphs</span><span class="p">)):</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1">### set up default atribute</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;num_nodes_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">feat_name</span> <span class="ow">in</span> <span class="n">node_feat_dict_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">feat_name</span> <span class="ow">in</span> <span class="n">edge_feat_dict_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">graph</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;edge_feat_dict&#39;</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;node_feat_dict&#39;</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;node_feat_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">### handling edge</span>
+        <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplet_type_list</span><span class="p">:</span>
+            <span class="n">edge_index</span> <span class="o">=</span> <span class="n">edge_index_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span>
+            <span class="n">num_edges</span> <span class="o">=</span> <span class="n">num_edges_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">num_edges_accum</span> <span class="o">=</span> <span class="n">num_edges_accum_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span>
+
+            <span class="c1">### add edge_index</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edge_index_dict&#39;</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_index</span><span class="p">[:,</span> <span class="n">num_edges_accum</span><span class="p">:</span><span class="n">num_edges_accum</span><span class="o">+</span><span class="n">num_edges</span><span class="p">]</span>
+
+            <span class="c1">### add edge feature</span>
+            <span class="k">for</span> <span class="n">feat_name</span> <span class="ow">in</span> <span class="n">edge_feat_dict_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">triplet</span> <span class="ow">in</span>  <span class="n">edge_feat_dict_dict</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]:</span>
+                    <span class="n">feat</span> <span class="o">=</span> <span class="n">edge_feat_dict_dict</span><span class="p">[</span><span class="n">feat_name</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span>
+                    <span class="n">graph</span><span class="p">[</span><span class="n">feat_name</span><span class="p">][</span><span class="n">triplet</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat</span><span class="p">[</span><span class="n">num_edges_accum</span> <span class="p">:</span> <span class="n">num_edges_accum</span> <span class="o">+</span> <span class="n">num_edges</span><span class="p">]</span>
+
+            <span class="n">num_edges_accum_dict</span><span class="p">[</span><span class="n">triplet</span><span class="p">]</span> <span class="o">+=</span> <span class="n">num_edges</span>
+
+        <span class="c1">### handling node</span>
+        <span class="k">for</span> <span class="n">ent_type</span> <span class="ow">in</span> <span class="n">ent_type_list</span><span class="p">:</span>
+            <span class="n">num_nodes</span> <span class="o">=</span> <span class="n">num_nodes_dict</span><span class="p">[</span><span class="n">ent_type</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">num_nodes_accum</span> <span class="o">=</span> <span class="n">num_nodes_accum_dict</span><span class="p">[</span><span class="n">ent_type</span><span class="p">]</span>
+
+            <span class="c1">### add node feature</span>
+            <span class="k">for</span> <span class="n">feat_name</span> <span class="ow">in</span> <span class="n">node_feat_dict_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">ent_type</span> <span class="ow">in</span> <span class="n">node_feat_dict_dict</span><span class="p">[</span><span class="n">feat_name</span><span class="p">]:</span>
+                    <span class="n">feat</span> <span class="o">=</span> <span class="n">node_feat_dict_dict</span><span class="p">[</span><span class="n">feat_name</span><span class="p">][</span><span class="n">ent_type</span><span class="p">]</span>
+                    <span class="n">graph</span><span class="p">[</span><span class="n">feat_name</span><span class="p">][</span><span class="n">ent_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat</span><span class="p">[</span><span class="n">num_nodes_accum</span> <span class="p">:</span> <span class="n">num_nodes_accum</span> <span class="o">+</span> <span class="n">num_nodes</span><span class="p">]</span>
+
+            <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;num_nodes_dict&#39;</span><span class="p">][</span><span class="n">ent_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_nodes</span>
+            <span class="n">num_nodes_accum_dict</span><span class="p">[</span><span class="n">ent_type</span><span class="p">]</span> <span class="o">+=</span> <span class="n">num_nodes</span>
+
+        <span class="n">graph_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">graph_list</span>
+
+<span class="k">def</span> <span class="nf">read_npz_dict</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="nb">dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">tmp</span>
+    <span class="k">return</span> <span class="nb">dict</span>
+
+<div class="viewcode-block" id="read_node_label_hetero">
+<a class="viewcode-back" href="../../../io/io.html#jittor_geometric.io.read_node_label_hetero">[docs]</a>
+<span class="k">def</span> <span class="nf">read_node_label_hetero</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;nodetype-has-label.csv.gz&#39;</span><span class="p">))</span>
+    <span class="n">label_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">has_label</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">has_label</span><span class="p">:</span>
+            <span class="n">label_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="s1">&#39;node-label&#39;</span><span class="p">,</span> <span class="n">nodetype</span><span class="p">,</span> <span class="s1">&#39;node-label.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No node label file found.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">label_dict</span></div>
+
+
+
+<div class="viewcode-block" id="read_nodesplitidx_split_hetero">
+<a class="viewcode-back" href="../../../io/io.html#jittor_geometric.io.read_nodesplitidx_split_hetero">[docs]</a>
+<span class="k">def</span> <span class="nf">read_nodesplitidx_split_hetero</span><span class="p">(</span><span class="n">split_dir</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split_dir</span><span class="p">,</span> <span class="s1">&#39;nodetype-has-split.csv.gz&#39;</span><span class="p">))</span>
+    <span class="n">train_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">valid_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">test_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">nodetype</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">has_label</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">has_label</span><span class="p">:</span>
+            <span class="n">train_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split_dir</span><span class="p">,</span> <span class="n">nodetype</span><span class="p">,</span> <span class="s1">&#39;train.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">valid_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split_dir</span><span class="p">,</span> <span class="n">nodetype</span><span class="p">,</span> <span class="s1">&#39;valid.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">test_dict</span><span class="p">[</span><span class="n">nodetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split_dir</span><span class="p">,</span> <span class="n">nodetype</span><span class="p">,</span> <span class="s1">&#39;test.csv.gz&#39;</span><span class="p">),</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No split file found.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">train_dict</span><span class="p">,</span> <span class="n">valid_dict</span><span class="p">,</span> <span class="n">test_dict</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

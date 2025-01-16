@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.data.dictionary &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Jittor Geometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/nn.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.data.dictionary</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jittor_geometric.data.dictionary</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) DP Technology.</span>
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates.</span>
+<span class="c1">#</span>
+<span class="c1"># This source code is licensed under the MIT license found in the</span>
+<span class="c1"># LICENSE file in the root directory of this source tree.</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+<div class="viewcode-block" id="Dictionary">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary">[docs]</a>
+<span class="k">class</span> <span class="nc">Dictionary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mapping from symbols to consecutive integers&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>  <span class="c1"># begin keyword-only arguments</span>
+        <span class="n">bos</span><span class="o">=</span><span class="s2">&quot;[CLS]&quot;</span><span class="p">,</span>
+        <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;[PAD]&quot;</span><span class="p">,</span>
+        <span class="n">eos</span><span class="o">=</span><span class="s2">&quot;[SEP]&quot;</span><span class="p">,</span>
+        <span class="n">unk</span><span class="o">=</span><span class="s2">&quot;[UNK]&quot;</span><span class="p">,</span>
+        <span class="n">extra_special_symbols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bos_word</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unk_word</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_word</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eos_word</span> <span class="o">=</span> <span class="n">bos</span><span class="p">,</span> <span class="n">unk</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="n">eos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">specials</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">specials</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">specials</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">unk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">specials</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">specials</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eos</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">indices</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unk_word</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of symbols in the dictionary&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sym</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sym</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span>
+
+<div class="viewcode-block" id="Dictionary.vec_index">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.vec_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">vec_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.index">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.index">[docs]</a>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sym</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the index of the specified symbol&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sym</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sym</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">sym</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">unk_word</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="Dictionary.special_index">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.special_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">special_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">specials</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.add_symbol">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.add_symbol">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_special</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a word to the dictionary&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">is_special</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">specials</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">n</span>
+            <span class="k">return</span> <span class="n">idx</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">idx</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.bos">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.bos">[docs]</a>
+    <span class="k">def</span> <span class="nf">bos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper to get index of beginning-of-sentence symbol&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bos_word</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.pad">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.pad">[docs]</a>
+    <span class="k">def</span> <span class="nf">pad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper to get index of pad symbol&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_word</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.eos">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.eos">[docs]</a>
+    <span class="k">def</span> <span class="nf">eos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper to get index of end-of-sentence symbol&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eos_word</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.unk">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.unk">[docs]</a>
+    <span class="k">def</span> <span class="nf">unk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper to get index of unk symbol&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unk_word</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.load">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.load">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the dictionary from a text file with the format:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        &lt;symbol0&gt; &lt;count0&gt;</span>
+<span class="sd">        &lt;symbol1&gt; &lt;count1&gt;</span>
+<span class="sd">        ...</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">add_from_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+
+
+<div class="viewcode-block" id="Dictionary.add_from_file">
+<a class="viewcode-back" href="../../../data/data.html#jittor_geometric.data.Dictionary.add_from_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads pre-defined dictionary symbols.</span>
+<span class="sd">        If f == &quot;default&quot;, it will load the default atom dictionary.</span>
+<span class="sd">        Otherwise, loads from a text file and adds its symbols to this instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">f</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="c1"># Default atom dictionary</span>
+            <span class="n">default_atoms</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;[PAD]&quot;</span><span class="p">,</span> <span class="s2">&quot;[CLS]&quot;</span><span class="p">,</span> <span class="s2">&quot;[SEP]&quot;</span><span class="p">,</span> <span class="s2">&quot;[UNK]&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Cl&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;Br&quot;</span><span class="p">,</span> 
+                <span class="s2">&quot;I&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;Na&quot;</span><span class="p">,</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;Al&quot;</span><span class="p">,</span> <span class="s2">&quot;Ca&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Sn&quot;</span><span class="p">,</span> <span class="s2">&quot;As&quot;</span><span class="p">,</span> <span class="s2">&quot;Hg&quot;</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">,</span> <span class="s2">&quot;Zn&quot;</span><span class="p">,</span> <span class="s2">&quot;Cr&quot;</span><span class="p">,</span> <span class="s2">&quot;Se&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Gd&quot;</span><span class="p">,</span> <span class="s2">&quot;Au&quot;</span><span class="p">,</span> <span class="s2">&quot;Li&quot;</span>
+            <span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">line_idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">default_atoms</span><span class="p">):</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_atoms</span><span class="p">)</span> <span class="o">-</span> <span class="n">line_idx</span>
+                <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s2">&quot;Duplicate word found when loading Dictionary: &#39;</span><span class="si">{}</span><span class="s2">&#39;, index is </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">word</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_symbol</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># File reading logic</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_from_file</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fnfe</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">fnfe</span>
+            <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Incorrect encoding detected in </span><span class="si">{}</span><span class="s2">, please &quot;</span>
+                    <span class="s2">&quot;rebuild the dataset&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line_idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">splits</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">splits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="n">line_idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;#overwrite&quot;</span><span class="p">:</span>
+                    <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">line</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="n">word</span> <span class="o">=</span> <span class="n">line</span>
+                <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s2">&quot;Duplicate word found when loading Dictionary: &#39;</span><span class="si">{}</span><span class="s2">&#39;, index is </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">word</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_symbol</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Incorrect dictionary format, expected &#39;&lt;token&gt; &lt;cnt&gt; [flags]&#39;&quot;</span>
+                <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

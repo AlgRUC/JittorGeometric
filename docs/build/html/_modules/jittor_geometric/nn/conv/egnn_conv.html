@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jittor_geometric.nn.conv.egnn_conv &mdash; Jittor_Geometric 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Jittor_Geometric
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Jittor Geometric</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../get_started/introduction.html">Get Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/nn.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../data/data.html">jittor_geometric.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../datasets/datasets.html">jittor_geometric.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../io/io.html">jittor_geometric.io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../partition/partition.html">jittor_geometric.partition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ops/ops.html">jittor_geometric.ops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utils/utils.html">jittor_geometric.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Jittor_Geometric</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jittor_geometric.nn.conv.egnn_conv</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jittor_geometric.nn.conv.egnn_conv</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">jittor</span> <span class="k">as</span> <span class="nn">jt</span>
+<span class="kn">from</span> <span class="nn">jittor</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">jittor</span> <span class="kn">import</span> <span class="n">Var</span>
+<span class="kn">import</span> <span class="nn">jittor_geometric</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.nn.conv</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.typing</span> <span class="kn">import</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">OptVar</span>
+<span class="kn">from</span> <span class="nn">einops</span> <span class="kn">import</span> <span class="n">rearrange</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">..inits</span> <span class="kn">import</span> <span class="n">xavier_normal</span><span class="p">,</span> <span class="n">zeros</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.utils</span> <span class="kn">import</span> <span class="n">degree</span><span class="p">,</span> <span class="n">scatter</span>
+<span class="c1"># helper functions</span>
+
+<span class="k">def</span> <span class="nf">fourier_encode_dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">num_encodings</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">include_self</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">orig_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">x</span>
+    <span class="n">scales</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">jt</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_encodings</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">device</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">scales</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">sin</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">cos</span><span class="p">()],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">orig_x</span><span class="p">),</span> <span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_self</span> <span class="k">else</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">class</span> <span class="nc">SiLU</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SiLU</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">jt</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="c1"># this follows the same strategy for normalization as done in SE3 Transformers</span>
+<span class="c1"># https://github.com/lucidrains/se3-transformer-pytorch/blob/main/se3_transformer_pytorch/se3_transformer_pytorch.py#L95</span>
+
+<span class="k">class</span> <span class="nc">CoorsNorm</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">scale_init</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="n">scale_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coors</span><span class="p">):</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">coors</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">normed_coors</span> <span class="o">=</span> <span class="n">coors</span> <span class="o">/</span> <span class="n">norm</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">normed_coors</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+
+<span class="k">class</span> <span class="nc">LayerNorm</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">affine</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;graph&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LayerNorm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">=</span> <span class="n">in_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">affine</span> <span class="o">=</span> <span class="n">affine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">affine</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">jt</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">in_channels</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">jt</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">in_channels</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jt</span><span class="o">.</span><span class="n">Var</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">jt</span><span class="o">.</span><span class="n">Var</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jt</span><span class="o">.</span><span class="n">Var</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
+            <span class="c1"># graph-level normalization: calculating the mean and std of the whole graph</span>
+            <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">std</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># normalization based on batch</span>
+                <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">norm</span> <span class="o">=</span> <span class="n">degree</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">clamp_</span><span class="p">(</span><span class="n">min_v</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span>
+                            <span class="n">reduce</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="n">scatter</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span>
+                            <span class="n">reduce</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="n">var</span> <span class="o">/</span> <span class="n">norm</span>
+
+            <span class="n">normed_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">normed_x</span> <span class="o">=</span> <span class="n">normed_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+
+            <span class="k">return</span> <span class="n">normed_x</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+            <span class="c1"># 节点级别的归一化：按节点特征归一化</span>
+            <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">layer_norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span><span class="p">,),</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown normalization mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span><span class="si">}</span><span class="s1">, affine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">affine</span><span class="si">}</span><span class="s1">, mode=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+
+<span class="c1"># global linear attention</span>
+
+<span class="k">class</span> <span class="nc">Attention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">heads</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="n">dim_head</span> <span class="o">=</span> <span class="mi">64</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">inner_dim</span> <span class="o">=</span> <span class="n">heads</span> <span class="o">*</span> <span class="n">dim_head</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heads</span> <span class="o">=</span> <span class="n">heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">dim_head</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_q</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">inner_dim</span><span class="p">,</span> <span class="n">bias</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_kv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">inner_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bias</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_out</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">inner_dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heads</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">kv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_kv</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;b n (h d) -&gt; b h n d&#39;</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="p">),</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="n">kv</span><span class="p">))</span>
+        <span class="c1"># dots = np.einsum(&#39;b h i d, b h j d -&gt; b h i j&#39;, q.numpy(), k.numpy()) * self.scale</span>
+        <span class="c1"># Compute the dot product for attention scores: (b, h, n, d) x (b, h, n, d) -&gt; (b, h, n, n)</span>
+        <span class="n">dots</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>  <span class="c1"># [b, h, n, n]</span>
+
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask_value</span> <span class="o">=</span> <span class="o">-</span> <span class="n">jt</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dots</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="s1">&#39;b n -&gt; b () () n&#39;</span><span class="p">)</span>
+            <span class="n">dots</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">mask_value</span><span class="p">)</span>
+
+        <span class="n">attn</span> <span class="o">=</span> <span class="n">dots</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;b h i j, b h j d -&gt; b h i d&#39;</span><span class="p">,</span> <span class="n">attn</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">v</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s1">&#39;b h n d -&gt; b n (h d)&#39;</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_out</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">GlobalLinearAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">,</span>
+        <span class="n">heads</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">dim_head</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_seq</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_queries</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn1</span> <span class="o">=</span> <span class="n">Attention</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">heads</span><span class="p">,</span> <span class="n">dim_head</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn2</span> <span class="o">=</span> <span class="n">Attention</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">heads</span><span class="p">,</span> <span class="n">dim_head</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ff</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">res_x</span><span class="p">,</span> <span class="n">res_queries</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">queries</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_seq</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_queries</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
+
+        <span class="n">induced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn1</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="n">out</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">induced</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span>  <span class="n">out</span> <span class="o">+</span> <span class="n">res_x</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="n">induced</span> <span class="o">+</span> <span class="n">res_queries</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">queries</span>
+
+
+<div class="viewcode-block" id="EGNNConv">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv">[docs]</a>
+<span class="k">class</span> <span class="nc">EGNNConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;EGNN implementation using Jittor and Jittor Geometric.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feats_dim</span><span class="p">,</span> <span class="n">pos_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">edge_attr_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m_dim</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                 <span class="n">fourier_features</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">soft_edge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">norm_feats</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">norm_coors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">norm_coors_scale_init</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">update_feats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">update_coors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">coor_weights_clamp_value</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">aggr</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">},</span> <span class="s1">&#39;pool method must be a valid option&#39;</span>
+        <span class="k">assert</span> <span class="n">update_feats</span> <span class="ow">or</span> <span class="n">update_coors</span><span class="p">,</span> <span class="s1">&#39;you must update either features, coordinates, or both&#39;</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;aggr&#39;</span><span class="p">,</span> <span class="n">aggr</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EGNNConv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Model parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fourier_features</span> <span class="o">=</span> <span class="n">fourier_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feats_dim</span> <span class="o">=</span> <span class="n">feats_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_dim</span> <span class="o">=</span> <span class="n">pos_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_dim</span> <span class="o">=</span> <span class="n">m_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soft_edge</span> <span class="o">=</span> <span class="n">soft_edge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_feats</span> <span class="o">=</span> <span class="n">norm_feats</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_coors</span> <span class="o">=</span> <span class="n">norm_coors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_feats</span> <span class="o">=</span> <span class="n">update_feats</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_coors</span> <span class="o">=</span> <span class="n">update_coors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coor_weights_clamp_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge_input_dim</span> <span class="o">=</span> <span class="p">(</span><span class="n">fourier_features</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">edge_attr_dim</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">feats_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span> <span class="k">if</span> <span class="n">dropout</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+
+        <span class="c1"># EDGES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge_mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edge_input_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_input_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
+            <span class="n">SiLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edge_input_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">m_dim</span><span class="p">),</span>
+            <span class="n">SiLU</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge_weight</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">m_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
+                                        <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span>
+        <span class="p">)</span> <span class="k">if</span> <span class="n">soft_edge</span> <span class="k">else</span> <span class="kc">None</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_norm</span> <span class="o">=</span> <span class="n">LayerNorm</span><span class="p">(</span><span class="n">feats_dim</span><span class="p">)</span> <span class="k">if</span> <span class="n">norm_feats</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coors_norm</span> <span class="o">=</span> <span class="n">CoorsNorm</span><span class="p">(</span><span class="n">scale_init</span> <span class="o">=</span> <span class="n">norm_coors_scale_init</span><span class="p">)</span> <span class="k">if</span> <span class="n">norm_coors</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">feats_dim</span> <span class="o">+</span> <span class="n">m_dim</span><span class="p">,</span> <span class="n">feats_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
+            <span class="n">SiLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">feats_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">feats_dim</span><span class="p">),</span>
+        <span class="p">)</span> <span class="k">if</span> <span class="n">update_feats</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># COORS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coors_mlp</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">m_dim</span><span class="p">,</span> <span class="n">m_dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
+            <span class="n">SiLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_dim</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span> <span class="k">if</span> <span class="n">update_coors</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_weights</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EGNNConv.init_weights">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.init_weights">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize weights.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">):</span>
+            <span class="n">xavier_normal</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="n">zeros</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EGNNConv.execute">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.execute">[docs]</a>
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">:</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptVar</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">batch</span><span class="p">:</span> <span class="n">OptVar</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">coors</span><span class="p">,</span> <span class="n">feats</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_dim</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_dim</span><span class="p">:]</span>
+        <span class="n">rel_coors</span> <span class="o">=</span> <span class="n">coors</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">coors</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">rel_dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">rel_coors</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fourier_features</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rel_dist</span> <span class="o">=</span> <span class="n">fourier_encode_dist</span><span class="p">(</span><span class="n">rel_dist</span><span class="p">,</span> <span class="n">num_encodings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fourier_features</span><span class="p">)</span>
+            <span class="n">rel_dist</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">rel_dist</span><span class="p">,</span> <span class="s1">&#39;n () d -&gt; n d&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">edge_attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">edge_attr_feats</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">rel_dist</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edge_attr_feats</span> <span class="o">=</span> <span class="n">rel_dist</span>
+
+        <span class="c1"># Propagate and compute messages</span>
+        <span class="n">hidden_feats</span><span class="p">,</span> <span class="n">coors_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feats</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr_feats</span><span class="p">,</span>
+                                                 <span class="n">coors</span><span class="o">=</span><span class="n">coors</span><span class="p">,</span> <span class="n">rel_coors</span><span class="o">=</span><span class="n">rel_coors</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">jt</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">coors_out</span><span class="p">,</span> <span class="n">hidden_feats</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EGNNConv.message">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.message">[docs]</a>
+    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_i</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">x_j</span><span class="p">:</span> <span class="n">Var</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">:</span> <span class="n">Var</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Var</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Message function.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_mlp</span><span class="p">(</span><span class="n">jt</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x_i</span><span class="p">,</span> <span class="n">x_j</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="EGNNConv.propagate">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.propagate">[docs]</a>
+    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">:</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The initial call to start propagating messages.</span>
+<span class="sd">            Args:</span>
+<span class="sd">            `edge_index` holds the indices of a general (sparse)</span>
+<span class="sd">                assignment matrix of shape :obj:`[N, M]`.</span>
+<span class="sd">            size (tuple, optional) if none, the size will be inferred</span>
+<span class="sd">                and assumed to be quadratic.</span>
+<span class="sd">            **kwargs: Any additional data which is needed to construct and</span>
+<span class="sd">                aggregate messages, and to update node embeddings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__check_input__</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">coll_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__collect__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__user_args__</span><span class="p">,</span>
+                                     <span class="n">edge_index</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">msg_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspector</span><span class="o">.</span><span class="n">distribute</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="n">coll_dict</span><span class="p">)</span>
+        <span class="n">aggr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspector</span><span class="o">.</span><span class="n">distribute</span><span class="p">(</span><span class="s1">&#39;aggregate&#39;</span><span class="p">,</span> <span class="n">coll_dict</span><span class="p">)</span>
+        <span class="n">update_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspector</span><span class="o">.</span><span class="n">distribute</span><span class="p">(</span><span class="s1">&#39;update&#39;</span><span class="p">,</span> <span class="n">coll_dict</span><span class="p">)</span>
+        
+        <span class="c1"># get messages</span>
+        <span class="n">m_ij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="o">**</span><span class="n">msg_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># update coors if specified</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_coors</span><span class="p">:</span>
+            <span class="n">coor_wij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coors_mlp</span><span class="p">(</span><span class="n">m_ij</span><span class="p">)</span>
+            <span class="c1"># clamp if arg is set</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coor_weights_clamp_value</span><span class="p">:</span>
+                <span class="n">coor_weights_clamp_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coor_weights_clamp_value</span>
+                <span class="n">coor_weights</span><span class="o">.</span><span class="n">clamp_</span><span class="p">(</span><span class="nb">min</span> <span class="o">=</span> <span class="o">-</span><span class="n">clamp_value</span><span class="p">,</span> <span class="nb">max</span> <span class="o">=</span> <span class="n">clamp_value</span><span class="p">)</span>
+
+            <span class="c1"># normalize if needed</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;rel_coors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coors_norm</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;rel_coors&quot;</span><span class="p">])</span>
+
+            <span class="n">mhat_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">coor_wij</span> <span class="o">*</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;rel_coors&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">aggr_kwargs</span><span class="p">)</span>
+            <span class="n">coors_out</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;coors&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">mhat_i</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coors_out</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;coors&quot;</span><span class="p">]</span>
+
+        <span class="c1"># update feats if specified</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_feats</span><span class="p">:</span>
+            <span class="c1"># weight the edges if arg is passed</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">soft_edge</span><span class="p">:</span>
+                <span class="n">m_ij</span> <span class="o">=</span> <span class="n">m_ij</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_weight</span><span class="p">(</span><span class="n">m_ij</span><span class="p">)</span>
+            <span class="n">m_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">m_ij</span><span class="p">,</span> <span class="o">**</span><span class="n">aggr_kwargs</span><span class="p">)</span>
+
+            <span class="n">hidden_feats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_norm</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;batch&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_norm</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+            <span class="n">hidden_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_mlp</span><span class="p">(</span> <span class="n">jt</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">hidden_feats</span><span class="p">,</span> <span class="n">m_i</span><span class="p">],</span> <span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">hidden_out</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">hidden_out</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">hidden_out</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+
+        <span class="c1"># return tuple</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">hidden_out</span><span class="p">,</span> <span class="n">coors_out</span><span class="p">),</span> <span class="o">**</span><span class="n">update_kwargs</span><span class="p">)</span></div>
+</div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
