@@ -24,7 +24,6 @@ dist/
 !doc/source/*
 core
 *.log
-examples/dyrep_example.py
-examples/jodie_example.py
 dhp_test.py
 dhp_test_arxiv.py
+examples/data/
