@@ -117,21 +117,22 @@ JittorGeometric includes implementations of popular GNN models, such as:
 ## Installation
 Follow these steps to install JittorGeometric:
 
-1. Install the Jittor framework by following the [Jittor official documentation](https://cg.cs.tsinghua.edu.cn/jittor/).
-2. Clone this repository and navigate to the project directory:
+1. Install Jittor:
    ```bash
-   git clone <repo_url>
-   cd jittor_geometric
+   python -m pip install git+https://github.com/Jittor/jittor.git
    ```
-3. Install the required dependencies:
+   or by following the [Jittor official documentation](https://cg.cs.tsinghua.edu.cn/jittor/).
+2. Installing other dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 fairseq==0.12.2 Flask==3.1.0 jittor_offline==0.0.7 matplotlib==3.10.0 numpy==2.2.1 pandas==2.2.3 Pillow==11.0.0 pymetis==2023.1.1 pyparsing==3.2.0 pywebio==1.8.3 recommonmark==0.7.1 scikit_learn==1.6.0 scipy==1.14.1 setuptools==69.5.1 six==1.16.0 sphinx_rtd_theme==3.0.2 torch==2.5.1 torchvision==0.20.1 tqdm==4.66.4
    ```
-4. Install JittorGeometric from the source code:
+3. Install the package:
    ```bash
-   git clone https://github.com/AlgRUC/JittorGeometric.git
+   git clone https://github.com/lyyisbored/JittorGeometric.git
    cd "the project root directory that contains the setup.py file"
    pip install .
+   ```
+4. Verify the installation by running the gcn_example.py
 
 
 ## Contributors
