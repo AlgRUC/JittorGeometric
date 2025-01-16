@@ -21,6 +21,7 @@ Dependencies
 - autograd==1.7.0
 - cupy==13.3.0
 - Flask==3.1.0
+- einops
 - huggingface_hub==0.27.1
 - jittor==1.3.9.14
 - numpy==1.24.0
@@ -48,7 +49,7 @@ Installation Steps
 
 2. Installing other dependencies, such as::
 
-    pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 numpy==1.24.0 pandas==2.2.3 Pillow==11.1.0 PyMetis==2023.1.1 six==1.16.0 pyparsing==3.2.1 scipy==1.15.1 setuptools==69.5.1 sympy==1.13.3 tqdm==4.66.4
+    pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 numpy==1.24.0 pandas==2.2.3 Pillow==11.1.0 PyMetis==2023.1.1 six==1.16.0 pyparsing==3.2.1 scipy==1.15.1 setuptools==69.5.1 sympy==1.13.3 tqdm==4.66.4 einops huggingface_hub==0.27.1
 
 3. Install the package::
 
