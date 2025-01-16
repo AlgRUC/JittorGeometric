@@ -10,9 +10,8 @@ python:
     - requirements: docs/requirements.txt
     - method: setuptools
       path: .
-    - method: apt
-      packages:
-        - python3.11-dev
+  system_packages:
+    - python3.11-dev
 
 sphinx:
   configuration: docs/source/conf.py
