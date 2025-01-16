@@ -69,4 +69,4 @@ Troubleshooting
 - On Linux, ensure that GCC 5.4 or higher is installed.
 - Ensure that CMake 3.10 or higher is installed and accessible in your environment.
 
-For more bugs you can contact us at the project homepage https://github.com/lyyisbored/JittorGeometric
+If you have any questions or would like to contribute, please feel free to contact runlin_lei@ruc.edu.cn.
