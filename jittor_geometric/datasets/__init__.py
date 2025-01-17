@@ -8,6 +8,7 @@ from .linkx import LINKXDataset
 from .hetero import HeteroDataset
 from .reddit import Reddit
 from .qm9 import QM9
+from .molecule_net import MoleculeNet
 
 __all__ = [
     'Planetoid',
@@ -21,6 +22,7 @@ __all__ = [
     'Reddit',
     'TemporalDataLoader',
     'QM9',
+    'MoleculeNet',
 ]
 
 classes = __all__

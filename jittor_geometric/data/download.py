@@ -6,7 +6,7 @@ import os.path as osp
 import urllib.request as ur
 import zipfile
 from six.moves import urllib
-
+import gzip
 from .makedirs import makedirs
 
 
@@ -72,3 +72,19 @@ def extract_zip(path, folder, log=True):
     maybe_log(path, log)
     with zipfile.ZipFile(path, 'r') as f:
         f.extractall(folder)
+
+
+def extract_gz(path: str, folder: str, log: bool = True) -> None:
+    r"""Extracts a gz archive to a specific folder.
+
+    Args:
+        path (str): The path to the tar archive.
+        folder (str): The folder.
+        log (bool, optional): If :obj:`False`, will not print anything to the
+            console. (default: :obj:`True`)
+    """
+    maybe_log(path, log)
+    path = osp.abspath(path)
+    with gzip.open(path, 'r') as r:
+        with open(osp.join(folder, '.'.join(path.split('.')[:-1])), 'wb') as w:
+            w.write(r.read())
