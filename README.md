@@ -117,10 +117,10 @@ JittorGeometric includes implementations of popular GNN models, such as:
 ## Installation
 Follow these steps to install JittorGeometric:
 
-0. Create a conda environment
+1. Create a conda environment
    ```bash
    conda create -n jittorGeometric python=3.10
-   codna activate jittorGeometric
+   conda activate jittorGeometric
    ```
 
 2. Install Jittor:
