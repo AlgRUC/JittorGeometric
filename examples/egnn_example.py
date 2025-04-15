@@ -250,8 +250,8 @@ def eval(model, loader):
         for step, batch in enumerate(tqdm(loader, desc="Iteration")):
             batch.x = jt.concat([batch.pos, batch.x], dim=-1)
             pred, _, _ = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
-            y_true.append(batch.y)
-            y_pred.append(pred)
+            y_true.append(batch.y.numpy())
+            y_pred.append(pred.numpy())
 
         y_true = jt.cat(y_true, dim = 0)
         y_pred = jt.cat(y_pred, dim = 0)

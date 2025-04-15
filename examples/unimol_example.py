@@ -70,7 +70,7 @@ class MolDataset(jt.dataset.Dataset):
         # `export HF_ENDPOINT=https://hf-mirror.com`,
         # TO USE THE MIRROR PROVIDED BY Hugging Face.
         """
-        hf_hub_download(repo_id=f"TGB-Seq/bace", filename=f"bace.pkl", local_dir=self.data_dir, repo_type="dataset")
+        hf_hub_download(repo_id=f"Drug-Data/bace", filename=f"bace.pkl", local_dir=self.data_dir, repo_type="dataset")
 
     def process_data(self, data_dir):
         """
@@ -173,6 +173,8 @@ def evaluate(model, data_loader, mode='val'):
                     -1, output.size(-1)
             )
             pred = probs.argmax(dim=1)[0]
+            pred = pred.numpy()
+            target = target.numpy()
             correct += (pred == target).sum().item()
             total += target.numel()
     

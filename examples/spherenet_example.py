@@ -50,8 +50,8 @@ def eval(model, loader):
         # batch_data.z, batch_data.pos, batch_data.pos
         for step, batch_data in enumerate(tqdm(loader, desc="Iteration")):
             pred = model(batch_data)
-            y_true.append(batch_data.y)
-            y_pred.append(pred)
+            y_true.append(batch_data.y.numpy())
+            y_pred.append(pred.numpy())
 
         y_true = jt.cat(y_true, dim = 0)
         y_pred = jt.cat(y_pred, dim = 0)
