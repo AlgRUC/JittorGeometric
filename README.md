@@ -1,5 +1,8 @@
-# JittorGeometric
+<p align="center">
+  <img height="150" src="assets/JittorGeometric_logo.png" />
+</p>
 
+# JittorGeometric
 **[Documentation](https://algruc.github.io/JittorGeometric/index.html)**
 
 JittorGeometric is a graph machine learning library based on the Jittor framework. As a Chinese-developed library, it is tailored for research and applications in Graph Neural Networks (GNNs), aiming to provide an efficient and flexible GNN implementation for researchers and engineers working with graph-structured data.
@@ -117,23 +120,29 @@ JittorGeometric includes implementations of popular GNN models, such as:
 ## Installation
 Follow these steps to install JittorGeometric:
 
-1. Install Jittor:
+1. Create a conda environment
+   ```bash
+   conda create -n jittorGeometric python=3.10
+   conda activate jittorGeometric
+   ```
+
+2. Install Jittor:
    ```bash
    python -m pip install git+https://github.com/Jittor/jittor.git
    ```
    or by following the [Jittor official documentation](https://cg.cs.tsinghua.edu.cn/jittor/).
-2. Installing other dependencies:
+3. Installing other dependencies:
    ```bash
-   pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 numpy==1.24.0 pandas==2.2.3 Pillow==11.1.0 PyMetis==2023.1.1 six==1.16.0 pyparsing==3.2.scipy==1.15.1 setuptools==69.5.1 sympy==1.13.3 tqdm==4.66.4 einops huggingface_hub==0.27.1
+   pip install astunparse==1.6.3 autograd==1.7.0 cupy==13.3.0 numpy==1.24.0 pandas==2.2.3 Pillow==11.1.0 PyMetis==2023.1.1 six==1.16.0 pyparsing==3.2 scipy==1.15.1 setuptools==69.5.1 sympy==1.13.3 tqdm==4.66.4 einops huggingface_hub==0.27.1
 
    ```
-3. Install the package:
+4. Install the package:
    ```bash
    git clone https://github.com/AlgRUC/JittorGeometric.git
    cd JittorGeometric
    pip install .
    ```
-4. Verify the installation by running the gcn_example.py
+5. Verify the installation by running the gcn_example.py
 
 
 ## Warnings

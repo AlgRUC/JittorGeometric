@@ -42,7 +42,7 @@ def evaluate(model, loader, target):
     for data in loader:
         with jt.no_grad():
             pred = model(data.z, data.pos, data.batch)
-        mae = (pred.view(-1) - data.y[:, target]).abs()
+        mae = (pred.view(-1).numpy() - data.y[:, target].numpy()).abs()
         maes.append(mae)
     mae = jt.cat(maes, dim=0)
     return mae.mean()

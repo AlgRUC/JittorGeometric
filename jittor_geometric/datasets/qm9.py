@@ -178,7 +178,7 @@ class QM9(InMemoryDataset):
         return 'data.pkl'
 
     def download(self) -> None:
-        hf_hub_download(repo_id=f"TGB-Seq/QM9", filename=f"qm9.pkl", local_dir=self.raw_dir, repo_type="dataset")
+        hf_hub_download(repo_id=f"Drug-Data/QM9", filename=f"qm9.pkl", local_dir=self.raw_dir, repo_type="dataset")
 
     def process(self) -> None:
         WITH_RDKIT = False
