@@ -76,7 +76,7 @@ class GraphAttentionEmbedding(jt.nn.Module):
         rel_t = last_update[edge_index[0]] - t
         rel_t_enc = self.time_enc(rel_t)
         edge_attr = jt.concat([rel_t_enc, msg], dim=-1)
-        return self.conv(x, edge_index, edge_attr)
+        return self.conv(x, edge_index, edge_attr) 
 
 # Define MLP-based predictor
 class LinkPredictor(jt.nn.Module):
@@ -197,7 +197,7 @@ for epoch in range(1, 51):
     if val_ap > best_ap:
         best_ap = val_ap
         # Save the model when achieving better performance on val set
-        jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
+        # jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
         print('Saved model is updated')
         patience = 5
     else:
