@@ -31,7 +31,7 @@ class IndexselectFunc(Function):
 
     def grad(self, grad_output):
         output_grad=jt.zeros(self.v_num,self.feature_dim)
-        indexselect_op.indexselectbwd(output_grad,grad_output,self.dim,self.index).fetch_sync()
+        indexselectbwd_op.indexselectbwd(output_grad,grad_output,self.dim,self.index).fetch_sync()
         return output_grad,None,None
     
 
