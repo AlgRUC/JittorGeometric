@@ -1,8 +1,9 @@
 '''
-Author: lusz
-Date: 2024-06-16 15:42:52
-Description: 
+Update:
+- Include AUC calculation
+- Add split index to train and test
 '''
+
 import os.path as osp
 import argparse
 import jittor as jt
@@ -16,6 +17,8 @@ from jittor_geometric.nn import GCNConv
 import time
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
+import numpy as np
+from sklearn.metrics import roc_auc_score
 
 jt.flags.use_cuda = 1
 jt.misc.set_global_seed(42)
@@ -31,7 +34,7 @@ if dataset in ['computers', 'photo']:
 elif dataset in ['cora', 'citeseer', 'pubmed']:
     dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['chameleon', 'squirrel']:
-    dataset = WikipediaNetwork(path, dataset, geom_gcn_preprocess=False)
+    dataset = WikipediaNetwork(path, dataset)
 elif dataset in ['ogbn-arxiv','ogbn-products','ogbn-papers100M']:
     dataset = OGBNodePropPredDataset(name=dataset, root=path)
 elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
@@ -51,6 +54,15 @@ with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
+def calculate_auc(y_true, y_pred):
+    try:
+        if len(y_pred.shape) > 1 and y_pred.shape[1] > 1:
+            return roc_auc_score(y_true.numpy(), nn.softmax(y_pred, dim=1).numpy(), multi_class='ovr')
+        else:
+            return roc_auc_score(y_true.numpy(), nn.sigmoid(y_pred).numpy())
+    except ValueError:
+        pred = (y_pred > 0).int() if len(y_pred.shape) == 1 else jt.argmax(y_pred, dim=1)
+        return pred.equal(y_true).sum().item() / len(y_true)
 
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.8):
@@ -59,48 +71,106 @@ class Net(nn.Module):
         self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=args.spmm)
         self.dropout = dropout
 
+    def reset_parameters(self):
+        self.conv1.reset_parameters()
+        self.conv2.reset_parameters()
+
     def execute(self):
         x, csc, csr = data.x, data.csc, data.csr
         x = nn.relu(self.conv1(x, csc, csr))
         x = nn.dropout(x, self.dropout, is_train=self.training)
         x = self.conv2(x, csc, csr)
-        return nn.log_softmax(x, dim=1)
-
+        return x
 
 model, data = Net(dataset), data
 optimizer = nn.Adam(params=model.parameters(), lr=0.001, weight_decay=5e-4) 
 
-def train():
+def train(split_idx=0):
     global total_forward_time, total_backward_time
     model.train()
-    pred = model()[data.train_mask]
-    label = data.y[data.train_mask]
-    loss = nn.nll_loss(pred, label)
+    
+    if len(data.train_mask.shape) > 1:
+        train_mask = data.train_mask[split_idx]
+    else:
+        train_mask = data.train_mask
+    
+    pred = model()[train_mask]
+    label = data.y[train_mask]
+    
+    if dataset in ['questions', 'minesweeper']:
+        loss = nn.binary_cross_entropy_with_logits(pred, label.float())
+    else:
+        loss = nn.cross_entropy_loss(pred, label)
+    
     optimizer.step(loss)
 
-def test():
+def test(split_idx=0):
     model.eval()
-    logits, accs = model(), []
-    for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        y_ = data.y[mask] 
-        logits_=logits[mask]
-        pred, _ = jt.argmax(logits_, dim=1)
-        acc = pred.equal(y_).sum().item() / mask.sum().item()
+    logits = model()
+    accs = []
+    
+    masks = [data.train_mask, data.val_mask, data.test_mask]
+    for mask in masks:            
+        current_mask = mask[split_idx] if len(mask.shape) > 1 else mask
+        y_true = data.y[current_mask]
+        logits_masked = logits[current_mask]
+        
+        if dataset in ['questions', 'minesweeper']:
+            acc = calculate_auc(y_true, logits_masked)
+        else:
+            pred, _ = jt.argmax(logits_masked, dim=1)
+            acc = pred.equal(y_true).sum().item() / current_mask.sum().item()
         accs.append(acc)
+    
     return accs
 
+has_multiple_splits = len(data.train_mask.shape) > 1
+n_splits = data.train_mask.shape[0] if has_multiple_splits else 1
 
-best_val_acc = test_acc = 0
+best_val_accs = [0] * n_splits
+test_accs = [0] * n_splits
+final_test_acc = 0
+final_val_acc = 0
+
 start = time.time()
-for epoch in range(1, 201):
-    train()
-    train_acc, val_acc, tmp_test_acc = test()
-    if val_acc > best_val_acc:
-        best_val_acc = val_acc
-        test_acc = tmp_test_acc
-    log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
-    print(log.format(epoch, train_acc, best_val_acc, test_acc))
+
+for split_idx in range(n_splits):
+    print(f"\nTraining on split {split_idx + 1}/{n_splits}")
+    model.reset_parameters()
+    model.load_parameters(model.state_dict())
+    optimizer = nn.Adam(model.parameters(), lr=0.01, weight_decay=0)
+    
+    best_val_acc = test_acc = 0
+    
+    for epoch in range(1, 201):
+        train(split_idx)
+        train_acc, val_acc, tmp_test_acc = test(split_idx)
+        
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            test_acc = tmp_test_acc
+        
+        if epoch % 20 == 0:
+            metric_name = "AUC" if dataset in ['questions', 'minesweeper'] else "Acc"
+            log = f'Split {split_idx + 1}/{n_splits}, Epoch: {{:03d}}, Train {metric_name}: {{:.4f}}, Val {metric_name}: {{:.4f}}, Test {metric_name}: {{:.4f}}'
+            print(log.format(epoch, train_acc, best_val_acc, test_acc))
+    
+    best_val_accs[split_idx] = best_val_acc
+    test_accs[split_idx] = test_acc
+
+final_val_acc = sum(best_val_accs) / n_splits
+final_test_acc = sum(test_accs) / n_splits
 
 jt.sync_all()
 end = time.time()
-print("Training_time"+str(end-start))
+
+metric_name = "AUC" if dataset in ['questions', 'minesweeper'] else "Acc"
+print(f"\nFinal Results across {n_splits} splits:")
+print(f"Average Val {metric_name}: {final_val_acc:.4f}")
+print(f"Average Test {metric_name}: {final_test_acc:.4f}")
+print(f"Training time: {end-start:.2f}s")
+
+if has_multiple_splits:
+    print("\nResults for each split:")
+    for split_idx in range(n_splits):
+        print(f"Split {split_idx + 1}: Val {metric_name}: {best_val_accs[split_idx]:.4f}, Test {metric_name}: {test_accs[split_idx]:.4f}")

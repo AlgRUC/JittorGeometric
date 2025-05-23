@@ -1,140 +1,92 @@
 import os.path as osp
-from typing import Callable, List, Optional, Union
-
 import numpy as np
 import jittor as jt
 from jittor_geometric.data import Data, InMemoryDataset, download_url
-from jittor_geometric.utils import coalesce
+from typing import Callable, Optional
 
 
 class WikipediaNetwork(InMemoryDataset):
-    r"""The Wikipedia networks introduced in the
-    `"Multi-scale Attributed Node Embedding"
-    <https://arxiv.org/abs/1909.13021>`_ paper.
+    r"""Heterophilic dataset from the paper 'A critical look at the evaluation of GNNs under 
+    heterophily: Are we really making progress?'
+    <https://arxiv.org/abs/2302.11640>.
 
-    This class represents Wikipedia networks where nodes correspond to web pages, and edges represent hyperlinks between them. The node features are derived from informative nouns on the Wikipedia pages, and the task is to predict the average daily traffic of each web page.
+    This class represents a collection of heterophilic graph datasets used to evaluate the performance of Graph Neural Networks (GNNs) in heterophilic settings. These datasets consist of graphs where nodes are connected based on certain relationships, and the task is to classify the nodes based on their features or labels. The datasets in this collection come from different domains, and each dataset has a unique structure and task.
 
     Dataset Details:
-    
-    - **Chameleon**: A Wikipedia page graph with node features representing nouns and the task of predicting traffic.
-    - **Squirrel**: Similar to Chameleon but derived from a different subset of Wikipedia pages.
 
-    Geometric GCN Preprocessing:
-    - If `geom_gcn_preprocess` is set to `True`, the dataset is preprocessed following the `"Geom-GCN: Geometric Graph Convolutional Networks"
-      <https://arxiv.org/abs/2002.05287>`_ paper. In this case, the traffic prediction task is converted into a five-category classification problem.
+    - **Chameleon**
+    - **Squirrel**
+    - **Chameleon-Filtered**
+    - **Squirrel-Filtered**
 
     Args:
         root (str): Root directory where the dataset should be saved.
-        name (str): The name of the dataset (:obj:`"chameleon"`, :obj:`"squirrel"`).
-        geom_gcn_preprocess (bool): Whether to load the preprocessed data from the Geom-GCN paper.
-            If set to `True`, preprocessed splits will also be available. (default: :obj:`True`)
-        transform (callable, optional): A function/transform that takes in a
-            :obj:`jittor_geometric.data.Data` object and returns a transformed
-            version. The data object will be transformed before every access.
+        name (str): The name of the dataset to load. Options include:
+            - `"chameleon"`
+            - `"squirrel"`
+            - `"chameleon_filtered"`
+            - `"squirrel_filtered"`
+        transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
+            and returns a transformed version. The data object will be transformed on every access.
             (default: :obj:`None`)
-        pre_transform (callable, optional): A function/transform that takes in a
-            :obj:`jittor_geometric.data.Data` object and returns a transformed
-            version. The data object will be transformed before being saved to disk.
+        pre_transform (callable, optional): A function/transform that takes in a :obj:`Data` object 
+            and returns a transformed version. The data object will be transformed before being saved to disk.
             (default: :obj:`None`)
 
     Example:
-        >>> dataset = WikipediaNetwork(root='/path/to/dataset', name='chameleon', geom_gcn_preprocess=True)
-        >>> data = dataset[0]  # Access the processed data object
+        >>> dataset = Wikipedia(root='/path/to/dataset', name='chameleon')
+        >>> dataset.data
+        >>> dataset[0]  # Accessing the first data point
     """
 
-    raw_url = 'https://graphmining.ai/datasets/ptg/wiki'
-    processed_url = ('https://raw.githubusercontent.com/graphdml-uiuc-jlu/'
-                     'geom-gcn/f1fc0d14b3b019c562737240d06ec83b07d16a8f')
+    url = ('https://github.com/yandex-research/heterophilous-graphs/raw/'
+           'main/data')
 
-    def __init__(
-        self,
-        root: str,
-        name: str,
-        geom_gcn_preprocess: bool = True,
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
-    ) -> None:
+    def __init__(self, root: str, name: str, 
+                 transform: Optional[Callable] = None, 
+                 pre_transform: Optional[Callable] = None):
+        self.root = root
         self.name = name.lower()
-        self.geom_gcn_preprocess = geom_gcn_preprocess
-        assert self.name in ['chameleon', 'squirrel']
-        super(WikipediaNetwork, self).__init__(root, transform, pre_transform)
-        self.data, self.slices = jt.load(self.processed_paths[0])
+        super().__init__(root, transform, pre_transform)
+        self.data, self.slices = jt.load(self.processed_paths[0])  # Jittor's loading method
 
     @property
     def raw_dir(self) -> str:
-        if self.geom_gcn_preprocess:
-            return osp.join(self.root, self.name, 'geom_gcn', 'raw')
-        else:
-            return osp.join(self.root, self.name, 'raw')
+        return osp.join(self.root, self.name, 'raw')
 
     @property
     def processed_dir(self) -> str:
-        if self.geom_gcn_preprocess:
-            return osp.join(self.root, self.name, 'geom_gcn', 'processed')
-        else:
-            return osp.join(self.root, self.name, 'processed')
+        return osp.join(self.root, self.name, 'processed')
 
     @property
-    def raw_file_names(self) -> Union[List[str], str]:
-        if self.geom_gcn_preprocess:
-            return (['out1_node_feature_label.txt', 'out1_graph_edges.txt'] +
-                    [f'{self.name}_split_0.6_0.2_{i}.npz' for i in range(10)])
-        else:
-            return f'{self.name}.npz'
+    def raw_file_names(self) -> str:
+        return f'{self.name}.npz'
 
     @property
     def processed_file_names(self) -> str:
         return 'data.pkl'
 
-    def download(self) -> None:
-        if self.geom_gcn_preprocess:
-            for filename in self.raw_file_names[:2]:
-                url = f'{self.processed_url}/new_data/{self.name}/{filename}'
-                download_url(url, self.raw_dir)
-            for filename in self.raw_file_names[2:]:
-                url = f'{self.processed_url}/splits/{filename}'
-                download_url(url, self.raw_dir)
-        else:
-            download_url(f'{self.raw_url}/{self.name}.npz', self.raw_dir)
+    def download(self):
+        download_url(f'{self.url}/{self.raw_file_names}', self.raw_dir)
 
-    def process(self) -> None:
-        if self.geom_gcn_preprocess:
-            with open(self.raw_paths[0]) as f:
-                lines = f.read().split('\n')[1:-1]
-            xs = [[float(value) for value in line.split('\t')[1].split(',')]
-                  for line in lines]
-            x = jt.array(xs, dtype=jt.float32)
-            ys = [int(line.split('\t')[2]) for line in lines]
-            y = jt.array(ys, dtype=jt.int32)
+    def process(self, undirected=True):
+        data = np.load(self.raw_paths[0])
 
-            with open(self.raw_paths[1]) as f:
-                lines = f.read().split('\n')[1:-1]
-                edge_indices = [[int(value) for value in line.split('\t')]
-                                for line in lines]
-            edge_index = jt.array(edge_indices).transpose().astype(jt.int32)
-            edge_index = coalesce(edge_index, num_nodes=x.shape[0])
+        x = jt.array(data['node_features'])
+        y = jt.array(data['node_labels'])
+        edge_index = jt.array(data['edges']).transpose()
 
-            train_masks, val_masks, test_masks = [], [], []
-            for filepath in self.raw_paths[2:]:
-                masks = np.load(filepath)
-                train_masks += [jt.array(masks['train_mask'])]
-                val_masks += [jt.array(masks['val_mask'])]
-                test_masks += [jt.array(masks['test_mask'])]
-            train_mask = jt.stack(train_masks, dim=1).bool()
-            val_mask = jt.stack(val_masks, dim=1).bool()
-            test_mask = jt.stack(test_masks, dim=1).bool()
+        if undirected:
+            reverse_edges = edge_index.flip(0)
+            edge_index = jt.contrib.concat([edge_index, reverse_edges], dim=1)
+            edge_index = jt.unique(edge_index, dim=1)
 
-            data = Data(x=x, edge_index=edge_index, y=y, train_mask=train_mask,
-                        val_mask=val_mask, test_mask=test_mask)
+        train_mask = jt.array(data['train_masks']).bool()
+        val_mask = jt.array(data['val_masks']).bool()
+        test_mask = jt.array(data['test_masks']).bool()
 
-        else:
-            raw_data = np.load(self.raw_paths[0], 'r', allow_pickle=True)
-            x = jt.array(raw_data['features'], dtype=jt.float32)
-            edge_index = jt.array(raw_data['edges'], dtype=jt.int32).transpose()
-            edge_index, _ = coalesce(edge_index, num_nodes=x.shape[0])
-            y = jt.array(raw_data['target'], dtype=jt.float32)
-
-            data = Data(x=x, edge_index=edge_index, y=y)
+        data = Data(x=x, edge_index=edge_index, y=y, train_mask=train_mask,
+                    val_mask=val_mask, test_mask=test_mask)
 
         if self.pre_transform is not None:
             data = self.pre_transform(data)
