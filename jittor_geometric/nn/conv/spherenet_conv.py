@@ -23,7 +23,6 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 
 from jittor_geometric.utils import scatter
-from jittor_geometric.typing import jt_scatter
 from jittor_geometric.data import CSC, CSR
 from jittor_geometric.ops import SpmmCsr, aggregateWithWeight
 from jittor_geometric.ops import cootocsr, cootocsc
@@ -54,7 +53,8 @@ def radius_graph(pos, batch, r):
     batch_expanded = batch.unsqueeze(1).expand(n, n)
     batch_pairs = batch_expanded == batch_expanded.t()
 
-    mask = batch_pairs & (distances < r)
+    not_self_loops = 1 - jittor.init.eye(n, dtype=jittor.bool)
+    mask = batch_pairs & (distances < r) & not_self_loops
 
     edge_index = jittor.nonzero(mask)
     edge_index = edge_index.t()
@@ -367,6 +367,7 @@ class angle_emb(jittor.nn.Module):
                 self.bessel_funcs.append(bessel)
 
     def execute(self, dist, angle, idx_kj):
+        breakpoint()
         dist = dist / self.cutoff
         rbf = jittor.stack([f(dist) for f in self.bessel_funcs], dim=1)
         # rbf = self.envelope(dist).unsqueeze(-1) * rbf
@@ -553,6 +554,7 @@ class update_e(jittor.nn.Module):
         glorot(self.lin_rbf.weight)
 
     def execute(self, x, emb, idx_kj, idx_ji):
+        breakpoint()
         rbf0, sbf, t = emb
         x1,_ = x
 
@@ -584,8 +586,8 @@ class update_e(jittor.nn.Module):
             e1 = layer(e1)
         e2 = self.lin_rbf(rbf0) * e1
         # fix in future
-        e1 = jittor.clamp(e1, -10.0, 10.0)
-        e2 = jittor.clamp(e2, -10.0 ,10.0)
+        #e1 = jittor.clamp(e1, -10.0, 10.0)
+        #e2 = jittor.clamp(e2, -10.0 ,10.0)
         return e1, e2
 
 
@@ -712,7 +714,6 @@ class SphereNet(jittor.nn.Module):
         edge_index = radius_graph(pos, batch=batch, r=self.cutoff)
         num_nodes = z.size(0)
         dist, angle, torsion, i, j, idx_kj, idx_ji = xyz_to_dat(pos, edge_index, num_nodes, use_torsion=True)
-
         emb = self.emb(dist, angle, torsion, idx_kj)
 
         #Initialize edge, node, graph features
@@ -720,6 +721,7 @@ class SphereNet(jittor.nn.Module):
 
         v = self.init_v(e, i)
 
+        #
         u = self.init_u(jittor.zeros_like(scatter(v, batch, dim=0)), v, batch) #scatter(v, batch, dim=0)
 
         for update_e, update_v, update_u in zip(self.update_es, self.update_vs, self.update_us):
@@ -737,7 +739,7 @@ if __name__ == "__main__":
         def __init__(self):
             n = 30
             z = jittor.randint(1, 5, shape=(n,))
-            pos = jittor.rand(n, 3) * 30
+            pos = jittor.rand(n, 3) * 10
             batch = jittor.zeros(n)
             batch[20:] = 1
             self.z = z

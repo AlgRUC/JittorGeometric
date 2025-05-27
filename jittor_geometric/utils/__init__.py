@@ -13,6 +13,7 @@ from .induced_graph import induced_graph
 from .neighbor_sampler import neighbor_sampler, randomwalk_sampler
 from .one_hot import one_hot
 from .num_nodes import maybe_num_nodes
+from .smiles import from_rdmol, to_rdmol, from_smiles, to_smiles
 
 __all__ = [
     'coalesce',
@@ -35,6 +36,10 @@ __all__ = [
     'randomwalk_sampler',
     'one_hot',
     'maybe_num_nodes',
+    'from_rdmol',
+    'to_rdmol',
+    'from_smiles',
+    'to_smiles',
 ]
 
 classes = __all__

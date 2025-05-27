@@ -46,22 +46,22 @@ def eval(model, loader):
     model.eval()
     y_true = []
     y_pred = []
+    with jt.no_grad():
+        # batch_data.z, batch_data.pos, batch_data.pos
+        for step, batch_data in enumerate(tqdm(loader, desc="Iteration")):
+            pred = model(batch_data)
+            y_true.append(batch_data.y.numpy())
+            y_pred.append(pred.numpy())
 
-    # batch_data.z, batch_data.pos, batch_data.pos
-    for step, batch_data in enumerate(tqdm(loader, desc="Iteration")):
-        pred = model(batch_data)
-        y_true.append(batch_data.y)
-        y_pred.append(pred)
+        y_true = jt.cat(y_true, dim = 0)
+        y_pred = jt.cat(y_pred, dim = 0)
 
-    y_true = jt.cat(y_true, dim = 0)
-    y_pred = jt.cat(y_pred, dim = 0)
-
-    return float(mae_loss(y_pred, y_true))
+        return float(mae_loss(y_pred, y_true))
 
 def main():
     # data
     dataset_name = 'qm9'
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '../data/qm9')
+    path = osp.join(osp.dirname(osp.realpath(__file__)), '../data/QM9')
     qm9_dataset = QM9(path, transform=T.NormalizeFeatures())
     # random split train/val/test = 8/1/1
     split_dict = qm9_dataset.get_idx_split()

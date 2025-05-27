@@ -38,7 +38,22 @@ def softplus(x: jt.Var, beta=jt.array(1.0), threshold=jt.array(20.0)) -> jt.Var:
     """
     return jt.log(jt.array(1.0) + jt.exp(beta * x)) / beta
 
+# def radius_graph(pos, batch, r):
+#     n = pos.size(0)
+#     #device = node.device
 
+#     node_expanded = pos.unsqueeze(1).expand(n, n, 3)
+#     node_pairwise_diff = node_expanded - pos.unsqueeze(0).expand(n, n, 3)
+#     distances = jt.norm(node_pairwise_diff, dim=2)
+
+#     batch_expanded = batch.unsqueeze(1).expand(n, n)
+#     batch_pairs = batch_expanded == batch_expanded.t()
+
+#     mask = batch_pairs & (distances < r)
+
+#     edge_index = jt.nonzero(mask)
+#     edge_index = edge_index.t()
+#     return edge_index
 
 def radius_graph(data, r, batch=None, max_num_neighbors=None, loop=False):
     """
@@ -402,6 +417,7 @@ class SchNet(nn.Module):
         batch = jt.zeros_like(z) if batch is None else batch
 
         h = self.embedding(z)
+        
         edge_index, edge_weight = self.interaction_graph(pos, batch)
         edge_attr = self.distance_expansion(edge_weight)
 
@@ -409,6 +425,7 @@ class SchNet(nn.Module):
             h = h + interaction(h, edge_index, edge_weight, edge_attr)
 
         h = self.lin1(h)
+
         h = self.act(h)
         h = self.lin2(h)
 
@@ -418,14 +435,15 @@ class SchNet(nn.Module):
             M = self.sum_aggr(x=mass, batch=batch, dim=0)
             c = self.sum_aggr(x=mass * pos, index=batch, dim=0) / M
             h = h * (pos - c.index_select(0, batch))
-
+        
         if not self.dipole and self.mean is not None and self.std is not None:
             h = h * self.std + self.mean
-
+        
         if not self.dipole and self.atomref is not None:
             h = h + self.atomref(z)
-
+        
         out = self.readout(h, batch, dim=0)
+        
 
         if self.dipole:
             out = jt.norm(out, dim=-1, keepdim=True)
@@ -473,6 +491,7 @@ class RadiusInteractionGraph(nn.Module):
         """
         edge_index = radius_graph(pos, r=self.cutoff, batch=batch,
                                   max_num_neighbors=self.max_num_neighbors)
+        # edge_index = radius_graph(pos, batch=batch, r=self.cutoff)
         row, col = edge_index
         edge_weight = (pos[row] - pos[col]).norm(dim=-1)
         return edge_index, edge_weight

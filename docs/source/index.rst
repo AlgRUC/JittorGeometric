@@ -1,14 +1,14 @@
-Welcome to Jittor Geometric's Documentation
+Welcome to JittorGeometric's Documentation
 ===========================================
 
 Overview
 --------
 
-Jittor Geometric is a library designed for machine learning on graph data based on the Jittor framework.
+JittorGeometric is a library designed for machine learning on graph data based on the Jittor framework.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Install Jittor Geometric
+   :caption:  JittorGeometric
 
    install/installation
 
@@ -22,6 +22,12 @@ Jittor Geometric is a library designed for machine learning on graph data based 
    :maxdepth: 2
    :caption: API References
 
-   datasets/datasets
    modules/nn
-   ops
+   data/data
+   datasets/datasets
+   dataloader/dataloader
+   io/io
+   partition/partition
+   transforms/transforms
+   ops/ops
+   utils/utils

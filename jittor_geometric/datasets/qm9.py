@@ -171,10 +171,6 @@ class QM9(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        # try:
-        #     import rdkit  # noqa
-        #     return ['gdb9.sdf', 'gdb9.sdf.csv', 'uncharacterized.txt']
-        # except ImportError:
         return ['qm9.pkl']
 
     @property
@@ -182,30 +178,9 @@ class QM9(InMemoryDataset):
         return 'data.pkl'
 
     def download(self) -> None:
-        # try:
-        #     import rdkit  # noqa
-        #     file_path = download_url(self.raw_url, self.raw_dir)
-        #     extract_zip(file_path, self.raw_dir)
-        #     os.unlink(file_path)
-
-        #     file_path = download_url(self.raw_url2, self.raw_dir)
-        #     os.rename(osp.join(self.raw_dir, '3195404'),
-        #               osp.join(self.raw_dir, 'uncharacterized.txt'))
-        # except ImportError:
-        # path = download_url(self.processed_url, self.raw_dir)
-        # extract_zip(path, self.raw_dir)
-        # os.unlink(path)
-        hf_hub_download(repo_id=f"TGB-Seq/QM9", filename=f"qm9.pkl", local_dir=self.raw_dir, repo_type="dataset")
+        hf_hub_download(repo_id=f"Drug-Data/QM9", filename=f"qm9.pkl", local_dir=self.raw_dir, repo_type="dataset")
 
     def process(self) -> None:
-        # try:
-        #     from rdkit import Chem, RDLogger
-        #     from rdkit.Chem.rdchem import BondType as BT
-        #     from rdkit.Chem.rdchem import HybridizationType
-        #     RDLogger.DisableLog('rdApp.*')  # type: ignore
-        #     WITH_RDKIT = True
-
-        # except ImportError:
         WITH_RDKIT = False
 
         if not WITH_RDKIT:

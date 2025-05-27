@@ -49,6 +49,7 @@ class GATConv(MessagePassingNts):
 
     def reset_parameters(self):
         glorot(self.weight)
+        glorot(self.edge_weight)
         self._cached_adj_t = None
         self._cached_csc=None
 

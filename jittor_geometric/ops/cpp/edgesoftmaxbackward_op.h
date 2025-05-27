@@ -20,9 +20,8 @@ struct EdgesoftmaxbackwardOp : Op {
     Var* indices;
     Var* offset;
     Var* edge_weight;
-    NanoString dtype;
     Var* output;
-    EdgesoftmaxbackwardOp(Var* outputVar_, Var* x_,Var* y_, Var* indices_,Var* offset_,NanoString dype_=ns_float32);
+    EdgesoftmaxbackwardOp(Var* outputVar_, Var* x_,Var* y_, Var* indices_,Var* offset_);
     const char* name() const override { return "edgesoftmaxbackward"; }
     DECLARE_jit_run;
 };

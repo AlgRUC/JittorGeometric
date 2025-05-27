@@ -12,7 +12,7 @@ from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 from jittor_geometric.nn.models.dygformer import DyGFormer
 from jittor_geometric.datasets import JODIEDataset
-from jittor_geometric.jitgeo_loader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
+from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.nn.dense.merge_predictor import MergeLayer
 def test(loader):
