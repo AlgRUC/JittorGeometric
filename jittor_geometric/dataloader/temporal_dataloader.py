@@ -232,7 +232,7 @@ def get_neighbor_sampler(data, sample_neighbor_strategy: str = 'uniform', time_s
     return NeighborSamplerOrigin(adj_list=adj_list, sample_neighbor_strategy=sample_neighbor_strategy, time_scaling_factor=time_scaling_factor, seed=seed)
 
 class TemporalDataLoader:
-    def __init__(self, data, batch_size=1, neg_sampling_ratio=None, drop_last=False, num_neg_sample=None, neg_samples=None, seed=None):
+    def __init__(self, data, batch_size=1, neg_sampling_ratio=None, drop_last=False, num_neg_sample=None, neg_samples=None, seed=None, shuffle=False):
         self.data = data
         self.batch_size = batch_size
         self.neg_sampling_ratio = neg_sampling_ratio
@@ -245,13 +245,23 @@ class TemporalDataLoader:
         if drop_last and data_len % batch_size != 0:
             self.arange = self.arange[:-1]
         self.seed = seed
+        self.shuffle = shuffle
         if seed is not None:
-            np.random_state = np.random.RandomState(seed)
+            self._random_state = np.random.RandomState(seed)
+        else:
+            self._random_state = np.random
+        if self.shuffle:
+            self._shuffle_arange()
+
+    def _shuffle_arange(self):
+        self._random_state.shuffle(self.arange)
 
     def __len__(self):
         return len(self.arange)
 
     def __iter__(self):
+        if self.shuffle:
+            self._shuffle_arange()
         for start in self.arange:
             end = start + self.batch_size
             batch = self.data[start:end]
@@ -265,7 +275,7 @@ class TemporalDataLoader:
             if self.num_neg_sample is not None and self.num_neg_sample > 0:
                 neg_dst_size = self.num_neg_sample * len(batch.dst)
                 if self.seed is not None:
-                    neg_dst = np.random_state.randint(self.min_dst, self.max_dst + 1, size=(neg_dst_size,))
+                    neg_dst = self._random_state.randint(self.min_dst, self.max_dst + 1, size=(neg_dst_size,))
                 else:
                     neg_dst = np.random.randint(self.min_dst, self.max_dst + 1, size=(neg_dst_size,))
                 neg_dst = jt.array(neg_dst)

@@ -70,6 +70,18 @@ class TemporalData(object):
         return max(int(self.src.max()), int(self.dst.max())) + 1
 
     @property
+    def max_node_id(self):
+        return max(int(self.src.max()), int(self.dst.max()))
+
+    @property
+    def src_size(self):
+        return self.src.max() - self.src.min() + 1
+    
+    @property
+    def dst_size(self):
+        return self.dst.max() - self.dst.min() + 1
+
+    @property
     def num_events(self):
         if isinstance(self.src,np.ndarray):
             return self.src.shape[0]
