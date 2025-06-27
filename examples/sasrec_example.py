@@ -24,7 +24,7 @@ def test(loader):
     loader_tqdm = tqdm(loader, ncols=120)
     for _, batch_data in enumerate(loader_tqdm):
         src, dst, t, neg_dst = jt.array(batch_data.src), jt.array(batch_data.dst), jt.array(batch_data.t), jt.array(batch_data.neg_dst)
-        src_neighb_seq, _, src_neighb_interact_times = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
+        src_neighb_seq, _, _ = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
         neighbor_num=(src_neighb_seq!=0).sum(axis=1)
         if neighbor_num.sum() == 0:
             continue
@@ -33,8 +33,6 @@ def test(loader):
         test_dst = jt.cat([pos_item, neg_item], dim=-1)
         batch_data=[jt.Var(src_neighb_seq), jt.Var(neighbor_num), jt.Var(test_dst)]
         pos_score, neg_score = model.predict(batch_data)
-        # print(pos_score.shape)
-        # print(neg_score.shape)
         neg_score = neg_score.flatten()
         num_neg = neg_score.shape[0]//pos_score.shape[0]
         if num_neg == 1: # ap
@@ -63,20 +61,20 @@ def train():
         train_idx_data_loader_tqdm = tqdm(train_loader, ncols=120)
         for batch_idx, batch_data in enumerate(train_idx_data_loader_tqdm):
             src, dst, t, neg_dst = jt.array(batch_data.src), jt.array(batch_data.dst), jt.array(batch_data.t), jt.array(batch_data.neg_dst)
-            src_neighb_seq, _, src_neighb_interact_times = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
+            src_neighb_seq, _, _ = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
             neighbor_num=(src_neighb_seq!=0).sum(axis=1)
             if neighbor_num.sum() == 0:
                 continue
-            pos_item = jt.Var(dst).unsqueeze(-1)
-            neg_item = jt.Var(neg_dst).unsqueeze(-1)
-            test_dst = jt.cat([pos_item, neg_item], dim=-1).flatten()
+            pos_item = jt.Var(dst)
+            neg_item = jt.Var(neg_dst)
+            test_dst = jt.cat([pos_item, neg_item], dim=0)
             batch_data=[jt.Var(src_neighb_seq), jt.Var(neighbor_num), jt.Var(test_dst)]
             batch_src_node_embeddings, dst_node_embeddings = model.calculate_loss(batch_data)
             batch_dst_node_embeddings = dst_node_embeddings[:len(pos_item)]
             batch_neg_dst_node_embeddings = dst_node_embeddings[len(pos_item):]
             batch_neg_src_node_embeddings = batch_src_node_embeddings
-            logits_pos = (batch_src_node_embeddings * batch_dst_node_embeddings).sum(dim=-1)
-            logits_neg = (batch_neg_src_node_embeddings * batch_neg_dst_node_embeddings).sum(dim=-1)
+            logits_pos = jt.matmul(batch_dst_node_embeddings, batch_neg_src_node_embeddings.transpose(0, 1))
+            logits_neg = jt.matmul(batch_neg_dst_node_embeddings, batch_neg_src_node_embeddings.transpose(0, 1))
             loss = loss_func(logits_pos, logits_neg)
             optimizer.zero_grad()
             optimizer.step(loss)
@@ -145,14 +143,12 @@ else:
     node_size = data.max_node_id
 dst_min_idx = data.dst.min()
 src_min_idx = data.src.min()
-print(src_min_idx, dst_min_idx)
 hidden_size = 64
 model = SASRec(n_layers=num_layers, n_heads=2, hidden_size=64, inner_size=256, hidden_dropout_prob=0.1, attn_dropout_prob=0.1, hidden_act='gelu', layer_norm_eps=1e-12, initializer_range=0.02, n_items=item_size, max_seq_length=num_neighbors)
 model.set_min_idx(src_min_idx, dst_min_idx)
-print(model.item_min_idx, model.user_min_idx)
 loss_func = BPRLoss()
 layer_norm = nn.LayerNorm(hidden_size, eps=1e-12)
-optimizer = jt.nn.Adam(list(model.parameters()),lr=0.001)
+optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 
 train()
 model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_SASRec.pkl'))

@@ -10,7 +10,7 @@ from tqdm import tqdm
 from sklearn.metrics import average_precision_score, roc_auc_score
 from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
-from jittor_geometric.nn.models.sasrec import SASRec
+from jittor_geometric.nn.models.sgnnhn import SGNNHN
 from jittor_geometric.datasets import JODIEDataset
 from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
@@ -24,13 +24,13 @@ def test(loader):
     loader_tqdm = tqdm(loader, ncols=120)
     for _, batch_data in enumerate(loader_tqdm):
         src, dst, t, neg_dst = jt.array(batch_data.src), jt.array(batch_data.dst), jt.array(batch_data.t), jt.array(batch_data.neg_dst)
-        src_neighb_seq, _, src_neighb_interact_times = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
+        src_neighb_seq, _, _ = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
         neighbor_num=(src_neighb_seq!=0).sum(axis=1)
         if neighbor_num.sum() == 0:
             continue
         pos_item = jt.Var(dst).unsqueeze(-1)
         neg_item = jt.Var(neg_dst).unsqueeze(-1)
-        test_dst = jt.cat([pos_item, neg_item], dim=-1) 
+        test_dst = jt.cat([pos_item, neg_item], dim=-1)
         batch_data=[jt.Var(src_neighb_seq), jt.Var(neighbor_num), jt.Var(test_dst)]
         pos_score, neg_score = model.predict(batch_data)
         neg_score = neg_score.flatten()
@@ -61,13 +61,13 @@ def train():
         train_idx_data_loader_tqdm = tqdm(train_loader, ncols=120)
         for batch_idx, batch_data in enumerate(train_idx_data_loader_tqdm):
             src, dst, t, neg_dst = jt.array(batch_data.src), jt.array(batch_data.dst), jt.array(batch_data.t), jt.array(batch_data.neg_dst)
-            src_neighb_seq, _, src_neighb_interact_times = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
+            src_neighb_seq, _, _ = full_neighbor_sampler.get_historical_neighbors_left(node_ids=src.numpy(), node_interact_times=t.numpy(), num_neighbors=num_neighbors)
             neighbor_num=(src_neighb_seq!=0).sum(axis=1)
             if neighbor_num.sum() == 0:
                 continue
-            pos_item = jt.Var(dst).unsqueeze(-1)
-            neg_item = jt.Var(neg_dst).unsqueeze(-1)
-            test_dst = jt.cat([pos_item, neg_item], dim=-1).flatten()
+            pos_item = jt.Var(dst)
+            neg_item = jt.Var(neg_dst)
+            test_dst = jt.cat([pos_item, neg_item], dim=0)
             batch_data=[jt.Var(src_neighb_seq), jt.Var(neighbor_num), jt.Var(test_dst)]
             batch_src_node_embeddings, dst_node_embeddings = model.calculate_loss(batch_data)
             batch_dst_node_embeddings = dst_node_embeddings[:len(pos_item)]
@@ -87,7 +87,7 @@ def train():
         # save the best model if AP is improved
         if ap['AP'] > best_ap:
             best_ap = ap['AP']
-            jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_SASRec.pkl')
+            jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_SGNNHN.pkl')
         else:
             patience -= 1
             if patience == 0:
@@ -127,7 +127,7 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDatas
     dataset = JODIEDataset(path, name=dataset_name)
     data = dataset[0]
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
-    train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
+    train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0, shuffle=True)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
@@ -144,12 +144,12 @@ else:
 dst_min_idx = data.dst.min()
 src_min_idx = data.src.min()
 hidden_size = 64
-model = SASRec(n_layers=num_layers, n_heads=2, hidden_size=64, inner_size=256, hidden_dropout_prob=0.1, attn_dropout_prob=0.1, hidden_act='gelu', layer_norm_eps=1e-12, initializer_range=0.02, n_items=item_size, max_seq_length=num_neighbors)
+model = SGNNHN(embedding_size=hidden_size, step=1, scale=12, n_items=item_size, dropout_seq=dropout, max_seq_length=num_neighbors)
 model.set_min_idx(src_min_idx, dst_min_idx)
 loss_func = BPRLoss()
 layer_norm = nn.LayerNorm(hidden_size, eps=1e-12)
 optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 
 train()
-model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_SASRec.pkl'))
+model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_SGNNHN.pkl'))
 print(test(test_loader))
