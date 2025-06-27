@@ -1,10 +1,11 @@
 import jittor as jt
-from jittor import nn
-import jittor.nn.functional as fn
-from dense.MLP import MLP
+from jittor import nn as nn
+from jittor_geometric.nn.dense.MLP import MLP
 import copy
 import math
-
+from jittor.nn import Embedding
+import numpy as np
+from jittor_geometric.utils.bprloss import BPRLoss
 class CRAFT(jt.nn.Module):
 
     def __init__(self, n_layers, n_heads, hidden_size, hidden_dropout_prob, attn_dropout_prob, hidden_act, layer_norm_eps, initializer_range, n_nodes, max_seq_length, loss_type, use_pos=True, input_cat_time_intervals=False, output_cat_time_intervals=True, output_cat_repeat_times=False, num_output_layer=1,  emb_dropout_prob=0.1, skip_connection=False):
@@ -22,8 +23,8 @@ class CRAFT(jt.nn.Module):
         self.output_cat_time_intervals = output_cat_time_intervals
         self.output_cat_repeat_times = output_cat_repeat_times
         self.emb_dropout_prob = emb_dropout_prob
-        self.node_embedding = nn.Embedding(
-            self.n_nodes+1, self.hidden_size, padding_idx=0
+        self.node_embedding = Embedding(
+            int(self.n_nodes)+1, self.hidden_size
         )
         self.use_pos = use_pos
         self.input_cat_time_intervals = input_cat_time_intervals
@@ -74,16 +75,12 @@ class CRAFT(jt.nn.Module):
 
     def _init_weights(self, module):
         if isinstance(module, (nn.Embedding, nn.Linear)):
-            module.weight.data.normal_(mean=0.0, std=self.initializer_range)
+            module.weight=jt.array(np.random.normal(loc=0.0, scale=self.initializer_range, size=module.weight.shape))
         elif isinstance(module, nn.LayerNorm):
-            module.bias.data.zero_()
-            module.weight.data.fill_(1.0)
+            module.bias=jt.array(np.zeros(module.bias.shape))
+            module.weight=jt.array(np.ones(module.weight.shape))
         if isinstance(module, nn.Linear) and module.bias is not None:
-            module.bias.data.zero_()
-            # nn.init.kaiming_normal_(module.weight)
-        # stdv = 1.0 / np.sqrt(self.hidden_size)
-        # for weight in self.parameters():
-        #     weight.data.uniform_(-stdv, stdv)
+            module.bias=jt.array(np.zeros(module.bias.shape))
 
     def forward(self, src_neighb_seq, src_neighb_seq_len, neighbors_interact_times, cur_times, test_dst = None, dst_last_update_times = None):
         bs = src_neighb_seq.shape[0]
@@ -107,7 +104,7 @@ class CRAFT(jt.nn.Module):
             repeat_times_feat = self.dropout(repeat_times_feat)
         if self.use_pos: # default
             position_ids = jt.arange(
-                src_neighb_seq.size(1), dtype=jt.long, device=src_neighb_seq.device
+                src_neighb_seq.size(1), dtype=jt.int64
             )
             position_ids = position_ids.unsqueeze(0).expand_as(src_neighb_seq)
             position_embedding = self.position_embedding(position_ids)
@@ -246,7 +243,7 @@ class MultiHeadCrossAttentionbyHand(nn.Module):
         x = x.view(*new_x_shape)
         return x
 
-    def forward(self, query, attention_mask, key=None, interaction_time=None):
+    def execute(self, query, attention_mask, key=None, interaction_time=None):
         # input_tensor: [batch_size, seq_len, hidden_size]
         if key is None:
             key = query
@@ -333,7 +330,7 @@ class FeedForward4CrossAttn(nn.Module):
     def get_hidden_act(self, act):
         ACT2FN = {
             "gelu": self.gelu,
-            "relu": fn.relu,
+            "relu": nn.relu,
             "swish": self.swish,
             "tanh": jt.tanh,
             "sigmoid": jt.sigmoid,
@@ -354,7 +351,7 @@ class FeedForward4CrossAttn(nn.Module):
     def swish(self, x):
         return x * jt.sigmoid(x)
 
-    def forward(self, input_tensor):
+    def execute(self, input_tensor):
         hidden_states = self.dense_1(input_tensor)
         hidden_states = self.intermediate_act_fn(hidden_states)
 
@@ -406,7 +403,7 @@ class CrossAttentionLayer(nn.Module):
             output_dim=output_dim
         )
 
-    def forward(self, query, attention_mask, key=None, interaction_time=None):
+    def execute(self, query, attention_mask, key=None, interaction_time=None):
         attention_output = self.multi_head_attention(query, attention_mask, key, interaction_time)
         feedforward_output = self.feed_forward(attention_output)
         return feedforward_output
@@ -457,7 +454,7 @@ class CrossAttention(nn.Module):
         )
         self.layer = nn.ModuleList([copy.deepcopy(layer) for _ in range(n_layers)])
 
-    def forward(self, query, attention_mask, key=None, output_all_encoded_layers=True, interaction_time=None):
+    def execute(self, query, attention_mask, key=None, output_all_encoded_layers=True, interaction_time=None):
         """
         Args:
             hidden_states (jt.Var): the input of the TransformerEncoder
@@ -477,14 +474,4 @@ class CrossAttention(nn.Module):
         if not output_all_encoded_layers:
             all_encoder_layers.append(query)
         return all_encoder_layers
-
-class BPRLoss(nn.Module):
-    def __init__(self, gamma=1e-10):
-        super(BPRLoss, self).__init__()
-        self.gamma = gamma
-
-    def forward(self, pos_score, neg_score, mask=None):
-        loss = -jt.log(self.gamma + jt.sigmoid(pos_score - neg_score))
-        if mask is not None:
-            loss = loss[mask]
-        return loss.mean()
+    

@@ -21,7 +21,7 @@ class MLP(nn.Module):
         else:
             self.lins.append(nn.Linear(input_dim, output_dim))
 
-    def forward(self, input: jt.Var):
+    def execute(self, input: jt.Var):
         x = input
         if self.num_layers > 1:
             for i in range(len(self.lins)-1):
