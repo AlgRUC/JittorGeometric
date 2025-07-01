@@ -6,6 +6,10 @@ from .dygformer import DyGFormer
 from .schnet import SchNet
 from .unimol import UniMolModel
 from .dimenet import DimeNet
+from .dgi import DGI
+from .grace import Grace
+from .mvgrl import MVGRL
+from .polygcl import PolyGCL
 
 __all__ = [
     'TGNMemory',
@@ -17,6 +21,10 @@ __all__ = [
     'DimeNet',
     'compute_src_dst_node_time_shifts',
     'UniMolModel',
+    'DGI',
+    'Grace',
+    'MVGRL',
+    'PolyGCL'
 ]
 
 classes = __all__

@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="be2e5b7a-564c-4b17-9533-d4def905ca94" name="Changes" comment="" />
+    <list default="true" id="be2e5b7a-564c-4b17-9533-d4def905ca94" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jittor_geometric/nn/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/jittor_geometric/nn/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jittor_geometric/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/jittor_geometric/utils/__init__.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -59,7 +70,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1751369876363</updated>
-      <workItem from="1751369877658" duration="1207000" />
+      <workItem from="1751369877658" duration="8900000" />
     </task>
     <servers />
   </component>
