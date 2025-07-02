@@ -126,7 +126,7 @@ JittorGeometric includes implementations of popular GNN models, such as:
 | [DGI](./examples/dgi_example.py)         | 2019 | ICLR  |
 | [MVGRL](./examples/mvgrl_example.py)     | 2020 | ICML  |
 | [GRACE](./examples/grace_example.py)     | 2020 | ICML  |
-| [PoluGCL](./examples/polygcl_example.py) | 2024 | ICLR  |
+| [PolyGCL](./examples/polygcl_example.py) | 2024 | ICLR  |
 
 ## Installation
 Follow these steps to install JittorGeometric:
