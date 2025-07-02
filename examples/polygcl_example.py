@@ -227,3 +227,4 @@ if __name__ == "__main__":
     uncertainty = np.max(
         np.abs(sns.utils.ci(sns.algorithms.bootstrap(values, func=np.mean, n_boot=1000)) - values.mean()))
     print(f'test acc mean = {test_acc_mean:.4f} ± {uncertainty * 100:.4f}')
+    # python polygcl_example.py --dataname cora --lr 0.0005 --wd 1e-3 --lr1 0.002 --dprate 0.3 --dropout 0.3

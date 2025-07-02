@@ -237,3 +237,4 @@ def main(args):
 if __name__ == "__main__":
     print(args)
     main(args)
+    # python dgi_example.py --dataname cora

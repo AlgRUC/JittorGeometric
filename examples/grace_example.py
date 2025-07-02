@@ -267,3 +267,4 @@ if __name__ == "__main__":
     uncertainty = np.max(
         np.abs(sns.utils.ci(sns.algorithms.bootstrap(values, func=np.mean, n_boot=1000), 95) - values.mean()))
     print(f'test acc mean = {test_acc_mean:.4f} ± {uncertainty * 100:.4f}')
+    # python grace_example.py --dataname cora --lr 5e-4 --wd 1e-5 --act_fn relu --der1 0.2 --der2 0.4 --dfr1 0.3 --dfr2 0.4 --temp 0.4 --gpu 1 --patience 50

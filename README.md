@@ -117,6 +117,17 @@ JittorGeometric includes implementations of popular GNN models, such as:
 | [SphereNet](./examples/spherenet_example.py)  | 2022 | ICLR   |
 | [Uni-Mol](./examples/unimol_example.py)    | 2023 | ICLR   |
 
+---
+
+### Graph Self-supervised Learning
+
+| Model                                    | Year | Venue |
+|------------------------------------------|------|-------|
+| [DGI](./examples/dgi_example.py)         | 2019 | ICLR  |
+| [MVGRL](./examples/mvgrl_example.py)     | 2020 | ICML  |
+| [GRACE](./examples/grace_example.py)     | 2020 | ICML  |
+| [PoluGCL](./examples/polygcl_example.py) | 2024 | ICLR  |
+
 ## Installation
 Follow these steps to install JittorGeometric:
 
