@@ -14,7 +14,7 @@ from .neighbor_sampler import neighbor_sampler, randomwalk_sampler
 from .one_hot import one_hot
 from .num_nodes import maybe_num_nodes
 from .smiles import from_rdmol, to_rdmol, from_smiles, to_smiles
-from .gssl_utils import set_seed, cheby, random_splits, aug, preprocess_features, compute_ppr
+from .gssl_utils import set_seed, cheby, random_splits, drop_feature, mask_edge, preprocess_features, compute_ppr
 
 __all__ = [
     'coalesce',
@@ -44,7 +44,8 @@ __all__ = [
     'set_seed',
     'cheby',
     'random_splits',
-    'aug',
+    'drop_feature',
+    'mask_edge',
     'preprocess_features',
     'compute_ppr'
 ]

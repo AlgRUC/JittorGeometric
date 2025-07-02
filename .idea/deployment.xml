@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="jingyu_chen@183.174.228.180:5102" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="jingyu_chen@183.174.228.171:5102 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="jingyu_chen@183.174.228.180:5102">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/jingyu_chen/new_jittor_geometric" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>

@@ -7,7 +7,7 @@ import numpy as np
 from jittor_geometric.datasets import Planetoid, WikipediaNetwork, GeomGCN
 import jittor_geometric.transforms as T
 from jittor_geometric.nn.models.grace import Grace
-from jittor_geometric.utils.gssl_utils import random_splits, set_seed, aug
+from jittor_geometric.utils.gssl_utils import random_splits, set_seed, drop_feature, mask_edge
 import seaborn as sns
 from alive_progress import alive_bar
 import random
@@ -37,6 +37,37 @@ def DataLoader(name):
     else:
         raise ValueError(f'dataset {name} not supported in dataloader')
     return dataset
+
+
+def aug(graph, x, feat_drop_rate, edge_mask_rate):
+    """
+    Data augmentation function: Randomly drop features and mask edges.
+    """
+    ng = graph.clone()
+    n_node = graph.num_nodes
+
+    edge_mask = mask_edge(graph, edge_mask_rate)
+    feat = drop_feature(x, feat_drop_rate)
+
+
+    src = graph.edge_index[0]
+    dst = graph.edge_index[1]
+
+    nsrc = src[edge_mask]
+    ndst = dst[edge_mask]
+
+    ng.edge_index = jt.stack([nsrc, ndst], dim=0)
+
+    edge_index, edge_weight = ng.edge_index, ng.edge_attr
+
+    edge_index, edge_weight = gcn_norm(
+        edge_index, edge_weight, n_node,
+        improved=False, add_self_loops=True)
+    with jt.no_grad():
+        ng.csc = cootocsc(edge_index, edge_weight, n_node)
+        ng.csr = cootocsr(edge_index, edge_weight, n_node)
+
+    return ng, feat
 
 def count_parameters(model):
     return sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad])

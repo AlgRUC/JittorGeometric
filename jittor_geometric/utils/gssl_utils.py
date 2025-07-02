@@ -2,8 +2,6 @@ import jittor as jt
 import math
 import numpy as np
 import random
-from jittor_geometric.ops import cootocsr,cootocsc
-from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 import numpy as np
 import scipy.sparse as sp
 from scipy.linalg import inv
@@ -54,37 +52,6 @@ def random_splits(label, num_classes, percls_trn, val_lb, seed=42):
     val_mask = index_to_mask(val_idx, size=num_nodes)
     test_mask = index_to_mask(test_idx, size=num_nodes)
     return train_mask, val_mask, test_mask
-
-
-def aug(graph, x, feat_drop_rate, edge_mask_rate):
-    """
-    Data augmentation function: Randomly drop features and mask edges.
-    """
-    ng = graph.clone()
-    n_node = graph.num_nodes
-
-    edge_mask = mask_edge(graph, edge_mask_rate)
-    feat = drop_feature(x, feat_drop_rate)
-
-
-    src = graph.edge_index[0]
-    dst = graph.edge_index[1]
-
-    nsrc = src[edge_mask]
-    ndst = dst[edge_mask]
-
-    ng.edge_index = jt.stack([nsrc, ndst], dim=0)
-
-    edge_index, edge_weight = ng.edge_index, ng.edge_attr
-
-    edge_index, edge_weight = gcn_norm(
-        edge_index, edge_weight, n_node,
-        improved=False, add_self_loops=True)
-    with jt.no_grad():
-        ng.csc = cootocsc(edge_index, edge_weight, n_node)
-        ng.csr = cootocsr(edge_index, edge_weight, n_node)
-
-    return ng, feat
 
 
 def drop_feature(x, drop_prob):
