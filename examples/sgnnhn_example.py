@@ -54,7 +54,8 @@ def test(loader):
 
 def train():
     best_ap = 0
-    patience = 5
+    max_patience = 5
+    patience = max_patience
     for epoch in range(num_epochs):
         model.train()
         train_losses = []
@@ -73,8 +74,8 @@ def train():
             batch_dst_node_embeddings = dst_node_embeddings[:len(pos_item)]
             batch_neg_dst_node_embeddings = dst_node_embeddings[len(pos_item):]
             batch_neg_src_node_embeddings = batch_src_node_embeddings
-            logits_pos = jt.matmul(batch_dst_node_embeddings, batch_neg_src_node_embeddings.transpose(0, 1))
-            logits_neg = jt.matmul(batch_neg_dst_node_embeddings, batch_neg_src_node_embeddings.transpose(0, 1))
+            logits_pos = (batch_src_node_embeddings * batch_dst_node_embeddings).sum(dim=-1)
+            logits_neg = (batch_neg_src_node_embeddings * batch_neg_dst_node_embeddings).sum(dim=-1)
             loss = loss_func(logits_pos, logits_neg)
             optimizer.zero_grad()
             optimizer.step(loss)
@@ -88,6 +89,7 @@ def train():
         if ap['AP'] > best_ap:
             best_ap = ap['AP']
             jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_SGNNHN.pkl')
+            patience = max_patience
         else:
             patience -= 1
             if patience == 0:
