@@ -6,6 +6,9 @@ from .dygformer import DyGFormer
 from .schnet import SchNet
 from .unimol import UniMolModel
 from .dimenet import DimeNet
+from .polyformer import PolyFormerModel, get_data_load
+from .sgformer import SGFormerModel
+from .nagphormer import NAGphormerModel, accuracy_batch, re_features, laplacian_positional_encoding
 
 __all__ = [
     'TGNMemory',
@@ -17,6 +20,13 @@ __all__ = [
     'DimeNet',
     'compute_src_dst_node_time_shifts',
     'UniMolModel',
+    'PolyFormerModel',
+    'get_data_load',
+    'SGFormerModel',
+    'NAGphormerModel',
+    'accuracy_batch', 
+    're_features',
+    'laplacian_positional_encoding'
 ]
 
 classes = __all__
