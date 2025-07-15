@@ -146,17 +146,43 @@ class EdgeEncoding(nn.Module):
         self.max_path_distance = max_path_distance  
         self.edge_vector = nn.Parameter(jt.randn(self.max_path_distance, self.edge_dim))  
 
-    def execute(self, x: jt.Var, edge_attr: jt.Var, edge_paths) -> jt.Var:  
-        cij = jt.zeros((x.shape[0], x.shape[0]))  
+    # def execute(self, x: jt.Var, edge_attr: jt.Var, edge_paths) -> jt.Var:  
+    #     cij = jt.zeros((x.shape[0], x.shape[0]))  
   
-        for src in edge_paths:
-            for dst in edge_paths[src]:
-                path_ij = edge_paths[src][dst][:self.max_path_distance]
-                weight_inds = [i for i in range(len(path_ij))]
-                cij[src][dst] = dot_product(self.edge_vector[weight_inds], edge_attr[path_ij]).mean()
-        cij = jt.where(jt.isnan(cij), jt.array(0.0), cij)
+    #     for src in edge_paths:
+    #         for dst in edge_paths[src]:
+    #             path_ij = edge_paths[src][dst][:self.max_path_distance]
+    #             weight_inds = [i for i in range(len(path_ij))]
+    #             cij[src][dst] = dot_product(self.edge_vector[weight_inds], edge_attr[path_ij]).mean()
+    #     cij = jt.where(jt.isnan(cij), jt.array(0.0), cij)
 
+    #     return cij
+    def execute(self, x: jt.Var, edge_attr: jt.Var, edge_paths) -> jt.Var:  
+        n_nodes = x.shape[0]  
+        chunk_size = min(256, n_nodes)  # 根据内存调整  
+        cij = jt.zeros((n_nodes, n_nodes))  
+        
+        # 分块处理避免一次性构建大矩阵  
+        for i in range(0, n_nodes, chunk_size):  
+            end_i = min(i + chunk_size, n_nodes)  
+            chunk_cij = jt.zeros((end_i - i, n_nodes))  
+            
+            for src_idx, src in enumerate(range(i, end_i)):  
+                if src in edge_paths:  
+                    for dst in edge_paths[src]:  
+                        if len(edge_paths[src][dst]) > 0:  
+                            path_ij = edge_paths[src][dst][:self.max_path_distance]  
+                            weight_inds = jt.array([j for j in range(len(path_ij))])  
+                            chunk_cij[src_idx][dst] = dot_product(  
+                                self.edge_vector[weight_inds], edge_attr[path_ij]  
+                            ).mean()  
+            
+            cij[i:end_i] = chunk_cij  
+            del chunk_cij  # 及时释放内存  
+        
+        cij = jt.where(jt.isnan(cij), jt.array(0.0), cij)  
         return cij
+
     
 class GraphormerAttentionHead(nn.Module):  
     def __init__(self, dim_in: int, dim_q: int, dim_k: int, edge_dim: int, max_path_distance: int):  
@@ -382,7 +408,7 @@ class Graphormer(nn.Module):
         :return: jt.Var, output node embeddings  
         """  
         x = data.x.float()  
-        edge_index = data.edge_index.int32()  # JittorGeometric uses int32 for edge indices  
+        edge_index = data.edge_index.int()  # JittorGeometric uses int32 for edge indices  
         edge_attr = data.edge_attr.float() 
   
         if type(data) == Data:  
@@ -401,6 +427,7 @@ class Graphormer(nn.Module):
   
         for layer in self.layers:  
             x = layer(x, edge_attr, b, edge_paths, ptr)  
+            jt.gc()
   
         x = self.node_out_lin(x)  
   

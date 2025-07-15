@@ -23,7 +23,6 @@ def global_mean_pool(x: jt.Var, batch: jt.Var, size: int = None) -> jt.Var:
         size = int(batch.max().item()) + 1
     B, F = size, x.shape[1]
 
-    # 初始化输出和计数器
     sum_out = jt.zeros((B, F), dtype=x.dtype)
     count = jt.zeros((B, 1), dtype=x.dtype)
 
@@ -65,11 +64,9 @@ model = Graphormer(
     max_out_degree=5,  
     max_path_distance=5,  
 )  
-
-# Then in your main code:  
+ 
 test_ids, train_ids = train_test_split([i for i in range(len(dataset))], test_size=0.8, random_state=42)  
-
-# Create data loaders - this should now work  
+ 
 train_dataset = [dataset[i] for i in train_ids]  
 test_dataset = [dataset[i] for i in test_ids]
   
@@ -82,7 +79,7 @@ loss_function = nn.L1Loss()
 
 # Training loop  
 for epoch in range(10):
-    model.train()  
+    model.train()
     batch_loss = 0.0  
       
     for batch in tqdm(train_loader):  
@@ -96,19 +93,19 @@ for epoch in range(10):
         else:  
             output = output.mean(dim=0, keepdim=True)  
           
-        loss = loss_function(output, y)
+        loss = loss_function(output, y) # 这里在优化edge encoding
         try : 
             optimizer.step(loss)
-            # print(type(loss), loss)
         except Exception as e:
             print(type(loss), loss)
             print(e)
-            sys.exit(0)
+        #     sys.exit(0)
 
         batch_loss += loss.item()
 
         del loss, output, y
         jt.sync_all()
+        # jt.display_memory_info()
         jt.gc()
 
     print("TRAIN_LOSS", batch_loss / len(train_ids))  
@@ -121,12 +118,12 @@ for epoch in range(10):
         for batch in tqdm(test_loader):  
             y = batch.y  
             output = model(batch)  
-              
+            
             # Global mean pooling for graph-level prediction  
             if hasattr(batch, 'batch'):  
                 output = global_mean_pool(output, batch.batch)  
             else:  
-                output = output.mean(dim=0, keepdim=True)  
+                output = output.mean(dim=0, keepdim=True)
               
             loss = loss_function(output, y)  
             batch_loss += loss.item()  
