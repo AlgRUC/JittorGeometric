@@ -93,13 +93,12 @@ for epoch in range(10):
         else:  
             output = output.mean(dim=0, keepdim=True)  
           
-        loss = loss_function(output, y) # 这里在优化edge encoding
+        loss = loss_function(output, y) 
         try : 
             optimizer.step(loss)
         except Exception as e:
             print(type(loss), loss)
             print(e)
-        #     sys.exit(0)
 
         batch_loss += loss.item()
 
