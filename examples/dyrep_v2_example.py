@@ -4,18 +4,19 @@ root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 import jittor as jt
 from sklearn.metrics import average_precision_score, roc_auc_score
-from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor.nn import Linear
-from jittor_geometric.data import TemporalData
 from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
-from jittor_geometric.nn import TGNMemory, TransformerConv
-from jittor_geometric.nn.models.tgn import (
+from jittor_geometric.nn import DyRepMemory_v2, TransformerConv
+from jittor_geometric.nn.models.dyrep_v2 import (
     IdentityMessage,
     LastAggregator,
     LastNeighborLoader,
+    LinkedListLastNeighborLoader,
 )
 from tqdm import *
 import numpy as np
+from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
+from jittor_geometric.data import TemporalData
 
 # Use cuda
 jt.flags.use_cuda = 1
@@ -67,8 +68,8 @@ elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTu
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 
-# Define the neighbor loader
-neighbor_loader = LastNeighborLoader(data.num_nodes, size=10)
+# Define the neighbor loader (v2: change to use LinkedList, where each node is allocated only the space it needs.
+neighbor_loader = LinkedListLastNeighborLoader(data.num_nodes, size=10)
 
 # Define attention module
 class GraphAttentionEmbedding(jt.nn.Module):
@@ -83,7 +84,7 @@ class GraphAttentionEmbedding(jt.nn.Module):
         rel_t = last_update[edge_index[0]] - t
         rel_t_enc = self.time_enc(rel_t)
         edge_attr = jt.concat([rel_t_enc, msg], dim=-1)
-        return self.conv(x, edge_index, edge_attr)
+        return self.conv(x, edge_index, edge_attr) 
 
 # Define MLP-based predictor
 class LinkPredictor(jt.nn.Module):
@@ -98,10 +99,9 @@ class LinkPredictor(jt.nn.Module):
         h = jt.nn.relu(h)
         return self.lin_final(h)
 
-
 # Define Memory module
 memory_dim = time_dim = embedding_dim = 100
-memory = TGNMemory(
+memory = DyRepMemory_v2(
     data.num_nodes,
     data.msg.size(-1),
     memory_dim,
@@ -140,6 +140,7 @@ def train():
         # Get updated memory of all nodes involved in the computation
         z, last_update = model[0](n_id)
         z = model[1](z, last_update, edge_index, data.t[e_id], data.msg[e_id])
+        
 
         # Compute predictions and loss
         pos_out = model[2](z[assoc[batch.src]], z[assoc[batch.dst]])
@@ -150,7 +151,7 @@ def train():
         # Update memory and neighbor loader with ground-truth state
         model[0].update_state(batch.src, batch.dst, batch.t, batch.msg)
         neighbor_loader.insert(batch.src, batch.dst)
-        
+
         # Backpropagation and optimization
         optimizer.zero_grad()
         optimizer.step(loss)
@@ -164,7 +165,7 @@ def test(loader):
     model.eval()
 
     # Ensure deterministic sampling across epochs
-    jt.set_seed(12345)  
+    jt.set_seed(12345)
 
     aps, aucs = [], []
     for batch in loader:
@@ -205,7 +206,7 @@ for epoch in range(1, 6):
     if val_ap > best_ap:
         best_ap = val_ap
         # Save the model when achieving better performance on val set
-        jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_TGN.pkl')
+        jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
         print('Saved model is updated')
         patience = 5
     else:
@@ -215,6 +216,6 @@ for epoch in range(1, 6):
             break
 
 # Load the saved model for testing
-model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_model_TGN.pkl'))
+model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_model_DyRep.pkl'))
 test_ap, test_auc = test(test_loader)
 print(f'Test AP: {test_ap:.4f}, Test AUC: {test_auc:.4f}')

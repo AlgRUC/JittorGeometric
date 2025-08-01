@@ -21,7 +21,14 @@ from jittor_geometric.data import TemporalData
 jt.flags.use_cuda = 1
 
 # Load dataset from DGB or TGB-Seq
-dataset_name = 'wikipedia' # wikipedia, mooc, reddit, lastfm
+import argparse
+parser = argparse.ArgumentParser(description='Train DyRep model on specified dataset.')
+parser.add_argument('--dataset_name', type=str, default='wikipedia',
+                    help='Name of the dataset (wikipedia, mooc, reddit, lastfm). Default: wikipedia')
+args = parser.parse_args()
+dataset_name = args.dataset_name
+print('dataset_name:', args.dataset_name)
+
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     # Load dataset from DGB
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
@@ -189,7 +196,7 @@ def test(loader):
 best_ap = 0
 patience = 5
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
-for epoch in range(1, 51):
+for epoch in range(1, 6):
     loss = train()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
     val_ap, val_auc = test(val_loader)
@@ -197,7 +204,7 @@ for epoch in range(1, 51):
     if val_ap > best_ap:
         best_ap = val_ap
         # Save the model when achieving better performance on val set
-        # jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
+        jt.save(model.state_dict(), f'{save_model_path}/{dataset_name}_model_DyRep.pkl')
         print('Saved model is updated')
         patience = 5
     else:

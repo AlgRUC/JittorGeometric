@@ -8,11 +8,12 @@ from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor.nn import Linear
 from jittor_geometric.data import TemporalData
 from jittor_geometric.datasets import JODIEDataset, TemporalDataLoader
-from jittor_geometric.nn import TGNMemory, TransformerConv
-from jittor_geometric.nn.models.tgn import (
+from jittor_geometric.nn import TGNMemory_v2, TransformerConv
+from jittor_geometric.nn.models.tgn_v2 import (
     IdentityMessage,
     LastAggregator,
     LastNeighborLoader,
+    LinkedListLastNeighborLoader,
 )
 from tqdm import *
 import numpy as np
@@ -68,7 +69,7 @@ elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTu
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 
 # Define the neighbor loader
-neighbor_loader = LastNeighborLoader(data.num_nodes, size=10)
+neighbor_loader = LinkedListLastNeighborLoader(data.num_nodes, size=10)
 
 # Define attention module
 class GraphAttentionEmbedding(jt.nn.Module):
@@ -101,7 +102,7 @@ class LinkPredictor(jt.nn.Module):
 
 # Define Memory module
 memory_dim = time_dim = embedding_dim = 100
-memory = TGNMemory(
+memory = TGNMemory_v2(
     data.num_nodes,
     data.msg.size(-1),
     memory_dim,
