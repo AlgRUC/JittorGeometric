@@ -150,6 +150,74 @@ class NeighborSamplerOrigin():
         # three ndarrays, with shape (batch_size, num_neighbors)
         return nodes_neighbor_ids, nodes_edge_ids, nodes_neighbor_times
 
+    def get_historical_neighbors_left(self, node_ids: np.ndarray, node_interact_times: np.ndarray, num_neighbors: int = 20):
+        """
+        get historical neighbors of nodes in node_ids with interactions before the corresponding time in node_interact_times
+        :param node_ids: ndarray, shape (batch_size, ) or (*, ), node ids
+        :param node_interact_times: ndarray, shape (batch_size, ) or (*, ), node interaction times
+        :param num_neighbors: int, number of neighbors to sample for each node
+        :return: the neighbors will be at the left side of the array
+        """
+        assert num_neighbors > 0, 'Number of sampled neighbors for each node should be greater than 0!'
+        # All interactions described in the following three matrices are sorted in each row by time
+        # each entry in position (i,j) represents the id of the j-th dst node of src node node_ids[i] with an interaction before node_interact_times[i]
+        # ndarray, shape (batch_size, num_neighbors)
+        nodes_neighbor_ids = np.zeros((len(node_ids), num_neighbors)).astype(np.longlong)
+        # each entry in position (i,j) represents the id of the edge with src node node_ids[i] and dst node nodes_neighbor_ids[i][j] with an interaction before node_interact_times[i]
+        # ndarray, shape (batch_size, num_neighbors)
+        nodes_edge_ids = np.zeros((len(node_ids), num_neighbors)).astype(np.longlong)
+        # each entry in position (i,j) represents the interaction time between src node node_ids[i] and dst node nodes_neighbor_ids[i][j], before node_interact_times[i]
+        # ndarray, shape (batch_size, num_neighbors)
+        nodes_neighbor_times = np.zeros((len(node_ids), num_neighbors)).astype(np.float32)
+        if node_interact_times is None: # None means to get all the neighbors
+            node_interact_times=np.ones_like(node_ids)*np.finfo(np.float32).max 
+        # extracts all neighbors ids, edge ids and interaction times of nodes in node_ids, which happened before the corresponding time in node_interact_times
+        for idx, (node_id, node_interact_time) in enumerate(zip(node_ids, node_interact_times)):
+            # find neighbors that interacted with node_id before time node_interact_time
+            node_neighbor_ids, node_edge_ids, node_neighbor_times, node_neighbor_sampled_probabilities = \
+                self.find_neighbors_before(node_id=node_id, interact_time=node_interact_time, return_sampled_probabilities=self.sample_neighbor_strategy == 'time_interval_aware')
+
+            if len(node_neighbor_ids) > 0:
+                if self.sample_neighbor_strategy in ['uniform', 'time_interval_aware']:
+                    # when self.sample_neighbor_strategy == 'uniform', we shuffle the data before sampling with node_neighbor_sampled_probabilities as None
+                    # when self.sample_neighbor_strategy == 'time_interval_aware', we sample neighbors based on node_neighbor_sampled_probabilities
+                    # for time_interval_aware sampling strategy, we additionally use softmax to make the sum of sampled probabilities be 1
+                    if node_neighbor_sampled_probabilities is not None:
+                        # for extreme case that node_neighbor_sampled_probabilities only contains -1e10, which will make the denominator of softmax be zero,
+                        # torch.softmax() function can tackle this case
+                        node_neighbor_sampled_probabilities = jt.softmax(jt.Var(node_neighbor_sampled_probabilities).float(), dim=0).numpy()
+                    if self.seed is None:
+                        sampled_indices = np.random.choice(a=len(node_neighbor_ids), size=num_neighbors, p=node_neighbor_sampled_probabilities)
+                    else:
+                        sampled_indices = self.random_state.choice(a=len(node_neighbor_ids), size=num_neighbors, p=node_neighbor_sampled_probabilities)
+
+                    nodes_neighbor_ids[idx, :] = node_neighbor_ids[sampled_indices]
+                    nodes_edge_ids[idx, :] = node_edge_ids[sampled_indices]
+                    nodes_neighbor_times[idx, :] = node_neighbor_times[sampled_indices]
+
+                    # resort based on timestamps, return the ids in sorted increasing order, note this maybe unstable when multiple edges happen at the same time
+                    # (we still do this though this is unnecessary for TGAT or CAWN to guarantee the order of nodes,
+                    # since TGAT computes in an order-agnostic manner with relative time encoding, and CAWN computes for each walk while the sampled nodes are in different walks)
+                    sorted_position = nodes_neighbor_times[idx, :].argsort()
+                    nodes_neighbor_ids[idx, :] = nodes_neighbor_ids[idx, :][sorted_position]
+                    nodes_edge_ids[idx, :] = nodes_edge_ids[idx, :][sorted_position]
+                    nodes_neighbor_times[idx, :] = nodes_neighbor_times[idx, :][sorted_position]
+                elif self.sample_neighbor_strategy == 'recent':
+                    # Take most recent interactions with number num_neighbors
+                    node_neighbor_ids = node_neighbor_ids[-num_neighbors:]
+                    node_edge_ids = node_edge_ids[-num_neighbors:]
+                    node_neighbor_times = node_neighbor_times[-num_neighbors:]
+
+                    # put the neighbors' information at the front positions
+                    nodes_neighbor_ids[idx, :len(node_neighbor_ids)] = node_neighbor_ids
+                    nodes_edge_ids[idx, :len(node_edge_ids)] = node_edge_ids
+                    nodes_neighbor_times[idx, :len(node_neighbor_times)] = node_neighbor_times
+                else:
+                    raise ValueError(f'Not implemented error for sample_neighbor_strategy {self.sample_neighbor_strategy}!')
+
+        # three ndarrays, with shape (batch_size, num_neighbors)
+        return nodes_neighbor_ids, nodes_edge_ids, nodes_neighbor_times
+    
     def get_multi_hop_neighbors(self, num_hops: int, node_ids: np.ndarray, node_interact_times: np.ndarray, num_neighbors: int = 20):
         """
         get historical neighbors of nodes in node_ids within num_hops hops
@@ -232,7 +300,7 @@ def get_neighbor_sampler(data, sample_neighbor_strategy: str = 'uniform', time_s
     return NeighborSamplerOrigin(adj_list=adj_list, sample_neighbor_strategy=sample_neighbor_strategy, time_scaling_factor=time_scaling_factor, seed=seed)
 
 class TemporalDataLoader:
-    def __init__(self, data, batch_size=1, neg_sampling_ratio=None, drop_last=False, num_neg_sample=None, neg_samples=None, seed=None):
+    def __init__(self, data, batch_size=1, neg_sampling_ratio=None, drop_last=False, num_neg_sample=None, neg_samples=None, seed=None, shuffle=False):
         self.data = data
         self.batch_size = batch_size
         self.neg_sampling_ratio = neg_sampling_ratio
@@ -245,13 +313,23 @@ class TemporalDataLoader:
         if drop_last and data_len % batch_size != 0:
             self.arange = self.arange[:-1]
         self.seed = seed
+        self.shuffle = shuffle
         if seed is not None:
-            np.random_state = np.random.RandomState(seed)
+            self._random_state = np.random.RandomState(seed)
+        else:
+            self._random_state = np.random
+        if self.shuffle:
+            self._shuffle_arange()
+
+    def _shuffle_arange(self):
+        self._random_state.shuffle(self.arange)
 
     def __len__(self):
         return len(self.arange)
 
     def __iter__(self):
+        if self.shuffle:
+            self._shuffle_arange()
         for start in self.arange:
             end = start + self.batch_size
             batch = self.data[start:end]
@@ -265,7 +343,7 @@ class TemporalDataLoader:
             if self.num_neg_sample is not None and self.num_neg_sample > 0:
                 neg_dst_size = self.num_neg_sample * len(batch.dst)
                 if self.seed is not None:
-                    neg_dst = np.random_state.randint(self.min_dst, self.max_dst + 1, size=(neg_dst_size,))
+                    neg_dst = self._random_state.randint(self.min_dst, self.max_dst + 1, size=(neg_dst_size,))
                 else:
                     neg_dst = np.random.randint(self.min_dst, self.max_dst + 1, size=(neg_dst_size,))
                 neg_dst = jt.array(neg_dst)

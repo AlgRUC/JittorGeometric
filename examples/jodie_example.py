@@ -38,7 +38,7 @@ if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
-elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
+elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']:
     # Load dataset from TGB-Seq
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
     dataset = TGBSeqDataset(root=path, name=dataset_name)
