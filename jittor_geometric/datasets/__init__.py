@@ -9,6 +9,7 @@ from .hetero import HeteroDataset
 from .reddit import Reddit
 from .qm9 import QM9
 from .molecule_net import MoleculeNet
+from .md17 import MD17
 
 __all__ = [
     'Planetoid',
@@ -23,6 +24,7 @@ __all__ = [
     'TemporalDataLoader',
     'QM9',
     'MoleculeNet',
+    'MD17',
 ]
 
 classes = __all__
