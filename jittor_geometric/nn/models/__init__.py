@@ -27,8 +27,6 @@ __all__ = [
     'compute_src_dst_node_time_shifts',
     'UniMolModel',
     'Graphormer',
-    'TransformerM'
-    'Graphormer',
     'TransformerM',
     'CRAFT',
 ]
