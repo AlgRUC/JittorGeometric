@@ -1,5 +1,6 @@
 import sys
 import os.path as osp
+import os
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(root)
 import jittor as jt
@@ -15,8 +16,6 @@ from jittor_geometric.evaluate import MRR_Evaluator
 from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.nn.dense.merge_predictor import MergeLayer
-import os.path as osp
-import os
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -98,7 +97,7 @@ dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 if not osp.exists(path):
     os.makedirs(path)
-if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']: # for TGBSeqDataset
+if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
     val_idx=np.nonzero(dataset.val_mask)[0]

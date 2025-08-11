@@ -6,6 +6,7 @@ from jittor import nn
 from jittor.nn import RNNCell, Linear
 
 from jittor_geometric.nn.inits import zeros, glorot
+import numpy as np
 
 DyRepMessageStoreType = Dict[int, Tuple[jt.Var, jt.Var, jt.Var, jt.Var]]
 
@@ -124,17 +125,17 @@ class DyRepMemory(nn.Module):
 
         msg_s, t_s, src_s, dst_s = self._compute_msg(n_id, self.msg_s_store,
                                                      self.msg_s_module)
+
         msg_d, t_d, src_d, dst_d = self._compute_msg(n_id, self.msg_d_store,
                                                      self.msg_d_module)
+
         idx = jt.concat([src_s, src_d], dim=0)
         msg = jt.concat([msg_s, msg_d], dim=0)
         t = jt.concat([t_s, t_d], dim=0)
-        
         aggr = self.aggr_module(msg, self._assoc[idx], t, n_id.shape[0])
-        
         memory = self.rnn(aggr, self.memory[n_id])
-
         last_update = jt.scatter(self.last_update, 0, idx, t, reduce='max')[n_id]
+
         return memory, last_update
 
     def _update_msg_store(self, src: jt.Var, dst: jt.Var, t: jt.Var,
@@ -189,7 +190,6 @@ def scatter_argmax(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[
 
     return out
 
-
 def scatter_max(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None):
     if src.numel() == 0 or index.numel() == 0:
         if dim_size is None:
@@ -200,7 +200,7 @@ def scatter_max(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int
         dim_size = int(index.max().item()) + 1 if index.numel() > 0 else 0
 
     max_values = jt.full((dim_size,), -float('inf'))
-    argmax_indices = jt.full((dim_size,), dim_size - 1, dtype=index.dtype)
+    argmax_indices = jt.full((dim_size,), dim_size - 1  , dtype=index.dtype)
 
     for i in range(index.numel()):
         if src[i] > max_values[index[i]]:
@@ -248,7 +248,6 @@ class IdentityMessage(nn.Module):
 
 class LastAggregator(nn.Module):
     def execute(self, msg: jt.Var, index: jt.Var, t: jt.Var, dim_size: int):
-        # argmax = scatter_argmax(t, index, dim=0, dim_size=dim_size)
         _, argmax = scatter_max(t, index, dim=0, dim_size=dim_size)
         out = jt.zeros((dim_size, msg.shape[-1]))
         mask = argmax < msg.size(0)  # Filter items with at least one entry.

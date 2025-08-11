@@ -6,6 +6,8 @@ from jittor import nn
 from jittor.nn import GRUCell, Linear
 
 from jittor_geometric.nn.inits import zeros, glorot
+import time
+import numpy as np
 
 TGNMessageStoreType = Dict[int, Tuple[jt.Var, jt.Var, jt.Var, jt.Var]]
 
@@ -129,13 +131,11 @@ class TGNMemory(nn.Module):
         idx = jt.concat([src_s, src_d], dim=0)
         msg = jt.concat([msg_s, msg_d], dim=0)
         t = jt.concat([t_s, t_d], dim=0)
-        
 
         aggr = self.aggr_module(msg, self._assoc[idx], t, n_id.shape[0])
-        
         memory = self.gru(aggr, self.memory[n_id])
-
         last_update = jt.scatter(self.last_update, 0, idx, t, reduce='max')[n_id]
+
         return memory, last_update
 
     def _update_msg_store(self, src: jt.Var, dst: jt.Var, t: jt.Var,
@@ -189,7 +189,6 @@ def scatter_argmax(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[
     out[index[nonzero]] = nonzero
 
     return out
-
 
 def scatter_max(src: jt.Var, index: jt.Var, dim: int = 0, dim_size: Optional[int] = None):
     if src.numel() == 0 or index.numel() == 0:

@@ -21,7 +21,14 @@ from jittor_geometric.data import TemporalData
 jt.flags.use_cuda = 1
 
 # Load dataset from DGB or TGB-Seq
-dataset_name = 'wikipedia' # wikipedia, mooc, reddit, lastfm
+import argparse
+parser = argparse.ArgumentParser(description='Train DyRep model on specified dataset.')
+parser.add_argument('--dataset_name', type=str, default='wikipedia',
+                    help='Name of the dataset (wikipedia, mooc, reddit, lastfm). Default: wikipedia')
+args = parser.parse_args()
+dataset_name = args.dataset_name
+print('dataset_name:', args.dataset_name)
+
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     # Load dataset from DGB
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
@@ -36,7 +43,7 @@ if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
-elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
+elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']:
     # Load dataset from TGB-Seq
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
     dataset = TGBSeqDataset(root=path, name=dataset_name)
@@ -76,7 +83,7 @@ class GraphAttentionEmbedding(jt.nn.Module):
         rel_t = last_update[edge_index[0]] - t
         rel_t_enc = self.time_enc(rel_t)
         edge_attr = jt.concat([rel_t_enc, msg], dim=-1)
-        return self.conv(x, edge_index, edge_attr)
+        return self.conv(x, edge_index, edge_attr) 
 
 # Define MLP-based predictor
 class LinkPredictor(jt.nn.Module):
@@ -189,7 +196,7 @@ def test(loader):
 best_ap = 0
 patience = 5
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
-for epoch in range(1, 51):
+for epoch in range(1, 6):
     loss = train()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
     val_ap, val_auc = test(val_loader)
