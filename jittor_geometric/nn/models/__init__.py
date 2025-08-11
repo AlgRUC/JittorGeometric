@@ -8,6 +8,8 @@ from .dygformer import DyGFormer
 from .schnet import SchNet
 from .unimol import UniMolModel
 from .dimenet import DimeNet
+from .graphormer import Graphormer
+from .transformerM import TransformerM
 from .craft import CRAFT
 
 __all__ = [
@@ -22,6 +24,8 @@ __all__ = [
     'DimeNet',
     'compute_src_dst_node_time_shifts',
     'UniMolModel',
+    'Graphormer',
+    'TransformerM',
     'CRAFT',
 ]
 
