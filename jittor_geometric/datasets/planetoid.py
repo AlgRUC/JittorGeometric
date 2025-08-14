@@ -106,3 +106,37 @@ class Planetoid(InMemoryDataset):
 
     def __repr__(self):
         return '{}()'.format(self.name)
+
+    def make_link_split(self, val_ratio=0.05, test_ratio=0.10):
+        data = self.get(0)
+
+        edge_index = data.edge_index.int32()  # [2, E]
+
+        row = edge_index[0]
+        col = edge_index[1]
+
+        E_u = int(row.shape[0])
+        n_val = int(math.floor(val_ratio * E_u))
+        n_test = int(math.floor(test_ratio * E_u))
+
+        # Shuffle
+        perm = jt.randperm(E_u)
+        row_u = row[perm]
+        col_u = col[perm]
+
+        # Slice into val / test / train
+        def stack_edges(r, c):
+            if int(r.shape[0]) == 0:
+                return jt.zeros((2, 0), dtype="int32")
+            return jt.stack([r, c], dim=0)
+
+        val_pos = stack_edges(row_u[:n_val], col_u[:n_val])
+        test_pos = stack_edges(row_u[n_val:n_val + n_test], col_u[n_val:n_val + n_test])
+        train_pos = stack_edges(row_u[n_val + n_test:], col_u[n_val + n_test:])
+
+        # Write back to data
+        data.train_pos_edge_index = train_pos
+        data.val_pos_edge_index = val_pos
+        data.test_pos_edge_index = test_pos
+
+        return data

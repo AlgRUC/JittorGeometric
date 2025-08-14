@@ -11,6 +11,8 @@ from .qm9 import QM9
 from .molecule_net import MoleculeNet
 from .md17 import MD17
 from .pcqm4m import PCQM4Mv2
+from .recsys import MovieLens1M, MovieLens100K, Yelp2018
+
 
 __all__ = [
     'Planetoid',
@@ -27,6 +29,7 @@ __all__ = [
     'MoleculeNet',
     'MD17',
     'PCQM4Mv2',
+    'MovieLens1M', 'MovieLens100K', 'Yelp2018'
 ]
 
 classes = __all__

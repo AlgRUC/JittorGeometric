@@ -16,6 +16,11 @@ from .craft import CRAFT
 from .polyformer import PolyFormerModel, get_data_load
 from .sgformer import SGFormerModel
 from .nagphormer import NAGphormerModel, accuracy_batch, re_features, laplacian_positional_encoding
+from .lightgcn import LightGCN
+from .simgcl import SimGCL
+from .xsimgcl import XSimGCL
+from .directau import DirectAU
+from .network_embedding import NetworkEmbeddingModel
 
 __all__ = [
     'TGNMemory',
@@ -38,7 +43,12 @@ __all__ = [
     'NAGphormerModel',
     'accuracy_batch', 
     're_features',
-    'laplacian_positional_encoding'
+    'laplacian_positional_encoding',
+    'LightGCN',
+    'SimGCL',
+    'XSimGCL',
+    'DirectAU',
+    'NetworkEmbeddingModel'
 ]
 
 classes = __all__

@@ -3,6 +3,7 @@ from .general_loader import GeneralLoader
 from .neighbor_loader import NeighborLoader
 from .cluster_loader import ClusterLoader
 from .dataloader import DataLoader
+from .recsys_loader import RecsysDataLoader
 
 __all__ = [
     'GeneralLoader',
