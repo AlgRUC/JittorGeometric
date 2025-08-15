@@ -1,6 +1,9 @@
+import os.path as osp
+import sys
 import jittor as jt
 from jittor.nn import Embedding, Linear, RNNCell
 import numpy as np
+from jittor import nn
 
 class JODIEEmbedding(jt.nn.Module):
     r"""The implementation of JODIE model for temporal link prediction, as described in the paper
@@ -17,67 +20,51 @@ class JODIEEmbedding(jt.nn.Module):
         :param embedding_dim: int, the dimensionality of the embedding space for users and items
         :param num_users: int, the total number of users in the graph
         :param num_items: int, the total number of items in the graph
-        :param src_node_mean_time_shift: float, the mean time shift for source node embeddings
-        :param src_node_std_time_shift: float, the standard deviation of time shift for source node embeddings
-        :param dst_node_mean_time_shift: float, the mean time shift for destination node embeddings
-        :param dst_node_std_time_shift: float, the standard deviation of time shift for destination node embeddings
+        :param src_mean: float, the mean time shift for source node embeddings
+        :param src_std: float, the standard deviation of time shift for source node embeddings
+        :param dst_mean: float, the mean time shift for destination node embeddings
+        :param dst_std: float, the standard deviation of time shift for destination node embeddings
 
     """
-    def __init__(self, embedding_dim: int, num_users: int, num_items: int,
-                 src_node_mean_time_shift: float, src_node_std_time_shift: float,
-                 dst_node_mean_time_shift: float, dst_node_std_time_shift: float):
-        super(JODIEEmbedding, self).__init__()
+    def __init__(self, embedding_dim, num_users, num_items, src_mean, src_std, dst_mean, dst_std):
+        super().__init__()
+        self.user_emb = nn.Embedding(num_users, embedding_dim)
+        self.item_emb = nn.Embedding(num_items, embedding_dim)
+        self.time_emb = nn.Linear(1, embedding_dim)
+        self.user_rnn = nn.RNNCell(embedding_dim * 2, embedding_dim)
+        self.item_rnn = nn.RNNCell(embedding_dim * 2, embedding_dim)
         
-        self.user_embedding = Embedding(num_users, embedding_dim)
-        self.item_embedding = Embedding(num_items, embedding_dim)
+        # Timestamp buffer (使用register_buffer确保GPU兼容)
+        self.register_buffer('last_user_t', jt.zeros(num_users) - 1)
+        self.register_buffer('last_item_t', jt.zeros(num_items) - 1)
         
-        self.time_embedding = Linear(1, embedding_dim)
-        
-        self.user_rnn = RNNCell(embedding_dim + embedding_dim, embedding_dim)
-        self.item_rnn = RNNCell(embedding_dim + embedding_dim, embedding_dim)
-        
-        self.last_user_timestamp = jt.ones(num_users) * -1
-        self.last_item_timestamp = jt.ones(num_items) * -1
-        self.last_user_timestamp.requires_grad = False
-        self.last_item_timestamp.requires_grad = False
-
-        
-        self.src_node_mean_time_shift = src_node_mean_time_shift
-        self.src_node_std_time_shift = src_node_std_time_shift
-        self.dst_node_mean_time_shift = dst_node_mean_time_shift
-        self.dst_node_std_time_shift = dst_node_std_time_shift
+        # Time parameters
+        self.src_mean = src_mean
+        self.src_std = src_std
+        self.dst_mean = dst_mean
+        self.dst_std = dst_std
 
     def execute(self, user_idx, item_idx, timestamp):
-        user_emb = self.user_embedding(user_idx)
-        item_emb = self.item_embedding(item_idx)
-        
-        last_user_time = self.last_user_timestamp[user_idx]
-        last_item_time = self.last_item_timestamp[item_idx]
-        
-        delta_t_user = timestamp - last_user_time
-        delta_t_item = timestamp - last_item_time
-        
-        delta_t_user = (delta_t_user - self.src_node_mean_time_shift) / (self.src_node_std_time_shift + 1e-9)
-        delta_t_item = (delta_t_item - self.dst_node_mean_time_shift) / (self.dst_node_std_time_shift + 1e-9)
+        u_emb = self.user_emb(user_idx)
+        i_emb = self.item_emb(item_idx)
 
-        delta_t_user = delta_t_user.unsqueeze(-1)
-        delta_t_item = delta_t_item.unsqueeze(-1)
+        delta_t_user = (timestamp - self.last_user_t[user_idx]) / (self.src_std + 1e-9)
+        delta_t_item = (timestamp - self.last_item_t[item_idx]) / (self.dst_std + 1e-9)
         
-        time_emb_user = self.time_embedding(delta_t_user)
-        time_emb_item = self.time_embedding(delta_t_item)
+        t_emb_user = self.time_emb(delta_t_user.unsqueeze(-1))
+        t_emb_item = self.time_emb(delta_t_item.unsqueeze(-1))
         
-        user_input = jt.concat([user_emb, time_emb_user], dim=-1)
-        item_input = jt.concat([item_emb, time_emb_item], dim=-1)
+        u_input = jt.concat([u_emb, t_emb_user], dim=-1)
+        i_input = jt.concat([i_emb, t_emb_item], dim=-1)
         
-        user_emb = self.user_rnn(user_input, user_emb)
-        item_emb = self.item_rnn(item_input, item_emb)
+        updated_u = self.user_rnn(u_input, u_emb)
+        updated_i = self.item_rnn(i_input, i_emb)
         
-        self.last_user_timestamp[user_idx] = timestamp
-        self.last_item_timestamp[item_idx] = timestamp
+        return updated_u, updated_i
 
-        return user_emb, item_emb
-
-
+    def update_timestamps(self, user_idx, item_idx, timestamp):
+        self.last_user_t.scatter_(0, user_idx, timestamp)
+        self.last_item_t.scatter_(0, item_idx, timestamp)
 
 def compute_src_dst_node_time_shifts(src_node_ids, dst_node_ids, node_interact_times):
     src_node_last_timestamps = {}

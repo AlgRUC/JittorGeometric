@@ -98,7 +98,7 @@ dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 if not osp.exists(path):
     os.makedirs(path)
-if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']: # for TGBSeqDataset
+if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
     val_idx=np.nonzero(dataset.val_mask)[0]

@@ -83,6 +83,7 @@ class JODIEDataset(InMemoryDataset):
         download_url(self.url.format(self.name), self.raw_dir)
 
     def process(self):
+        print(self.raw_paths[0])
         df = pd.read_csv(self.raw_paths[0], skiprows=1, header=None)
 
         src = jt.array(df.iloc[:, 0].values).to(jt.int64)

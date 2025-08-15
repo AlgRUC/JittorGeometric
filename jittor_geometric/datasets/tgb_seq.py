@@ -50,7 +50,7 @@ class TGBSeqDataset(InMemoryDataset):
     """
 
     names = ['ML-20M', 'Taobao', 'Yelp', 'GoogleLocal',
-             'Flickr', 'YouTube', 'Patent', 'WikiLink', 'wikipedia']
+             'Flickr', 'YouTube', 'WikiLink', 'wikipedia']
 
     def __init__(
         self,

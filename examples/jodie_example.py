@@ -16,7 +16,14 @@ from jittor_geometric.nn.models import JODIEEmbedding, compute_src_dst_node_time
 jt.flags.use_cuda = 1
 
 # Load dataset from DGB or TGB-Seq
-dataset_name = 'wikipedia' # wikipedia, mooc, reddit, lastfm
+import argparse
+parser = argparse.ArgumentParser(description='Train DyRep model on specified dataset.')
+parser.add_argument('--dataset_name', type=str, default='wikipedia',
+                    help='Name of the dataset (wikipedia, mooc, reddit, lastfm). Default: wikipedia')
+args = parser.parse_args()
+dataset_name = args.dataset_name
+print('dataset_name:', args.dataset_name)
+
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     # Load dataset from DGB
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
@@ -31,7 +38,7 @@ if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
-elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'Patent', 'WikiLink']:
+elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']:
     # Load dataset from TGB-Seq
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
     dataset = TGBSeqDataset(root=path, name=dataset_name)
@@ -105,6 +112,9 @@ def train():
         # Compute predictions and loss
         pos_pred = model[1](pos_user_emb, pos_item_emb)
         neg_pred = model[1](neg_user_emb, neg_item_emb)
+
+        model[0].update_timestamps(user_idx, item_idx, timestamp)
+
         loss = criterion(pos_pred, jt.ones_like(pos_pred)) + criterion(neg_pred, jt.zeros_like(neg_pred))
         
         # Backpropagation and optimization
@@ -134,6 +144,8 @@ def test(loader):
         y_pred = jt.concat([pos_pred.sigmoid(), neg_pred.sigmoid()], dim=0).numpy()
         y_true = jt.concat([jt.ones(pos_pred.shape[0]), jt.zeros(neg_pred.shape[0])], dim=0).numpy()
 
+        model[0].update_timestamps(user_idx, item_idx, timestamp)
+
         # Compute metrics
         aps.append(average_precision_score(y_true, y_pred))
         aucs.append(roc_auc_score(y_true, y_pred))
@@ -143,7 +155,7 @@ def test(loader):
 best_ap = 0
 patience = 5
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
-for epoch in range(1, 11):
+for epoch in range(1, 30):
     loss = train()
     print(f'Epoch {epoch}, Loss: {loss:.4f}')
     val_ap, val_auc = test(val_loader)

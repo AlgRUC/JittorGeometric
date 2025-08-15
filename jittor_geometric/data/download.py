@@ -8,6 +8,7 @@ import zipfile
 from six.moves import urllib
 import gzip
 from .makedirs import makedirs
+import tarfile
 
 
 GBFACTOR = float(1 << 30)
@@ -88,3 +89,23 @@ def extract_gz(path: str, folder: str, log: bool = True) -> None:
     with gzip.open(path, 'r') as r:
         with open(osp.join(folder, '.'.join(path.split('.')[:-1])), 'wb') as w:
             w.write(r.read())
+
+
+def extract_tar(
+    path: str,
+    folder: str,
+    mode: str = 'r:gz',
+    log: bool = True,
+) -> None:
+    r"""Extracts a tar archive to a specific folder.
+
+    Args:
+        path (str): The path to the tar archive.
+        folder (str): The folder.
+        mode (str, optional): The compression mode. (default: :obj:`"r:gz"`)
+        log (bool, optional): If :obj:`False`, will not print anything to the
+            console. (default: :obj:`True`)
+    """
+    maybe_log(path, log)
+    with tarfile.open(path, mode) as f:
+        f.extractall(folder, filter='data')
