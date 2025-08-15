@@ -159,10 +159,10 @@ class EdgeEncoding(nn.Module):
     #     return cij
     def execute(self, x: jt.Var, edge_attr: jt.Var, edge_paths) -> jt.Var:  
         n_nodes = x.shape[0]  
-        chunk_size = min(256, n_nodes)  # 根据内存调整  
+        chunk_size = min(256, n_nodes)  # modify by memory  
         cij = jt.zeros((n_nodes, n_nodes))  
         
-        # 分块处理避免一次性构建大矩阵  
+        # Block processing avoids building a large matrix at one time  
         for i in range(0, n_nodes, chunk_size):  
             end_i = min(i + chunk_size, n_nodes)  
             chunk_cij = jt.zeros((end_i - i, n_nodes))  
@@ -178,8 +178,8 @@ class EdgeEncoding(nn.Module):
                             ).mean()  
             
             cij[i:end_i] = chunk_cij  
-            del chunk_cij  # 及时释放内存  
-        
+            del chunk_cij  
+            
         cij = jt.where(jt.isnan(cij), jt.array(0.0), cij)  
         return cij
 

@@ -21,7 +21,7 @@ print(len(qm9_dataset))
 # random split train/val/test = 8/1/1
 split_dict = qm9_dataset.get_idx_split()
 
-# # dataloader
+# dataloader
 train_loader = DataLoader(qm9_dataset[split_dict["train"]], batch_size=8, shuffle=True)
 valid_loader = DataLoader(qm9_dataset[split_dict["valid"]], batch_size=8, shuffle=False)
 test_loader = DataLoader(qm9_dataset[split_dict["test"]], batch_size=8, shuffle=False)
@@ -57,9 +57,9 @@ for target in range(12):
                   num_gaussians=50, cutoff=args.cutoff)
     optimizer = jt.optim.Adam(model.parameters(), lr=0.0001)
     
-    # 训练循环
+    # training
     best_val_mae = float('inf')
-    for epoch in range(30):  # 训练30个epoch
+    for epoch in range(30):  # train 30 epochs
         loss = train(model, train_loader, optimizer, target)
         val_mae = evaluate(model, valid_loader, target)
         
@@ -69,7 +69,7 @@ for target in range(12):
         
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Val MAE: {val_mae:.4f}')
 
-    # 测试过程保持不变
+    # test process
     # loader = DataLoader(test_dataset, batch_size=256)
 
     maes = []

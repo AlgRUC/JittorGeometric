@@ -27,10 +27,10 @@ def global_mean_pool(x: jt.Var, batch: jt.Var, size: int = None) -> jt.Var:
     count = jt.zeros((B, 1), dtype=x.dtype)
 
     for i in range(B):
-        mask = (batch == i).unsqueeze(-1)  # [N, 1]
-        masked_x = x * mask               # 只有当前 batch 的节点保留
-        sum_out[i] = masked_x.sum(dim=0)  # 累加
-        count[i] = mask.sum()             # 节点数量
+        mask = (batch == i).unsqueeze(-1)  
+        masked_x = x * mask               
+        sum_out[i] = masked_x.sum(dim=0)  
+        count[i] = mask.sum()             
 
     return sum_out / jt.maximum(count, jt.ones_like(count))
 
