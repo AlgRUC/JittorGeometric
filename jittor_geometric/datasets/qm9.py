@@ -1,4 +1,4 @@
-import os
+import os, platform
 import os.path as osp
 import sys
 from typing import Callable, List, Optional
@@ -173,7 +173,14 @@ class QM9(InMemoryDataset):
     @property
     def raw_file_names(self) -> List[str]:
         try:
-            import rdkit  # noqa
+            if platform.system() == 'Linux':
+                # Handle potential rdkit import issues on Linux
+                os.RTLD_GLOBAL = os.RTLD_GLOBAL | os.RTLD_DEEPBIND
+                import jittor_utils
+                with jittor_utils.import_scope(os.RTLD_GLOBAL | os.RTLD_NOW):
+                    import rdkit
+            else:
+                import rdkit
             return ['gdb9.sdf', 'gdb9.sdf.csv', 'uncharacterized.txt']
         except ImportError:
             return ['qm9.pkl']
@@ -184,7 +191,14 @@ class QM9(InMemoryDataset):
 
     def download(self) -> None:
         try:
-            import rdkit  # noqa
+            if platform.system() == 'Linux':
+                # Handle potential rdkit import issues on Linux
+                os.RTLD_GLOBAL = os.RTLD_GLOBAL | os.RTLD_DEEPBIND
+                import jittor_utils
+                with jittor_utils.import_scope(os.RTLD_GLOBAL | os.RTLD_NOW):
+                    import rdkit
+            else:
+                import rdkit
             file_path = download_url(self.raw_url, self.raw_dir)
             extract_zip(file_path, self.raw_dir)
             os.unlink(file_path)
@@ -197,12 +211,21 @@ class QM9(InMemoryDataset):
 
     def process(self) -> None:
         try:
-            from rdkit import Chem, RDLogger
-            from rdkit.Chem.rdchem import BondType as BT
-            from rdkit.Chem.rdchem import HybridizationType
-            RDLogger.DisableLog('rdApp.*')  # type: ignore[attr-defined]
+            if platform.system() == 'Linux':
+                # Handle potential rdkit import issues on Linux
+                os.RTLD_GLOBAL = os.RTLD_GLOBAL | os.RTLD_DEEPBIND
+                import jittor_utils
+                with jittor_utils.import_scope(os.RTLD_GLOBAL | os.RTLD_NOW):
+                    from rdkit import Chem, RDLogger
+                    from rdkit.Chem.rdchem import BondType as BT
+                    from rdkit.Chem.rdchem import HybridizationType
+                    RDLogger.DisableLog('rdApp.*')  # type: ignore[attr-defined]
+            else:
+                from rdkit import Chem, RDLogger
+                from rdkit.Chem.rdchem import BondType as BT
+                from rdkit.Chem.rdchem import HybridizationType
+                RDLogger.DisableLog('rdApp.*')  # type: ignore[attr-defined]
             WITH_RDKIT = True
-
         except ImportError:
             WITH_RDKIT = False
 

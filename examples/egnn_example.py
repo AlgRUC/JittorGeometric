@@ -9,7 +9,7 @@ from jittor_geometric.nn.conv.egnn_conv import GlobalLinearAttention, SiLU
 from jittor_geometric.typing import Var
 from jittor_geometric.datasets import QM9
 import jittor_geometric.transforms as T
-from jittor_geometric.jitgeo_loader import DataLoader
+from jittor_geometric.dataloader import DataLoader
 from tqdm import tqdm
 
 # helper functions

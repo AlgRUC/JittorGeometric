@@ -14,7 +14,7 @@ from jittor_geometric.nn.models.unimol import UniMolModel
 from jittor_geometric.data.conformer import ConformerGen
 from huggingface_hub import hf_hub_download
 import pickle
-from jittor_geometric.jitgeo_loader import DataLoader
+from jittor_geometric.dataloader import DataLoader
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
