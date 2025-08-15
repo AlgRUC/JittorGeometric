@@ -36,6 +36,7 @@ class TIGER(nn.Module):
     )
         # Initialize T5 model with the specified configuration
         self.model = T5ForConditionalGeneration(t5config)
+        
     
     @property
     def n_parameters(self):
