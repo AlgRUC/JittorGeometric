@@ -1,3 +1,4 @@
+import copy
 from itertools import repeat, product
 
 import jittor as jt
@@ -59,7 +60,8 @@ class InMemoryDataset(Dataset):
         if self.data.y is None:
             return 0
         elif self.data.y.ndim == 1:
-            return int(self.data.y.max().item()) + 1
+            return int(jt.unsqueeze(self.data.y,1).max().item()) + 1
+            # return int(self.data.y.max().item()) + 1
         else:
             return self.data.y.size(-1)
 
@@ -74,6 +76,8 @@ class InMemoryDataset(Dataset):
                 self.__data_list__ = self.len() * [None]
             else:
                 data = self.__data_list__[idx]
+                if data is not None:
+                    return copy.copy(data)
 
         data = self.data.__class__()
         if hasattr(self.data, '__num_nodes__'):
@@ -100,6 +104,9 @@ class InMemoryDataset(Dataset):
                 data[key] = item[s]
             else:
                 data[key] = item[tuple(s)]
+
+        if hasattr(self, '__data_list__'):
+            self.__data_list__[idx] = copy.copy(data)
 
         return data
 
@@ -146,3 +153,14 @@ class InMemoryDataset(Dataset):
             slices[key] = jt.array(slices[key], dtype=Var.int32)
 
         return data, slices
+
+    def copy(self, idx=None):
+        if idx is None:
+            data_list = [self.get(i) for i in range(len(self))]
+        else:
+            data_list = [self.get(i) for i in idx]
+        dataset = copy.copy(self)
+        dataset.__indices__ = None
+        dataset.__data_list__ = data_list
+        dataset.data, dataset.slices = self.collate(data_list)
+        return dataset
