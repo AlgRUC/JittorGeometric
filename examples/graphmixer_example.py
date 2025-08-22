@@ -16,6 +16,7 @@ from jittor_geometric.evaluate import MRR_Evaluator
 from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.nn.dense.merge_predictor import MergeLayer
+# Evaluation function
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -48,6 +49,7 @@ def test(loader):
         res_list['MRR'] = np.mean(mrr_list)
     return res_list
 
+# Training function
 def train():
     best_ap = 0
     patience = 5
@@ -84,6 +86,7 @@ node_feat_dims = 172
 edge_feat_dims = 172
 hidden_dims = 100
 num_layers = 2
+# Setup configuration
 jt.flags.use_cuda = 1 #jt.has_cuda
 num_epochs = 1
 time_feat_dim = 100
@@ -97,6 +100,7 @@ dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 if not osp.exists(path):
     os.makedirs(path)
+# Load dataset based on type
 if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
@@ -121,7 +125,7 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDatas
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
-# Define the neighbor loader
+# Initialize neighbor sampler and model components
 full_neighbor_sampler = get_neighbor_sampler(data, 'recent',seed=0)
 
 edge_raw_features = None
@@ -145,6 +149,7 @@ model = nn.Sequential(dynamic_backbone, link_predictor)
 
 optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 
+# Run training and final evaluation
 train()
 model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_GraphMixer.pkl'))
 print(test(test_loader))

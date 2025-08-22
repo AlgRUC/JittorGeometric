@@ -8,6 +8,7 @@ import jittor_geometric.transforms as T
 from jittor_geometric.nn import ChebConv
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
+# Setup configuration
 jt.flags.use_cuda = 0
 
 parser = argparse.ArgumentParser()
@@ -15,16 +16,19 @@ parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 args = parser.parse_args()
 
+# Load dataset
 dataset = 'cora'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data')
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
+# Prepare data and edge normalization
 v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
 
+# Apply GDC preprocessing if requested
 if args.use_gdc:
     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
                 normalization_out='col',
@@ -34,6 +38,7 @@ if args.use_gdc:
     data = gdc(data)
 
 
+# Chebyshev spectral graph convolution model
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -51,6 +56,7 @@ class Net(nn.Module):
         return norm.reshape(-1, 1) * x_j
 
 
+# Initialize model and optimizer
 model, data = Net(), data
 optimizer = nn.Adam([
     dict(params=model.conv1.parameters(), weight_decay=0),
@@ -58,6 +64,7 @@ optimizer = nn.Adam([
 ], lr=0.01)  # Only perform weight-decay on first convolution.
 
 
+# Training function
 def train():
     model.train()
     pred = model(data.x, edge_index, edge_weight)[data.train_mask]
@@ -66,9 +73,11 @@ def train():
     optimizer.step(loss)
 
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(data.x, edge_index, edge_weight), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
         mask = mask
@@ -83,11 +92,12 @@ def test():
     return accs
 
 
-# train()
+# Training loop
 best_val_acc = test_acc = 0
 for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
+    # Track best validation accuracy
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc

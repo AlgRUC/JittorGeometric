@@ -20,6 +20,7 @@ from jittor_geometric.datasets.recsys import Hit, MRR, NDCG, Recall, DataStruct
 from jittor_geometric.nn.models import LightGCN, SimGCL, XSimGCL, DirectAU
 from tqdm import tqdm
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default="ml-1m", help='graph dataset')
@@ -35,6 +36,7 @@ parser.add_argument('--weight_decay', type=float, default=0, help='weight decay'
 args = parser.parse_args()
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load recommender system dataset
 if args.dataset == 'ml-100k':
     dataset = MovieLens100K(root=path)
 elif args.dataset == 'ml-1m':
@@ -45,6 +47,7 @@ elif args.dataset == 'yelp2018':
 data = dataset.get(0)
 num_epochs = args.num_epochs + 1
 
+# Create data loaders for training and evaluation
 train_loader = RecsysDataLoader(
     edge_index = data.train_edge_index,
     num_items  = int(data.num_items),

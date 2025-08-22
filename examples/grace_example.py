@@ -17,6 +17,7 @@ from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
 warnings.filterwarnings("ignore")
 
+# Logistic regression classifier for evaluation
 class LogReg(nn.Module):
     def __init__(self, hid_dim, n_classes):
         super(LogReg, self).__init__()
@@ -26,6 +27,7 @@ class LogReg(nn.Module):
         ret = self.fc(x)
         return ret
 
+# Dataset loader for various graph datasets
 def DataLoader(name):
     name = name.lower()
     if name in ['cora', 'citeseer', 'pubmed']:
@@ -39,6 +41,7 @@ def DataLoader(name):
     return dataset
 
 
+# Data augmentation: randomly drop features and mask edges
 def aug(graph, x, feat_drop_rate, edge_mask_rate):
     """
     Data augmentation function: Randomly drop features and mask edges.
@@ -72,6 +75,7 @@ def aug(graph, x, feat_drop_rate, edge_mask_rate):
 def count_parameters(model):
     return sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad])
 
+# Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataname", type=str, default="cora")
 parser.add_argument("--gpu", type=int, default=1)

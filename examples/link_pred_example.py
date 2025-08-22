@@ -15,6 +15,7 @@ from jittor_geometric.datasets import Planetoid, Amazon
 from jittor_geometric.nn.models import NetworkEmbeddingModel
 from sklearn.metrics import roc_auc_score
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default="cora", help='graph dataset')
@@ -31,12 +32,14 @@ args = parser.parse_args()
 dataset = args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load dataset and create link prediction splits
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset)
 elif dataset in ['cora', 'citeseer', 'pubmed']:
     dataset = Planetoid(path, dataset)
 data = dataset.make_link_split(val_ratio=0.1, test_ratio=0.10)
 
+# Initialize network embedding model
 num_nodes = int(data.num_nodes)
 
 model = NetworkEmbeddingModel(args.dataset, num_nodes, args.embedding_size, method=args.model, line_order=args.order)
@@ -50,6 +53,7 @@ model.register_pos_edges(
 model.prepare_walk_engine(walk_length=args.walk_length, walks_per_node=args.walks_per_node)
 optimizer = jt.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+# Training loop
 for epoch in range(args.num_epochs):
     model.train()
     train_loss = 0
@@ -60,6 +64,7 @@ for epoch in range(args.num_epochs):
         train_loss += float(loss.data[0])
         batch_count += 1
 
+    # Validation evaluation
     model.eval()
     with jt.no_grad():
         val_pos = data.val_pos_edge_index
@@ -74,6 +79,7 @@ for epoch in range(args.num_epochs):
         val_auc = roc_auc_score(y_true, y_pred)
         print(f'Epoch: {epoch}, train loss: {(train_loss / batch_count):.4f}, val_auc: {val_auc:.4f}')
 
+# Final test evaluation
 model.eval()
 with jt.no_grad():
     test_pos = data.test_pos_edge_index

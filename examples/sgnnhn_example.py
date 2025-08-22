@@ -16,6 +16,7 @@ from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, 
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.utils.bprloss import BPRLoss
 
+# Evaluation function
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -52,6 +53,7 @@ def test(loader):
         res_list['MRR'] = np.mean(mrr_list)
     return res_list
 
+# Training function
 def train():
     best_ap = 0
     max_patience = 5
@@ -97,6 +99,7 @@ def train():
 
 hidden_dims = 64
 num_layers = 2
+# Setup configuration
 jt.flags.use_cuda = 1 #jt.has_cuda
 num_epochs = 100
 num_neighbors = 30
@@ -109,6 +112,7 @@ dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 if not osp.exists(path):
     os.makedirs(path)
+# Load dataset based on type
 if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
@@ -133,7 +137,7 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDatas
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
-# Define the neighbor loader
+# Initialize neighbor sampler and SGNNHN model
 full_neighbor_sampler = get_neighbor_sampler(data, 'recent',seed=1)
 if dataset_name in ['GoogleLocal', 'ML-20M', 'Taobao', 'Yelp', 'mooc', 'lastfm', 'reddit', 'wikipedia']:
     user_size = data.src_size
@@ -146,12 +150,14 @@ else:
 dst_min_idx = data.dst.min()
 src_min_idx = data.src.min()
 hidden_size = 64
+# Create SGNNHN sequential model
 model = SGNNHN(embedding_size=hidden_size, step=1, scale=12, n_items=item_size, dropout_seq=dropout, max_seq_length=num_neighbors)
 model.set_min_idx(src_min_idx, dst_min_idx)
 loss_func = BPRLoss()
 layer_norm = nn.LayerNorm(hidden_size, eps=1e-12)
 optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 
+# Run training and final evaluation
 train()
 model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_SGNNHN.pkl'))
 print(test(test_loader))

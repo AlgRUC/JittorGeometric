@@ -18,6 +18,7 @@ from jittor_geometric.nn import BernNet
 import time
 from jittor_geometric.ops import cootocsr,cootocsc
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
@@ -29,6 +30,7 @@ args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load dataset
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['cora', 'citeseer', 'pubmed']:
@@ -42,17 +44,20 @@ elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', '
 elif dataset in ['reddit']:
     dataset = Reddit(os.path.join(path, 'Reddit'))
 
+# Prepare data and Laplacian matrices
 data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
 v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
 
+# Compute Laplacian matrices for BernNet
 #L=I-D^(-0.5)AD^(-0.5)
 edge_index1, edge_weight1 = get_laplacian(edge_index, edge_weight, normalization='sym', dtype=data.x.dtype, num_nodes=v_num)
 #2I-L
 edge_index2, edge_weight2 = add_self_loops(edge_index1, -edge_weight1, fill_value=2., num_nodes=v_num)
 
+# Convert to sparse matrix format
 with jt.no_grad():
     data.csc1 = cootocsc(edge_index1, edge_weight1, v_num)
     data.csr1 = cootocsr(edge_index1, edge_weight1, v_num)
@@ -61,6 +66,7 @@ with jt.no_grad():
     data.csr2 = cootocsr(edge_index2, edge_weight2, v_num)
 
 
+# BernNet model with Bernstein polynomial propagation
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.5):
         super(Net, self).__init__()
@@ -68,6 +74,7 @@ class Net(nn.Module):
         self.lin1 = nn.Linear(dataset.num_features, hidden)
         self.lin2 = nn.Linear(hidden, dataset.num_classes)
         
+        # Bernstein polynomial propagation layer
         self.prop = BernNet(args.K)
         self.dropout = dropout
 
@@ -80,14 +87,17 @@ class Net(nn.Module):
         x = nn.relu(self.lin1(x))
         x = nn.dropout(x, self.dropout, is_train=self.training)
         x = self.lin2(x)
+        # Apply BernNet propagation
         x = self.prop(x, csc1, csr1, csc2, csr2)
         
         return nn.log_softmax(x, dim=1)
 
 
+# Initialize model and optimizer
 model, data = Net(dataset), data
 optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4) 
 
+# Training function
 def train():
     global total_forward_time, total_backward_time
     model.train()
@@ -96,9 +106,11 @@ def train():
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask] 
         logits_=logits[mask]
@@ -108,12 +120,14 @@ def test():
     return accs
 
 
+# Training loop
 train()
 best_val_acc = test_acc = 0
 start = time.time()
 for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
+    # Track best validation accuracy
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc

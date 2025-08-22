@@ -13,6 +13,7 @@ import time
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.sage_conv import sage_norm
 
+# Setup configuration
 jt.flags.use_cuda = 1
 jt.misc.set_global_seed(42)
 parser = argparse.ArgumentParser()
@@ -22,6 +23,7 @@ args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load dataset
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['cora', 'citeseer', 'pubmed']:
@@ -35,6 +37,7 @@ elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', '
 elif dataset in ['reddit']:
     dataset = Reddit(os.path.join(path, 'Reddit'))
 
+# Prepare data and edge normalization
 data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
@@ -44,11 +47,13 @@ edge_index, edge_weight = data.edge_index, data.edge_attr
 edge_index, edge_weight = sage_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
+# Convert to sparse matrix format
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
 
+# GraphSAGE model with two conv layers
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.8):
         super(Net, self).__init__()
@@ -65,9 +70,11 @@ class Net(nn.Module):
 
 
     
+# Initialize model and optimizer
 model, data =Net(dataset), data
 optimizer = nn.Adam(params=model.parameters(), lr=0.001, weight_decay=5e-4) 
 
+# Training function
 def train():
     global total_forward_time, total_backward_time
     model.train()
@@ -76,9 +83,11 @@ def train():
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask] 
         logits_=logits[mask]
@@ -88,11 +97,13 @@ def test():
     return accs
 
 
+# Training loop
 best_val_acc = test_acc = 0
 start = time.time()
 for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
+    # Track best validation accuracy
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc

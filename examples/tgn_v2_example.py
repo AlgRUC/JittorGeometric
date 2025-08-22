@@ -18,10 +18,10 @@ from jittor_geometric.nn.models.tgn_v2 import (
 from tqdm import *
 import numpy as np
 
-# Use cuda
+# Setup configuration
 jt.flags.use_cuda = 1
 
-# Load dataset from DGB or TGB-Seq
+# Parse arguments and load dataset
 import argparse
 parser = argparse.ArgumentParser(description='Train DyRep model on specified dataset.')
 parser.add_argument('--dataset_name', type=str, default='wikipedia',
@@ -30,6 +30,7 @@ args = parser.parse_args()
 dataset_name = args.dataset_name
 print('dataset_name:', args.dataset_name)
 
+# Load dataset based on type
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     # Load dataset from DGB
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
@@ -68,7 +69,7 @@ elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTu
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 
-# Define the neighbor loader
+# Initialize linked list neighbor loader
 neighbor_loader = LinkedListLastNeighborLoader(data.num_nodes, size=10)
 
 # Define attention module
@@ -100,7 +101,7 @@ class LinkPredictor(jt.nn.Module):
         return self.lin_final(h)
 
 
-# Define Memory module
+# Initialize TGN memory module and model components
 memory_dim = time_dim = embedding_dim = 100
 memory = TGNMemory_v2(
     data.num_nodes,
@@ -128,6 +129,7 @@ criterion = jt.nn.BCEWithLogitsLoss()
 assoc = jt.empty(data.num_nodes, dtype=jt.int32)
 
 
+# Training function
 def train():
     model.train()
     model[0].reset_state()
@@ -161,6 +163,7 @@ def train():
     return total_loss / train_data.num_events
 
 
+# Evaluation function
 def test(loader):
     model.eval()
 
@@ -198,6 +201,7 @@ def test(loader):
 best_ap = 0
 patience = 5
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
+# Training loop with early stopping
 for epoch in range(1, 6):
     loss = train()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')

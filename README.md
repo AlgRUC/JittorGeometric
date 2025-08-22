@@ -19,11 +19,13 @@ JittorGeometric is a graph machine learning library based on the Jittor framewor
 import os.path as osp
 from jittor_geometric.datasets import Planetoid
 import jittor_geometric.transforms as T
+import jittor as jt
 
-dataset = 'Cora'
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
+dataset = 'cora'
+path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'data', dataset)
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
+v_num = data.x.shape[0]
 
 ### Data Preprocess
 from jittor_geometric.ops import cootocsr,cootocsc
@@ -42,9 +44,9 @@ from jittor_geometric.nn import GCNConv
 
 class GCN(nn.Module):
     def __init__(self, dataset, dropout=0.8):
-        super(Net, self).__init__()
-        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256,spmm=args.spmm)
-        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes,spmm=args.spmm)
+        super(GCN, self).__init__()
+        self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256)
+        self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes)
         self.dropout = dropout
 
     def execute(self):
@@ -111,11 +113,13 @@ JittorGeometric includes implementations of popular GNN models, such as:
 
 | Model      | Year | Venue  |
 |------------|------|--------|
-| [SchNet](./examples/schnet_example.py)     | 2017 | NeurIPS|
+| [SchNet](./examples/schnet_example.py)     | 2017 | NeurIPS |
 | [DimeNet](./examples/dimenet_example.py)    | 2020 | ICLR   |
 | [EGNN](./examples/egnn_example.py)       | 2021 | ICML   |
+| [Graphormer](./examples/graphormer_example.py)    | 2021 | NeurIPS   |
 | [SphereNet](./examples/spherenet_example.py)  | 2022 | ICLR   |
 | [Uni-Mol](./examples/unimol_example.py)    | 2023 | ICLR   |
+| [Transformer-M](./examples/transformer-m_example.py)    | 2023 | ICLR   |
 
 ---
 
@@ -127,6 +131,16 @@ JittorGeometric includes implementations of popular GNN models, such as:
 | [MVGRL](./examples/mvgrl_example.py)     | 2020 | ICML  |
 | [GRACE](./examples/grace_example.py)     | 2020 | ICML  |
 | [PolyGCL](./examples/polygcl_example.py) | 2024 | ICLR  |
+
+---
+
+### Graph Transformers
+
+| Model                                    | Year | Venue |
+|------------------------------------------|------|-------|
+| [SGFormer](./examples/sgformer_example.py)         | 2023 | NeurIPS  |
+| [NAGFormer](./examples/nagphormer_example.py)     | 2023 | ICLR  |
+| [PolyFormer](./examples/polyformer_example.py)     | 2024 | KDD  |
 
 ## Installation
 Follow these steps to install JittorGeometric:

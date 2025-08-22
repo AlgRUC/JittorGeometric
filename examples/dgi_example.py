@@ -13,10 +13,11 @@ import jittor_geometric.transforms as T
 from jittor_geometric.nn.models.dgi import DGI
 from jittor_geometric.utils.gssl_utils import random_splits, set_seed
 import seaborn as sns
-### Data Preprocess
+# Data preprocessing utilities
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
+# Logistic regression classifier for evaluation
 class LogReg(nn.Module):
     def __init__(self, hid_dim, n_classes):
         super(LogReg, self).__init__()
@@ -26,6 +27,7 @@ class LogReg(nn.Module):
         ret = self.fc(x)
         return ret
 
+# Dataset loader for various graph datasets
 def DataLoader(name):
     name = name.lower()
     if name in ['cora', 'citeseer', 'pubmed']:
@@ -38,6 +40,7 @@ def DataLoader(name):
         raise ValueError(f'dataset {name} not supported in dataloader')
     return dataset
 
+# Parse arguments
 parser = argparse.ArgumentParser(description="DGI")
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument("--dropout", type=float, default=0.0, help="dropout probability")
@@ -57,6 +60,7 @@ parser.add_argument("--dev", type=int, default=0, help="device id")
 parser.set_defaults(self_loop=False)
 args = parser.parse_args()
 
+# Setup configuration
 if args.gpu != -1 and jt.has_cuda:
     jt.flags.use_cuda = 1
 else:
@@ -65,6 +69,7 @@ else:
 set_seed(args.seed)
 
 def main(args):
+    # Load dataset and prepare data
     dataset = DataLoader(name=args.dataname)
     data = dataset[0]
     features = data.x
@@ -76,17 +81,18 @@ def main(args):
 
     edge_index, edge_weight = data.edge_index, data.edge_attr
 
-    # add self loop
+    # Prepare edge normalization
     if args.self_loop:
         edge_index, _ = add_self_loops(edge_index)
     edge_index, edge_weight = gcn_norm(
         edge_index, edge_weight, n_node,
         improved=False, add_self_loops=True)
+    # Convert to sparse matrix format
     with jt.no_grad():
         data.csc = cootocsc(edge_index, edge_weight, n_node)
         data.csr = cootocsr(edge_index, edge_weight, n_node)
 
-    # DGI model
+    # Initialize DGI model and optimizer
     dgi = DGI(
         data,
         in_feats,
@@ -103,7 +109,7 @@ def main(args):
         dgi.parameters(), lr=args.dgi_lr, weight_decay=args.weight_decay
     )
 
-    # Train DGI model
+    # Training loop for DGI
     cnt_wait = 0
     best = 1e9
     best_t = 0
@@ -153,13 +159,15 @@ def main(args):
     print("Each run avg_time:", run_sum, "s")
     print("Each epoch avg_time:", 1000 * run_sum / epochsss, "ms")
 
+    # Load best model and generate embeddings
     print("Loading {}th epoch".format(best_t))
     dgi.load_state_dict(jt.load("best_dgi.pkl"))
     dgi.eval()
     embeds = dgi.encoder(features, corrupt=False)
     embeds = embeds.detach()
+    
+    # Linear evaluation with multiple splits
     print("=== Evaluation ===")
-    ''' Linear Evaluation '''
     results = []
     # 10 fixed seeds for random splits from BernNet
     SEEDS = [1941488137, 4198936517, 983997847, 4023022221, 4019585660, 2108550661, 1648766618, 629014539, 3212139042,
