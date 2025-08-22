@@ -15,6 +15,7 @@ from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 from jittor_geometric.ops import cootocsr, cootocsc
 from jittor_geometric.nn import SGFormerModel
     
+# Setup configuration and arguments
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--epochs', type=int, default=2000)
@@ -64,7 +65,7 @@ class Net(nn.Module):
         x = self.net(data)
         return x
 
-print('loading datset')
+# Load heterogeneous dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 if args.dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
     dataset = HeteroDataset(path, args.dataset)
@@ -74,6 +75,7 @@ else:
 data = dataset[0]
 v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
+# Normalize edges and create sparse matrices
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
@@ -93,11 +95,13 @@ if args.dataset.lower() in ["roman_empire", "amazon_ratings", "minesweeper", "to
 else:
     raise ValueError(f"Dataset {args.dataset} is not supported for fixed splits.")
 
+# Initialize SGFormer model and optimizer
 model = Net(dataset, args)
 
 optimizer = nn.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
 
+# Training function
 def train():
     model.train()
     logits = model()[data.train_mask]
@@ -108,6 +112,7 @@ def train():
         loss = nn.cross_entropy_loss(logits, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
@@ -130,6 +135,7 @@ train()
 best_val_acc = test_acc = 0
 start = time.time()
 early_stopping_cnt = 0
+# Training loop with early stopping
 for epoch in range(args.epochs):
     train()
     train_acc, val_acc, tmp_test_acc = test()

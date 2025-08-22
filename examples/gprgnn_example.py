@@ -18,6 +18,7 @@ import time
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
@@ -31,6 +32,7 @@ args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load dataset
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['cora', 'citeseer', 'pubmed']:
@@ -44,6 +46,7 @@ elif dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', '
 elif dataset in ['reddit']:
     dataset = Reddit(os.path.join(path, 'Reddit'))
 
+# Prepare data and edge normalization
 data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
@@ -52,11 +55,13 @@ edge_index, edge_weight = data.edge_index, data.edge_attr
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
+# Convert to sparse matrix format
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
 
+# GPRGNN model with generalized PageRank propagation
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.5):
         super(Net, self).__init__()
@@ -64,6 +69,7 @@ class Net(nn.Module):
         self.lin1 = nn.Linear(dataset.num_features, hidden)
         self.lin2 = nn.Linear(hidden, dataset.num_classes)
         
+        # GPRGNN propagation layer
         self.prop = GPRGNN(args.K, args.alpha, args.Init)
         self.dropout = dropout
 
@@ -73,14 +79,17 @@ class Net(nn.Module):
         x = nn.relu(self.lin1(x))
         x = nn.dropout(x, self.dropout)
         x = self.lin2(x)
+        # Apply GPRGNN propagation
         x = self.prop(x, csc, csr)
         
         return nn.log_softmax(x, dim=1)
 
 
+# Initialize model and optimizer
 model, data = Net(dataset), data
 optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4) 
 
+# Training function
 def train():
     global total_forward_time, total_backward_time
     model.train()
@@ -89,9 +98,11 @@ def train():
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask] 
         logits_=logits[mask]

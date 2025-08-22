@@ -17,6 +17,7 @@ from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.nn.models.craft import BPRLoss
 
     
+# Test function for CRAFT model
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -60,6 +61,7 @@ def test(loader):
         res_list['MRR'] = np.mean(mrr_list)
     return res_list
 
+# Training function
 def train():
     best_ap = 0
     patience = 5
@@ -98,6 +100,7 @@ def train():
             if patience == 0:
                 break
 
+# Configuration parameters
 hidden_dims = 64
 num_layers = 2
 jt.flags.use_cuda = 1 #jt.has_cuda
@@ -112,6 +115,7 @@ dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 if not osp.exists(path):
     os.makedirs(path)
+# Load dataset based on type
 if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
@@ -136,7 +140,7 @@ elif dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']: # for JODIEDatas
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
 
-# Define the neighbor loader
+# Initialize neighbor sampler
 full_neighbor_sampler = get_neighbor_sampler(data, 'recent', seed=1)
 if dataset_name in ['GoogleLocal', 'ML-20M', 'Taobao', 'Yelp', 'mooc', 'lastfm', 'reddit', 'wikipedia']:
     user_size = data.src_size
@@ -148,11 +152,13 @@ else:
     node_size = data.max_node_id
 dst_min_idx = data.dst.min()
 src_min_idx = data.src.min()
+# Initialize CRAFT model and optimizer
 model = CRAFT(n_layers=num_layers, n_heads=2, hidden_size=64, hidden_dropout_prob=0.1, attn_dropout_prob=0.1, 
 hidden_act='gelu', layer_norm_eps=1e-12, initializer_range=0.02, n_nodes=item_size, max_seq_length=num_neighbors, loss_type='BPR', use_pos=True, input_cat_time_intervals=False, output_cat_time_intervals=True, output_cat_repeat_times=True, num_output_layer=1, emb_dropout_prob=0.1, skip_connection=True)
 
 optimizer = jt.nn.Adam(list(model.parameters()),lr=0.0001)
 model.set_min_idx(src_min_idx, dst_min_idx)
+# Run training and evaluation
 train()
 model.load_state_dict(jt.load(f'{save_model_path}/{dataset_name}_CRAFT.pkl'))
 print(test(test_loader))

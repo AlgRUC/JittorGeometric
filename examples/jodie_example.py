@@ -12,20 +12,21 @@ from jittor_geometric.datasets.tgb_seq import TGBSeqDataset
 from jittor_geometric.data import TemporalData
 from jittor_geometric.nn.models import JODIEEmbedding, compute_src_dst_node_time_shifts
 
-# Use cuda
+# Setup configuration
 jt.flags.use_cuda = 1
 
-# Load dataset from DGB or TGB-Seq
+# Parse arguments and load dataset
 import argparse
-parser = argparse.ArgumentParser(description='Train DyRep model on specified dataset.')
+parser = argparse.ArgumentParser(description='Train JODIE model on specified dataset.')
 parser.add_argument('--dataset_name', type=str, default='wikipedia',
                     help='Name of the dataset (wikipedia, mooc, reddit, lastfm). Default: wikipedia')
 args = parser.parse_args()
 dataset_name = args.dataset_name
 print('dataset_name:', args.dataset_name)
 
+# Load dataset based on type
 if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
-    # Load dataset from DGB
+    # Load dataset from JODIE
     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'JODIE')
     dataset = JODIEDataset(path, name=dataset_name) 
     data = dataset[0]
@@ -34,7 +35,7 @@ if dataset_name in [ 'wikipedia', 'reddit', 'mooc', 'lastfm']:
     # Split the dataset into train/val/test sets
     train_data, val_data, test_data = data.train_val_test_split(val_ratio=0.15, test_ratio=0.15)
     
-    # Create TemporalDataLoader objects
+    # Create data loaders
     train_loader = TemporalDataLoader(train_data, batch_size=200, neg_sampling_ratio=1.0)
     val_loader = TemporalDataLoader(val_data, batch_size=200, neg_sampling_ratio=1.0)
     test_loader = TemporalDataLoader(test_data, batch_size=200, neg_sampling_ratio=1.0)
@@ -63,14 +64,14 @@ elif dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTu
     val_loader = TemporalDataLoader(val_data, batch_size=200, num_neg_sample=1)
     test_loader = TemporalDataLoader(test_data, batch_size=200, num_neg_sample=1)
 
-# Compute time shift
+# Compute time statistics for nodes
 src_node_mean_time_shift, src_node_std_time_shift, dst_node_mean_time_shift, dst_node_std_time_shift = compute_src_dst_node_time_shifts(
     src_node_ids=data.src.numpy(), 
     dst_node_ids=data.dst.numpy(), 
     node_interact_times=data.t.numpy()
 )
 
-# Define MLP-based predictor
+# MLP-based link predictor
 class LinkPredictor(jt.nn.Module):
     def __init__(self, in_channels):
         super(LinkPredictor, self).__init__()

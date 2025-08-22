@@ -13,13 +13,14 @@ from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 from math import log
 import argparse
 
-
+# Setup configuration
 jt.flags.use_cuda = 1
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--spmm', action='store_true', help='whether using spmm')
 args = parser.parse_args()
 
+# Load dataset
 dataset_name = 'cora'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
@@ -29,17 +30,20 @@ else:
     # See more dataset examples in ./dataset_example.py
     pass
 
+# Prepare data and edge normalization
 data = dataset[0]
 v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
+# Convert to sparse matrix format
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
 
+# GCN2 model with residual connections
 class Net(nn.Module):
     def __init__(self, dataset, hidden_channels, num_layers=64, alpha=0.1, lamda=0.5, dropout=0.6):
         super(Net, self).__init__()
@@ -48,6 +52,7 @@ class Net(nn.Module):
         self.lins.append(nn.Linear(dataset.num_features, hidden_channels))
         self.lins.append(nn.Linear(hidden_channels, dataset.num_classes))
 
+        # Stack multiple GCN2 layers
         self.convs = nn.ModuleList()
         for layer in range(num_layers):
             self.convs.append(
@@ -63,6 +68,7 @@ class Net(nn.Module):
         x = nn.relu(self.lins[0](x))
         _hidden.append(x)
 
+        # Apply GCN2 layers with residual connections
         for i, conv in enumerate(self.convs):
             x = nn.dropout(x, self.dropout, is_train=self.training)
             alpha = self.alpha
@@ -76,6 +82,7 @@ class Net(nn.Module):
         return nn.log_softmax(x, dim=-1)
 
 
+# Initialize model and optimizer
 model = Net(dataset, hidden_channels=64, num_layers=64, alpha=0.1, lamda=0.5, dropout=0.6)
 optimizer = nn.Adam([
     dict(params=model.convs.parameters(), weight_decay=0.01),
@@ -86,6 +93,7 @@ optimizer = nn.Adam([
 print(model)
 
 
+# Training function
 def train():
     model.train()
     out = model()[data.train_mask]
@@ -95,9 +103,11 @@ def train():
     return float(loss)
 
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask] 
         logits_=logits[mask]
@@ -107,10 +117,12 @@ def test():
     return accs
 
 
+# Training loop
 best_val_acc = test_acc = 0
 for epoch in range(1, 1001):
     loss = train()
     train_acc, val_acc, tmp_test_acc = test()
+    # Track best validation accuracy
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc

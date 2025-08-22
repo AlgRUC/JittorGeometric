@@ -20,10 +20,13 @@ from jittor_geometric.utils import add_remaining_self_loops
 from jittor_geometric.utils.num_nodes import maybe_num_nodes
 from jittor_geometric.data import CSC,CSR
 from jittor_geometric.ops import cootocsr,cootocsc
+
+# Setup configuration
 jt.flags.use_cuda = 1
 jt.flags.lazy_execution = 0
 # jt.misc.set_global_seed(42)
 jt.cudnn.set_max_workspace_ratio(0.0)
+# Edge normalization for GCN
 def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
              add_self_loops=True, dtype=None):
 
@@ -50,6 +53,7 @@ def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
         deg_inv_sqrt.masked_fill(deg_inv_sqrt == float('inf'), 0)
         return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
 
+# Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
@@ -57,10 +61,12 @@ parser.add_argument('--dataset', help='graph dataset')
 args = parser.parse_args()
 dataset=args.dataset
 
+# Load dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 data = dataset[0]
 
+# Apply GDC preprocessing if requested
 if args.use_gdc:
     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
                 normalization_out='col',
@@ -69,6 +75,7 @@ if args.use_gdc:
                                            dim=0), exact=True)
     data = gdc(data)
 
+# Prepare data and edge normalization
 v_num = data.x.shape[0]
 e_num = data.edge_index.shape[1]
 edge_index, edge_weight=data.edge_index,data.edge_attr
@@ -77,10 +84,12 @@ edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         False, True)
 
+# Convert to sparse matrix format
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
+# GAT model with two attention layers
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -97,6 +106,7 @@ class Net(nn.Module):
         return nn.log_softmax(x, dim=1)
         
 
+# Initialize model and optimizer
 model, data = Net(), data
 optimizer = nn.Adam([
     dict(params=model.conv1.parameters(), weight_decay=1e-4),
@@ -104,6 +114,7 @@ optimizer = nn.Adam([
 ], lr=5e-3)
 
 
+# Training function
 def train():
     model.train()
 
@@ -112,9 +123,11 @@ def train():
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
         logits_=logits[mask]
@@ -125,11 +138,13 @@ def test():
 
 
 
+# Training loop
 train()
 best_val_acc = test_acc = 0
 for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
+    # Track best validation accuracy
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc

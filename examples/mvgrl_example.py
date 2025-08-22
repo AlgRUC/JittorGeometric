@@ -20,6 +20,7 @@ from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 from sklearn.preprocessing import MinMaxScaler
 from jittor_geometric.utils import add_self_loops
 
+# Logistic regression classifier for evaluation
 class LogReg(nn.Module):
     def __init__(self, hid_dim, n_classes):
         super(LogReg, self).__init__()
@@ -29,6 +30,7 @@ class LogReg(nn.Module):
         ret = self.fc(x)
         return ret
 
+# Dataset loader for various graph datasets
 def DataLoader(name):
     name = name.lower()
     if name in ['cora', 'citeseer', 'pubmed']:
@@ -41,6 +43,7 @@ def DataLoader(name):
         raise ValueError(f'dataset {name} not supported in dataloader')
     return dataset
 
+# Process dataset and compute diffusion matrix
 def process_dataset(name, epsilon, preprocess=False, self_loop=False):
     dataset = DataLoader(name=name)
     data = dataset[0]

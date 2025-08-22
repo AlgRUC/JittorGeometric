@@ -24,6 +24,7 @@ class Net(nn.Module):
         return x
 
 
+# Setup configuration and arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42)
 parser.add_argument('--epochs', type=int, default=2000)
@@ -52,6 +53,7 @@ print('use_cuda', jt.flags.use_cuda)
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load heterogeneous dataset
 if args.dataset in ['roman_empire', 'amazon_ratings', 'minesweeper', 'questions', 'tolokers']:
     dataset = HeteroDataset(path, args.dataset)
 else:
@@ -70,11 +72,13 @@ else:
     raise ValueError(f"Dataset {args.dataset} is not supported for fixed splits.")
 
 
+# Initialize PolyFormer model and optimizer
 model = Net(dataset, args)
 
 optimizer = nn.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
 
+# Training function
 def train():
     model.train()
     logits = model()[data.train_mask]
@@ -85,6 +89,7 @@ def train():
         loss = nn.cross_entropy_loss(logits, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
@@ -106,6 +111,7 @@ train()
 best_val_acc = test_acc = 0
 start = time.time()
 early_stopping_cnt = 0
+# Training loop with early stopping
 for epoch in range(args.epochs):
     train()
     train_acc, val_acc, tmp_test_acc = test()

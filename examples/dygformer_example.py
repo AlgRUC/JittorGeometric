@@ -15,6 +15,7 @@ from jittor_geometric.datasets import JODIEDataset
 from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
 from jittor_geometric.nn.dense.merge_predictor import MergeLayer
+# Test function for DyGFormer model
 def test(loader):
     mrr_eval = MRR_Evaluator()
     model.eval()
@@ -45,6 +46,7 @@ def test(loader):
         res_list['MRR'] = np.mean(mrr_list)
     return res_list
 
+# Training function
 def train():
     best_ap = 0
     patience = 5
@@ -54,11 +56,10 @@ def train():
         train_idx_data_loader_tqdm = tqdm(train_loader, ncols=120)
         for batch_idx, batch_data in enumerate(train_idx_data_loader_tqdm):
             src, dst, t, neg_dst = batch_data.src, batch_data.dst, batch_data.t, batch_data.neg_dst
-            # compute the embeddings of src and dst nodes
+            # Compute node embeddings
             src_node_embeddings, dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src, dst, t)
-            # compute the embeddings of src and neg_dst nodes
             neg_src_node_embeddings, neg_dst_node_embeddings = model[0].compute_src_dst_node_temporal_embeddings(src,neg_dst,t)
-            # compute the scores of positive and negative samples
+            # Compute link prediction scores
             pos_score = model[1](src_node_embeddings, dst_node_embeddings)
             neg_score = model[1](neg_src_node_embeddings, neg_dst_node_embeddings)
             loss=criterion(pos_score, jt.ones_like(pos_score))

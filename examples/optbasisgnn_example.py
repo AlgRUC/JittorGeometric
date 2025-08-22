@@ -18,6 +18,7 @@ import time
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_gdc', action='store_true',
@@ -29,6 +30,7 @@ args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load dataset based on type
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
 elif dataset in ['cora', 'citeseer', 'pubmed']:
@@ -47,6 +49,7 @@ total_forward_time = 0.0
 total_backward_time = 0.0
 v_num = data.x.shape[0]
 edge_index, edge_weight = data.edge_index, data.edge_attr
+# Normalize edge weights and create sparse matrices
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
@@ -80,6 +83,7 @@ class Net(nn.Module):
         return nn.log_softmax(x, dim=1)
 
 
+# Initialize OptBasis model and optimizer
 model, data = Net(dataset), data
 # optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4) 
 
@@ -89,6 +93,7 @@ optimizer = nn.Adam([
     dict(params=model.prop.parameters(), learning_rate=0.01, weight_decay=0)
 ], lr=0.01)
 
+# Training function
 def train():
     global total_forward_time, total_backward_time
     model.train()
@@ -97,6 +102,7 @@ def train():
     loss = nn.nll_loss(pred, label)
     optimizer.step(loss)
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
@@ -112,6 +118,7 @@ def test():
 train()
 best_val_acc = test_acc = 0
 start = time.time()
+# Training loop
 for epoch in range(1, 1001):
     train()
     train_acc, val_acc, tmp_test_acc = test()

@@ -9,6 +9,7 @@ from jittor_geometric.nn import SGConv
 from jittor_geometric.ops import cootocsr,cootocsc
 from jittor_geometric.nn.conv.gcn_conv import gcn_norm
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', help='graph dataset')
@@ -17,10 +18,11 @@ args = parser.parse_args()
 dataset=args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
-
+# Load dataset
 dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
 
 
+# Prepare data and edge normalization
 data = dataset[0]
 total_forward_time = 0.0
 total_backward_time = 0.0
@@ -29,10 +31,12 @@ edge_index, edge_weight = data.edge_index, data.edge_attr
 edge_index, edge_weight = gcn_norm(
                         edge_index, edge_weight,v_num,
                         improved=False, add_self_loops=True)
+# Convert to sparse matrix format
 with jt.no_grad():
     data.csc = cootocsc(edge_index, edge_weight, v_num)
     data.csr = cootocsr(edge_index, edge_weight, v_num)
 
+# SGC model with K-hop aggregation
 class Net(nn.Module):
     def __init__(self, dataset, dropout=0.8):
         super(Net, self).__init__()
@@ -49,10 +53,12 @@ class Net(nn.Module):
 
 
 
+# Initialize model and optimizer
 model, data = Net(dataset), data
 optimizer = nn.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
 
+# Training function
 def train():
     model.train()
     pred = model()[data.train_mask]
@@ -61,9 +67,11 @@ def train():
     optimizer.step(loss)
 
 
+# Evaluation function
 def test():
     model.eval()
     logits, accs = model(), []
+    # Evaluate on train, val, test sets
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         y_ = data.y[mask]
         mask = mask
@@ -78,10 +86,12 @@ def test():
     return accs
 
 
+# Training loop
 best_val_acc = test_acc = 0
 for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
+    # Track best validation accuracy
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         test_acc = tmp_test_acc

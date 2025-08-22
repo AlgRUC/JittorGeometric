@@ -16,7 +16,6 @@ extern/mkl/mkldnn_lnx*/*
 build/
 venv/
 !*.src.md
-!README.md
 !README.cn.md
 !CHANGELOG.md
 python/jittor.egg-info

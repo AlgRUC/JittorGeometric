@@ -43,6 +43,7 @@ elif dataset in ['cora', 'citeseer', 'pubmed']:
 # Create link prediction split (train/val/test)
 data = dataset.make_link_split(val_ratio=0.1, test_ratio=0.10)
 
+# Initialize network embedding model
 num_nodes = int(data.num_nodes)
 
 # Initialize network embedding model

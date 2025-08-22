@@ -90,6 +90,7 @@ def get_dataset(dataset, pe_dim):
 
 
 
+# Setup configuration
 jt.flags.use_cuda = 1
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default='pubmed')
@@ -107,8 +108,10 @@ parser.add_argument('--weight_decay', type=float, default=0.00001)
 
 args = parser.parse_args()
 
+# Load dataset and create features with positional encoding
 adj, features, labels, idx_train, idx_val, idx_test = get_dataset(args.dataset, args.pe_dim)
 
+# Process features using hop-based aggregation
 processed_features = re_features(adj, features.numpy(), args.hops) 
 processed_features = jt.Var(processed_features).float32()
 
@@ -116,10 +119,12 @@ train_dataset = NumpyDataset(processed_features[idx_train], labels[idx_train])
 val_dataset   = NumpyDataset(processed_features[idx_val],   labels[idx_val])
 test_dataset  = NumpyDataset(processed_features[idx_test],  labels[idx_test])
 
+# Create data loaders
 train_loader = jt.dataset.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 val_loader   = jt.dataset.DataLoader(val_dataset,   batch_size=args.batch_size, shuffle=True)
 test_loader  = jt.dataset.DataLoader(test_dataset,  batch_size=args.batch_size, shuffle=False)
 
+# Initialize NAGphormer model and optimizer
 model = NAGphormerModel(
     hops=args.hops,
     n_class=int(jt.max(labels).item() + 1),
@@ -135,6 +140,7 @@ model = NAGphormerModel(
 
 optimizer = nn.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+# Training function
 def train():
     model.train()
     loss_train_b = 0.0
@@ -149,6 +155,7 @@ def train():
         optimizer.step(loss_train)
         loss_train_b += float(loss_train)
 
+# Evaluation function
 def test():
     global nums
     model.eval()
@@ -172,6 +179,7 @@ def test():
 
 
 best_val_acc = test_acc = 0
+# Training loop
 for epoch in range(1, 201):
     train()
     train_acc, val_acc, tmp_test_acc = test()
