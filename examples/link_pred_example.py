@@ -15,7 +15,10 @@ from jittor_geometric.datasets import Planetoid, Amazon
 from jittor_geometric.nn.models import NetworkEmbeddingModel
 from sklearn.metrics import roc_auc_score
 
+# Enable CUDA for GPU acceleration
 jt.flags.use_cuda = 1
+
+# Parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default="cora", help='graph dataset')
 parser.add_argument('--model', default="LINE", help='model name')
@@ -31,14 +34,18 @@ args = parser.parse_args()
 dataset = args.dataset
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load dataset based on type
 if dataset in ['computers', 'photo']:
     dataset = Amazon(path, dataset)
 elif dataset in ['cora', 'citeseer', 'pubmed']:
     dataset = Planetoid(path, dataset)
+
+# Create link prediction split (train/val/test)
 data = dataset.make_link_split(val_ratio=0.1, test_ratio=0.10)
 
 num_nodes = int(data.num_nodes)
 
+# Initialize network embedding model
 model = NetworkEmbeddingModel(args.dataset, num_nodes, args.embedding_size, method=args.model, line_order=args.order)
 model.set_graph(edge_index=data.train_pos_edge_index, num_nodes=num_nodes, bidirectional=True)
 model.register_pos_edges(
@@ -50,16 +57,20 @@ model.register_pos_edges(
 model.prepare_walk_engine(walk_length=args.walk_length, walks_per_node=args.walks_per_node)
 optimizer = jt.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+# Training loop
 for epoch in range(args.num_epochs):
     model.train()
     train_loss = 0
     batch_count = 0
+    
+    # Train on batches of positive and negative edges
     for pos_i, pos_j, neg_j in model.batch_generator(batch_size=4096, window_size=args.walk_size, num_neg=1, shuffle=True):
         loss = model(pos_i, pos_j, neg_j)
         optimizer.step(loss)
         train_loss += float(loss.data[0])
         batch_count += 1
 
+    # Validation phase
     model.eval()
     with jt.no_grad():
         val_pos = data.val_pos_edge_index
@@ -74,6 +85,7 @@ for epoch in range(args.num_epochs):
         val_auc = roc_auc_score(y_true, y_pred)
         print(f'Epoch: {epoch}, train loss: {(train_loss / batch_count):.4f}, val_auc: {val_auc:.4f}')
 
+# Test phase
 model.eval()
 with jt.no_grad():
     test_pos = data.test_pos_edge_index

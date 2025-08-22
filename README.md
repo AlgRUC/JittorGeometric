@@ -128,6 +128,26 @@ JittorGeometric includes implementations of popular GNN models, such as:
 | [GRACE](./examples/grace_example.py)     | 2020 | ICML  |
 | [PolyGCL](./examples/polygcl_example.py) | 2024 | ICLR  |
 
+### Graph Recommendation
+
+| Model                                    | Year | Venue |
+|------------------------------------------|------|-------|
+| [SASREC](./examples/sasrec_example.py)   | 2018 | ICDM  |
+| [SGNNHN](./examples/sgnnhn_example.py)   | 2020 | CIKM  |
+| [CRAFT](./examples/craft_example.py)     | 2025 | ArXiv |
+
+### Graph Embedding
+
+| Model                                    | Year | Venue |
+|------------------------------------------|------|-------|
+| [Deepwalk](./examples/link_pred_example.py)   | 2014 | KDD  |
+| [LINE](./examples/link_pred_example.py)     | 2015 | WWW  |
+| [Node2Vec](./examples/link_pred_example.py)   | 2016 | KDD  |
+| [LightGCN](./examples/recsys_example.py)   | 2020 | SIGIR  |
+| [DirectAU](./examples/recsys_example.py)   | 2022 | KDD  |
+| [SimGCL](./examples/recsys_example.py)   | 2024 | KAIS  |
+| [XSimGCL](./examples/recsys_example.py)   | 2024 | TKDE  |
+
 ## Installation
 Follow these steps to install JittorGeometric:
 

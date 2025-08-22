@@ -20,7 +20,10 @@ from jittor_geometric.datasets.recsys import Hit, MRR, NDCG, Recall, DataStruct
 from jittor_geometric.nn.models import LightGCN, SimGCL, XSimGCL, DirectAU
 from tqdm import tqdm
 
+# Enable CUDA for GPU acceleration
 jt.flags.use_cuda = 1
+
+# Parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default="ml-1m", help='graph dataset')
 parser.add_argument('--model', default="lightgcn", help='model name')
@@ -35,6 +38,7 @@ parser.add_argument('--weight_decay', type=float, default=0, help='weight decay'
 args = parser.parse_args()
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../data')
 
+# Load recommendation dataset
 if args.dataset == 'ml-100k':
     dataset = MovieLens100K(root=path)
 elif args.dataset == 'ml-1m':
@@ -45,6 +49,7 @@ elif args.dataset == 'yelp2018':
 data = dataset.get(0)
 num_epochs = args.num_epochs + 1
 
+# Create data loader for training
 train_loader = RecsysDataLoader(
     edge_index = data.train_edge_index,
     num_items  = int(data.num_items),
@@ -53,6 +58,7 @@ train_loader = RecsysDataLoader(
     shuffle    = True,
 )
 
+# Initialize recommendation model
 if args.model.lower() == 'lightgcn':
     model = LightGCN(data.num_users, data.num_items, args.embedding_size, args.nlayer, data.train_edge_index, reg_weight=args.reg_weight)
 elif args.model.lower() == 'simgcl':
@@ -64,6 +70,7 @@ elif args.model.lower() == 'directau':
 
 optimizer = nn.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+# Evaluation function for different data splits
 def evaluate(model, data, split="val", k=[10]):
     model.eval()
     with jt.no_grad():
@@ -78,6 +85,7 @@ def evaluate(model, data, split="val", k=[10]):
 
         return evaluate_topk_from_edges(model, split_edge_index, data.train_edge_index, data.num_items, k=k)
 
+# Build evaluation results from top-k predictions
 def build_eval_result(scores, positive_u, positive_i, ks=[10]):
     topk_scores, topk_idx = jt.topk(scores, k=max(ks), dim=1, largest=True)
     pos_matrix = jt.zeros((scores.shape), dtype=jt.int)
@@ -87,6 +95,7 @@ def build_eval_result(scores, positive_u, positive_i, ks=[10]):
     result = jt.concat([pos_idx, pos_len], dim=1)
     return result
 
+# Evaluate top-k recommendation performance
 def evaluate_topk_from_edges(model, split_edge_index, train_edge_index, num_items, k=[10]):
     data_struct = DataStruct()
     test_users = jt.unique(split_edge_index[0]).numpy().tolist()
@@ -115,16 +124,20 @@ def evaluate_topk_from_edges(model, split_edge_index, train_edge_index, num_item
     }
     return metrics
 
+# Training loop with early stopping
 best_score = -float("inf")
 patience_counter = 0
 for epoch in range(1, num_epochs):
     print(f"Epoch {epoch}/{num_epochs}")
     model.train()
+    
+    # Train on batches of user-item interactions
     for users, pos_items, neg_items in train_loader:
         optimizer.zero_grad()
         loss = model(users, pos_items, neg_items)
         optimizer.step(loss)
 
+    # Evaluate and check early stopping
     if epoch % args.eval_step == 0 or epoch == num_epochs:
         val_metrics = evaluate(model, data, split="val", k=[10])
         print(f"[Validation @ Epoch {epoch}]")
@@ -141,6 +154,7 @@ for epoch in range(1, num_epochs):
                 print(f"Early stopping at epoch {epoch}. Best NDCG@10={best_score:.4f}")
                 break
 
+# Final test evaluation
 test_metrics = evaluate(model, data, split="test", k=[10])
 print("Test result:")
 for metric, value in test_metrics.items():
