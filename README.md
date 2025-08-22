@@ -132,6 +132,8 @@ JittorGeometric includes implementations of popular GNN models, such as:
 | [GRACE](./examples/grace_example.py)     | 2020 | ICML  |
 | [PolyGCL](./examples/polygcl_example.py) | 2024 | ICLR  |
 
+---
+
 ### Graph Recommendation
 
 | Model                                    | Year | Venue |
@@ -139,6 +141,8 @@ JittorGeometric includes implementations of popular GNN models, such as:
 | [SASREC](./examples/sasrec_example.py)   | 2018 | ICDM  |
 | [SGNNHN](./examples/sgnnhn_example.py)   | 2020 | CIKM  |
 | [CRAFT](./examples/craft_example.py)     | 2025 | ArXiv |
+
+---
 
 ### Graph Embedding
 
