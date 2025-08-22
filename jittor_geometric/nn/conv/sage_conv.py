@@ -121,7 +121,7 @@ class SAGEConv(MessagePassing):
             zeros(self.bias)
         self._cached_edge_index = None
         self._cached_adj_t = None
-
+    '''
     def execute(self, x: Var, edge_index: Adj,
                 edge_weight: OptVar = None) -> Var:
         """"""
@@ -155,6 +155,73 @@ class SAGEConv(MessagePassing):
        
         if self.bias is not None:
             out += self.bias
+        return out
+    '''
+
+    def execute(self, x: Var, edge_index: Adj = None,
+            edge_weight: Var = None,
+            csc = None, csr = None) -> Var:
+        """
+        Args:
+            x:  (Var)
+            edge_index: COO  (2, E)
+            edge_weight:             
+            csc: CSC
+            csr: CSR
+        """
+        # csc/csr
+        if csc is not None and csr is not None:
+            
+            x = (x, x)
+            if self.weight_proj is not None:
+                x = (jt.nn.relu(x[0] @ self.weight_proj + self.bias_proj), x[1])
+            if self.spmm and jt.flags.use_cuda == 1:
+                out = self.propagate_spmm(x=x[0], csr=csr)
+            else:
+                out = self.propagate_msg(x=x[0], csc=csc, csr=csr)
+
+        
+            out = out @ self.weight1
+
+            if self.root_weight is not None:
+                out = out + x[1] @ self.root_weight
+
+            if self.bias is not None:
+                out += self.bias
+        else:
+           
+            if self.normalize and isinstance(edge_index, Var):
+                cache = self._cached_edge_index
+                if cache is None:
+                    edge_index, edge_weight = sage_norm(
+                        edge_index, edge_weight, x.size(self.node_dim),
+                        self.improved, self.add_self_loops)
+                    with jt.no_grad():
+                        csc = cootocsc(edge_index, edge_weight, x.size(0))
+                        csr = cootocsr(edge_index, edge_weight, x.size(0))
+                    if self.cached:
+                        self._cached_edge_index = (edge_index, edge_weight, csr, csc)
+                else:
+                    edge_index, edge_weight, csr, csc = cache
+            x = (x, x)
+            if self.weight_proj is not None:
+                x = (jt.nn.relu(x[0] @ self.weight_proj + self.bias_proj), x[1])
+
+
+            if self.spmm and jt.flags.use_cuda == 1:
+                out = self.propagate_spmm(x=x[0], csr=csr)
+            else:
+                out = self.propagate_msg(x=x[0], csc=csc, csr=csr)
+
+        
+            out = out @ self.weight1
+
+            if self.root_weight is not None:
+                out = out + x[1] @ self.root_weight
+
+            if self.bias is not None:
+                out += self.bias
+
         return out
 
     # propagate by message passing
