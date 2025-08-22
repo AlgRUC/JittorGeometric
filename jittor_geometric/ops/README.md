@@ -255,3 +255,112 @@ new_edge_index, new_edge_attr = toUndirected(edge_index, edge_attr, num_nodes)
 # Outputs
 # new_edge_index: [[0, 1, 1, 2], [1, 0, 2, 1]]
 # new_edge_attr: [0.5, 0.5, 0.8, 0.8]
+```
+
+
+
+### 10. `csctocsr`
+Converts a sparse matrix from **CSC (Compressed Sparse Column)** format to **CSR (Compressed Sparse Row)** format.
+
+#### Inputs
+- **`column_offset` (Var)**: The column pointer array in CSC format. Each element indicates the start index of a column in `row_indices`.
+- **`row_indices` (Var)**: The row indices array in CSC format. Each element represents the row index of a non-zero entry.
+- **`dst` (Var)**: Array of destination node IDs (columns in the adjacency matrix).
+- **`src` (Var)**: Array of source node IDs (rows in the adjacency matrix).
+
+#### Outputs
+Returns a tuple:
+1. **`row_offset` (Var)**: The row pointer array in CSR format. Each element indicates the start index of a row in `column_indices`.
+2. **`column_indices` (Var)**: The column indices array in CSR format. Each element represents the column index of a non-zero entry.
+
+#### Example
+```python
+from jittor_geometric.ops import csctocsr
+import jittor as jt
+
+# === CSC format ===
+column_offset = jt.array([0, 0, 1, 2, 4], dtype="int32")  # Column pointers
+row_indices   = jt.array([0, 0, 1, 2], dtype="int32")     # Row indices
+dst = jt.array([0, 1, 2, 3], dtype="int32")
+src = jt.array([0, 1, 2, 3], dtype="int32")
+
+# Convert to CSR
+row_offset, column_indices = csctocsr(column_offset, row_indices, dst, src)
+# output
+# row_offset:    [0, 2, 3, 4, 4]
+# column_indices [1, 2, 3, 3]
+```
+
+### 11. `getweight`
+Computes edge weights for a graph represented in CSC (Compressed Sparse Column) format based on node in-degree and out-degree. 
+
+#### Inputs
+- **`vtx_size` (int)**: The total number of vertices in the graph.
+- **`csc_layer_dst` (Var)**: The array of destination nodes for each column in CSC format.
+- **`csc_layer_src` (Var)**: The array of source nodes corresponding to `row_indices` in CSC format.
+- **`csc_layer_column_offset` (Var)**: The column offsets in CSC format, indicating the start and end indices of edges for each destination node.
+- **`csc_layer_row_indices` (Var)**: The row indices in CSC format, indicating source nodes for each edge.
+
+#### Outputs
+- **`csc_layer_edge_weight` (Var)**: A 1D Var containing the computed edge weights for each edge in the CSC representation.
+
+#### Example
+```python
+from jittor_geometric.ops import getweight
+import jittor as jt
+column_offset = jt.array([0, 1, 2, 3, 4], dtype="int32")
+row_indices   = jt.array([0, 0, 1, 2], dtype="int32")
+dst           = jt.array([0, 1, 2, 3], dtype="int32")
+src           = jt.array([0, 1, 2, 3], dtype="int32")
+vtx_size      = 4
+# Compute weights
+edge_weight = getweight(vtx_size, dst, src, column_offset, row_indices)
+#output
+#[0.7071067690849304, 0.7071067690849304, 1.0, 1.0]
+```
+
+### 12. `gpuinitco`
+Initializes the local column offsets for a given set of destination nodes in a CSC graph, considering a maximum `fanout` for sampling.
+
+#### Inputs
+- **`dst_size` (int)**: The number of destination nodes.
+- **`fanout_i` (int)**: Maximum number of neighbors to sample per destination node.
+- **`csc_layer_dst` (Var)**: A 1D Var containing the IDs of the destination nodes to initialize.
+- **`csc_global_column_offset` (Var)**: The global column offset array of the CSC graph.
+
+#### Outputs
+- **`csc_layer_column_offset` (Var)**: A 1D Var of size `dst_size + 1`, containing the local column offsets for each destination node.  
+  Each element `i+1` is set to the minimum of the number of neighbors for `dst[i]` and `fanout_i`.
+
+#### Example
+```python
+import jittor as jt
+from jittor_geometric.ops import gpuinitco
+
+# Example inputs
+dst_size = 4
+fanout_i = 2
+csc_layer_dst = jt.array([0, 1, 2, 3], dtype="int32")
+csc_global_column_offset = jt.array([0, 1, 3, 4, 5], dtype="int32")  # global CSC column offsets
+
+# Initialize local column offsets
+csc_layer_column_offset = gpuinitco(dst_size, fanout_i, csc_layer_dst, csc_global_column_offset)
+
+# Outputs
+# [0, 1, 2, 1, 1]
+```
+
+### 13. `sampleprocessing`
+Samples edges for a graph represented in CSC (Compressed Sparse Column) format, producing local row indices for a given layer based on fanout limits and the global graph structure.
+
+#### Inputs
+- **`fanout_i` (int)**: Maximum number of neighbors to sample per destination node.
+- **`csc_layer_dst` (Var)**: A 1D Var containing the IDs of destination nodes in the current layer.
+- **`csc_layer_column_offset` (Var)**: A 1D Var of size `len(csc_layer_dst)+1`, containing the local column offsets for each destination node (typically initialized by `gpuinitco`).
+- **`csc_global_column_offset` (Var)**: The global column offsets of the full CSC graph.
+- **`csc_global_row_indices` (Var)**: The global row indices of the full CSC graph.
+
+#### Outputs
+- **`csc_layer_row_indices` (Var)**: A 1D Var containing the sampled source node indices for each destination node in the layer.
+
+
