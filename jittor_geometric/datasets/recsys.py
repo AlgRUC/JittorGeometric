@@ -444,10 +444,12 @@ class MovieLens100K(RecSysBase):
     """MovieLens-100K (RecBole processed).
 
     Downloads: https://recbole.s3-accelerate.amazonaws.com/ProcessedDatasets/MovieLens/ml-100k.zip
+    
     Expected in raw_dir after extraction:
-      - ml-100k.item
-      - ml-100k.user
-      - ml-100k.inter
+    
+    - ml-100k.item
+    - ml-100k.user  
+    - ml-100k.inter
     """
     url = "https://recbole.s3-accelerate.amazonaws.com/ProcessedDatasets/MovieLens/ml-100k.zip"
 
@@ -538,9 +540,12 @@ class Yelp2018(RecSysBase):
     """Yelp-2018 (RecBole processed).
 
     Downloads: https://recbole.s3-accelerate.amazonaws.com/ProcessedDatasets/Yelp/yelp2018.zip
+    
     Accepts either file naming variant inside the zip:
-      - yelp2018.item/.user/.inter  (common)
-      - yelp-2018.item/.user/.inter (also supported)
+    
+    - yelp2018.item/.user/.inter  (common)
+    - yelp-2018.item/.user/.inter (also supported)
+    
     After extraction, we normalize to yelp-2018.* in raw_dir.
     """
     url = "https://recbole.s3-accelerate.amazonaws.com/ProcessedDatasets/Yelp/yelp2018.zip"
