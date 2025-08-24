@@ -1,7 +1,7 @@
 jittor_geometric.nn.dense
-=========================
+==========================
 
-Dense layers used in Dynamic Graph Neural Networks.
+Dense layers and utilities.
 
 .. automodule:: jittor_geometric.nn.dense
    :members:

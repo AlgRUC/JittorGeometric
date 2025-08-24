@@ -1,10 +1,11 @@
 jittor_geometric.data
-=========================
+=====================
+
+Data structures and utilities.
 
 .. automodule:: jittor_geometric.data
-   :imported-members:
    :members:
    :undoc-members:
-```
+   :show-inheritance:
 
 

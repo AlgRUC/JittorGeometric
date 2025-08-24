@@ -1,9 +1,7 @@
-Modules
-==========
+Neural Network Modules
+======================
 
-Modules for Jittor Geometric.
-
-Including models, convoluition layers and aggregation layers.
+Neural network modules for JittorGeometric.
 
 .. toctree::
    :maxdepth: 1

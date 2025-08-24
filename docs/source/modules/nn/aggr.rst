@@ -1,7 +1,7 @@
 jittor_geometric.nn.aggr
 =========================
 
-Aggregation layers used in Graph Neural Networks.
+Aggregation functions.
 
 .. automodule:: jittor_geometric.nn.aggr
    :members:

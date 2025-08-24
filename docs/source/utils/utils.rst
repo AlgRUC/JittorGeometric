@@ -1,10 +1,11 @@
 jittor_geometric.utils
-=========================
+======================
+
+Utility functions.
 
 .. automodule:: jittor_geometric.utils
-   :imported-members:
    :members:
    :undoc-members:
-```
+   :show-inheritance:
 
 

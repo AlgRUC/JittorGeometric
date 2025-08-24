@@ -1,7 +1,7 @@
 jittor_geometric.nn.conv
 =========================
 
-Convolutional layers used in Graph Neural Networks.
+Graph convolution layers.
 
 .. automodule:: jittor_geometric.nn.conv
    :members:

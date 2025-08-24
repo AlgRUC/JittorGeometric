@@ -1,10 +1,11 @@
 jittor_geometric.ops
-=========================
+====================
+
+Custom operators and CUDA kernels.
 
 .. automodule:: jittor_geometric.ops
-   :imported-members:
    :members:
    :undoc-members:
-```
+   :show-inheritance:
 
 
