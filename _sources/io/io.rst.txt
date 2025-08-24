@@ -1,10 +1,11 @@
 jittor_geometric.io
-=========================
+===================
+
+Input/output utilities.
 
 .. automodule:: jittor_geometric.io
-   :imported-members:
    :members:
    :undoc-members:
-```
+   :show-inheritance:
 
 

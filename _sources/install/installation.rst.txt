@@ -7,11 +7,32 @@ This document provides the installation instructions for jittor_geometric
 System Requirements
 -------------------
 
-- **Python**: 3.7 or higher.
-- **GCC** (Linux only): 5.4 or higher.
-- **CMake**: 3.10 or higher.
-- **CUDA** (optional): 11.2 (for GPU support).
-- **cuDNN** (optional): Compatible with the installed CUDA version.
+- **Python**: 3.7 or higher
+- **GCC** (Linux only): 5.4 or higher
+- **CMake**: 3.10 or higher
+
+GPU Environment (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **CUDA**: 11.2 (for NVIDIA GPU support)
+- **cuDNN**: Compatible with the installed CUDA version
+
+Ascend Environment (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **CANN (Compute Architecture for Neural Networks) Toolkit**: 6.0.1 or higher
+- **Ascend Driver**: Compatible with your hardware (e.g., Ascend 910B/910B1/910B2)
+- **ACL Python API**: Installed as part of the CANN Toolkit
+- **AscendC Compiler**: Included in the CANN Toolkit
+
+Before running on Ascend, configure the environment variables::
+
+    source /usr/local/Ascend/ascend-toolkit/set_env.sh
+
+Also ensure to preload the correct OpenMP library (adjust path to your environment)::
+
+    export LD_PRELOAD=$CONDA_PREFIX/lib/libgomp.so.1
+
 
 Dependencies
 -----------------

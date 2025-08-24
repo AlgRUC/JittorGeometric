@@ -5,14 +5,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jittor_geometric.nn.conv.message_passing &mdash; Jittor_Geometric 1.0.0 documentation</title>
+  <title>jittor_geometric.nn.conv.message_passing &mdash; JittorGeometric v2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=abf69441" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../../_static/documentation_options.js?v=51b770b3"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -24,12 +25,13 @@
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            Jittor_Geometric
+            JittorGeometric
+              <img src="../../../../_static/JittorGeometric_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,34 +41,665 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">JittorGeometric</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../install/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/installation.html#system-requirements">System Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../install/installation.html#gpu-environment-optional">GPU Environment (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../install/installation.html#ascend-environment-optional">Ascend Environment (optional)</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../get_started/introduction.html">Get Started</a></li>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/installation.html#installation-steps">Installation Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/installation.html#troubleshooting">Troubleshooting</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../get_started/introduction.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#step-1-import-libraries">Step 1: Import Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#step-2-load-a-dataset">Step 2: Load a Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#step-3-define-a-simple-gcn-model">Step 3: Define a Simple GCN Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#step-4-training-the-model">Step 4: Training the Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#step-5-evaluate-the-model">Step 5: Evaluate the Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get_started/introduction.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Core Modules</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../modules/nn.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../data/data.html">jittor_geometric.data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../datasets/datasets.html">jittor_geometric.datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../dataloader/dataloader.html">jittor_geometric.dataloader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../io/io.html">jittor_geometric.io</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../partition/partition.html">jittor_geometric.partition</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../transforms/transforms.html">jittor_geometric.transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/nn.html">Neural Network Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/nn/aggr.html">jittor_geometric.nn.aggr</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation"><code class="docutils literal notranslate"><span class="pre">Aggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.__init__"><code class="docutils literal notranslate"><span class="pre">Aggregation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.execute"><code class="docutils literal notranslate"><span class="pre">Aggregation.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.reset_parameters"><code class="docutils literal notranslate"><span class="pre">Aggregation.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.assert_index_present"><code class="docutils literal notranslate"><span class="pre">Aggregation.assert_index_present()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.assert_sorted_index"><code class="docutils literal notranslate"><span class="pre">Aggregation.assert_sorted_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.assert_two_dimensional_input"><code class="docutils literal notranslate"><span class="pre">Aggregation.assert_two_dimensional_input()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.reduce"><code class="docutils literal notranslate"><span class="pre">Aggregation.reduce()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.segment"><code class="docutils literal notranslate"><span class="pre">Aggregation.segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.to_dense_batch"><code class="docutils literal notranslate"><span class="pre">Aggregation.to_dense_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.Aggregation.to_dense_batch_helper"><code class="docutils literal notranslate"><span class="pre">Aggregation.to_dense_batch_helper()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MultiAggregation"><code class="docutils literal notranslate"><span class="pre">MultiAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MultiAggregation.__init__"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MultiAggregation.reset_parameters"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MultiAggregation.get_out_channels"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.get_out_channels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MultiAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MultiAggregation.combine"><code class="docutils literal notranslate"><span class="pre">MultiAggregation.combine()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.SumAggregation"><code class="docutils literal notranslate"><span class="pre">SumAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.SumAggregation.execute"><code class="docutils literal notranslate"><span class="pre">SumAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MeanAggregation"><code class="docutils literal notranslate"><span class="pre">MeanAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MeanAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MeanAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MaxAggregation"><code class="docutils literal notranslate"><span class="pre">MaxAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MaxAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MaxAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MinAggregation"><code class="docutils literal notranslate"><span class="pre">MinAggregation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/aggr.html#jittor_geometric.nn.aggr.MinAggregation.execute"><code class="docutils literal notranslate"><span class="pre">MinAggregation.execute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/nn/conv.html">jittor_geometric.nn.conv</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing"><code class="docutils literal notranslate"><span class="pre">MessagePassing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.special_args"><code class="docutils literal notranslate"><span class="pre">MessagePassing.special_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.__init__"><code class="docutils literal notranslate"><span class="pre">MessagePassing.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.propagate"><code class="docutils literal notranslate"><span class="pre">MessagePassing.propagate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.message"><code class="docutils literal notranslate"><span class="pre">MessagePassing.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.aggregate"><code class="docutils literal notranslate"><span class="pre">MessagePassing.aggregate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.update"><code class="docutils literal notranslate"><span class="pre">MessagePassing.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCNConv"><code class="docutils literal notranslate"><span class="pre">GCNConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCNConv.__init__"><code class="docutils literal notranslate"><span class="pre">GCNConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCNConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GCNConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCNConv.execute"><code class="docutils literal notranslate"><span class="pre">GCNConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCNConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">GCNConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCNConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">GCNConv.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebConv"><code class="docutils literal notranslate"><span class="pre">ChebConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebConv.__init__"><code class="docutils literal notranslate"><span class="pre">ChebConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">ChebConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebConv.execute"><code class="docutils literal notranslate"><span class="pre">ChebConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebConv.forward"><code class="docutils literal notranslate"><span class="pre">ChebConv.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebConv.message"><code class="docutils literal notranslate"><span class="pre">ChebConv.message()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SGConv"><code class="docutils literal notranslate"><span class="pre">SGConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SGConv.__init__"><code class="docutils literal notranslate"><span class="pre">SGConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SGConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">SGConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SGConv.execute"><code class="docutils literal notranslate"><span class="pre">SGConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SGConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">SGConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SGConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">SGConv.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCN2Conv"><code class="docutils literal notranslate"><span class="pre">GCN2Conv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCN2Conv.__init__"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCN2Conv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCN2Conv.execute"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCN2Conv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GCN2Conv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">GCN2Conv.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.special_args"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.special_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.__init__"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.propagate"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.propagate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.aggregate_with_weight"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.aggregate_with_weight()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.scatter_to_edge"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.scatter_to_edge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.edge_forward"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.edge_forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.scatter_to_vertex"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.scatter_to_vertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassingNts.vertex_forward"><code class="docutils literal notranslate"><span class="pre">MessagePassingNts.vertex_forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv"><code class="docutils literal notranslate"><span class="pre">GATConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.__init__"><code class="docutils literal notranslate"><span class="pre">GATConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GATConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.execute"><code class="docutils literal notranslate"><span class="pre">GATConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.propagate"><code class="docutils literal notranslate"><span class="pre">GATConv.propagate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.scatter_to_edge"><code class="docutils literal notranslate"><span class="pre">GATConv.scatter_to_edge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.edge_forward"><code class="docutils literal notranslate"><span class="pre">GATConv.edge_forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.scatter_to_vertex"><code class="docutils literal notranslate"><span class="pre">GATConv.scatter_to_vertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GATConv.vertex_forward"><code class="docutils literal notranslate"><span class="pre">GATConv.vertex_forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv"><code class="docutils literal notranslate"><span class="pre">EGNNConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.__init__"><code class="docutils literal notranslate"><span class="pre">EGNNConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.init_weights"><code class="docutils literal notranslate"><span class="pre">EGNNConv.init_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.execute"><code class="docutils literal notranslate"><span class="pre">EGNNConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.message"><code class="docutils literal notranslate"><span class="pre">EGNNConv.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EGNNConv.propagate"><code class="docutils literal notranslate"><span class="pre">EGNNConv.propagate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.APPNP"><code class="docutils literal notranslate"><span class="pre">APPNP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.APPNP.__init__"><code class="docutils literal notranslate"><span class="pre">APPNP.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.APPNP.reset_parameters"><code class="docutils literal notranslate"><span class="pre">APPNP.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.APPNP.execute"><code class="docutils literal notranslate"><span class="pre">APPNP.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.APPNP.propagate_msg"><code class="docutils literal notranslate"><span class="pre">APPNP.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.APPNP.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">APPNP.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN"><code class="docutils literal notranslate"><span class="pre">GPRGNN</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.__init__"><code class="docutils literal notranslate"><span class="pre">GPRGNN.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.reset_parameters"><code class="docutils literal notranslate"><span class="pre">GPRGNN.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.execute"><code class="docutils literal notranslate"><span class="pre">GPRGNN.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.propagate_msg"><code class="docutils literal notranslate"><span class="pre">GPRGNN.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.GPRGNN.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">GPRGNN.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EvenNet"><code class="docutils literal notranslate"><span class="pre">EvenNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EvenNet.__init__"><code class="docutils literal notranslate"><span class="pre">EvenNet.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EvenNet.reset_parameters"><code class="docutils literal notranslate"><span class="pre">EvenNet.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EvenNet.execute"><code class="docutils literal notranslate"><span class="pre">EvenNet.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EvenNet.propagate_msg"><code class="docutils literal notranslate"><span class="pre">EvenNet.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.EvenNet.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">EvenNet.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.BernNet"><code class="docutils literal notranslate"><span class="pre">BernNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.BernNet.__init__"><code class="docutils literal notranslate"><span class="pre">BernNet.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.BernNet.reset_parameters"><code class="docutils literal notranslate"><span class="pre">BernNet.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.BernNet.execute"><code class="docutils literal notranslate"><span class="pre">BernNet.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.BernNet.propagate_msg"><code class="docutils literal notranslate"><span class="pre">BernNet.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.BernNet.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">BernNet.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebNetII"><code class="docutils literal notranslate"><span class="pre">ChebNetII</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebNetII.__init__"><code class="docutils literal notranslate"><span class="pre">ChebNetII.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebNetII.reset_parameters"><code class="docutils literal notranslate"><span class="pre">ChebNetII.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebNetII.execute"><code class="docutils literal notranslate"><span class="pre">ChebNetII.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebNetII.propagate_msg"><code class="docutils literal notranslate"><span class="pre">ChebNetII.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ChebNetII.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">ChebNetII.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.TransformerConv"><code class="docutils literal notranslate"><span class="pre">TransformerConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.TransformerConv.__init__"><code class="docutils literal notranslate"><span class="pre">TransformerConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.TransformerConv.execute"><code class="docutils literal notranslate"><span class="pre">TransformerConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.TransformerConv.forward"><code class="docutils literal notranslate"><span class="pre">TransformerConv.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.TransformerConv.message"><code class="docutils literal notranslate"><span class="pre">TransformerConv.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.TransformerConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">TransformerConv.reset_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv"><code class="docutils literal notranslate"><span class="pre">OptBasisConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv.__init__"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv.three_term_prop"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.three_term_prop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv.execute"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.OptBasisConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">OptBasisConv.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ClusterGCNConv"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ClusterGCNConv.__init__"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ClusterGCNConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ClusterGCNConv.execute"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ClusterGCNConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.ClusterGCNConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">ClusterGCNConv.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SAGEConv"><code class="docutils literal notranslate"><span class="pre">SAGEConv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SAGEConv.__init__"><code class="docutils literal notranslate"><span class="pre">SAGEConv.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SAGEConv.reset_parameters"><code class="docutils literal notranslate"><span class="pre">SAGEConv.reset_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SAGEConv.execute"><code class="docutils literal notranslate"><span class="pre">SAGEConv.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SAGEConv.propagate_msg"><code class="docutils literal notranslate"><span class="pre">SAGEConv.propagate_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.SAGEConv.propagate_spmm"><code class="docutils literal notranslate"><span class="pre">SAGEConv.propagate_spmm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/nn/dense.html">jittor_geometric.nn.dense</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.MergeLayer"><code class="docutils literal notranslate"><span class="pre">MergeLayer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.MergeLayer.__init__"><code class="docutils literal notranslate"><span class="pre">MergeLayer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.MergeLayer.execute"><code class="docutils literal notranslate"><span class="pre">MergeLayer.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.TimeEncoder"><code class="docutils literal notranslate"><span class="pre">TimeEncoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.TimeEncoder.__init__"><code class="docutils literal notranslate"><span class="pre">TimeEncoder.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.TimeEncoder.execute"><code class="docutils literal notranslate"><span class="pre">TimeEncoder.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.MLP.__init__"><code class="docutils literal notranslate"><span class="pre">MLP.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../modules/nn/dense.html#jittor_geometric.nn.dense.MLP.execute"><code class="docutils literal notranslate"><span class="pre">MLP.execute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../data/data.html">jittor_geometric.data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__init__"><code class="docutils literal notranslate"><span class="pre">Data.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.from_dict"><code class="docutils literal notranslate"><span class="pre">Data.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.to_dict"><code class="docutils literal notranslate"><span class="pre">Data.to_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.to_namedtuple"><code class="docutils literal notranslate"><span class="pre">Data.to_namedtuple()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__getitem__"><code class="docutils literal notranslate"><span class="pre">Data.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__setitem__"><code class="docutils literal notranslate"><span class="pre">Data.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.keys"><code class="docutils literal notranslate"><span class="pre">Data.keys</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__len__"><code class="docutils literal notranslate"><span class="pre">Data.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__contains__"><code class="docutils literal notranslate"><span class="pre">Data.__contains__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__iter__"><code class="docutils literal notranslate"><span class="pre">Data.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__call__"><code class="docutils literal notranslate"><span class="pre">Data.__call__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__cat_dim__"><code class="docutils literal notranslate"><span class="pre">Data.__cat_dim__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.__inc__"><code class="docutils literal notranslate"><span class="pre">Data.__inc__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.num_nodes"><code class="docutils literal notranslate"><span class="pre">Data.num_nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.num_edges"><code class="docutils literal notranslate"><span class="pre">Data.num_edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.num_faces"><code class="docutils literal notranslate"><span class="pre">Data.num_faces</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.num_node_features"><code class="docutils literal notranslate"><span class="pre">Data.num_node_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.num_features"><code class="docutils literal notranslate"><span class="pre">Data.num_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.num_edge_features"><code class="docutils literal notranslate"><span class="pre">Data.num_edge_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.contains_isolated_nodes"><code class="docutils literal notranslate"><span class="pre">Data.contains_isolated_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.contains_self_loops"><code class="docutils literal notranslate"><span class="pre">Data.contains_self_loops()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.apply"><code class="docutils literal notranslate"><span class="pre">Data.apply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.contiguous"><code class="docutils literal notranslate"><span class="pre">Data.contiguous()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.cpu"><code class="docutils literal notranslate"><span class="pre">Data.cpu()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.cuda"><code class="docutils literal notranslate"><span class="pre">Data.cuda()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.clone"><code class="docutils literal notranslate"><span class="pre">Data.clone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.pin_memory"><code class="docutils literal notranslate"><span class="pre">Data.pin_memory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Data.debug"><code class="docutils literal notranslate"><span class="pre">Data.debug()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.raw_file_names"><code class="docutils literal notranslate"><span class="pre">Dataset.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.processed_file_names"><code class="docutils literal notranslate"><span class="pre">Dataset.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.download"><code class="docutils literal notranslate"><span class="pre">Dataset.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.process"><code class="docutils literal notranslate"><span class="pre">Dataset.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.len"><code class="docutils literal notranslate"><span class="pre">Dataset.len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.get"><code class="docutils literal notranslate"><span class="pre">Dataset.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.__init__"><code class="docutils literal notranslate"><span class="pre">Dataset.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.indices"><code class="docutils literal notranslate"><span class="pre">Dataset.indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.raw_dir"><code class="docutils literal notranslate"><span class="pre">Dataset.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.processed_dir"><code class="docutils literal notranslate"><span class="pre">Dataset.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.num_node_features"><code class="docutils literal notranslate"><span class="pre">Dataset.num_node_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.num_features"><code class="docutils literal notranslate"><span class="pre">Dataset.num_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.num_edge_features"><code class="docutils literal notranslate"><span class="pre">Dataset.num_edge_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.raw_paths"><code class="docutils literal notranslate"><span class="pre">Dataset.raw_paths</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.processed_paths"><code class="docutils literal notranslate"><span class="pre">Dataset.processed_paths</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.__len__"><code class="docutils literal notranslate"><span class="pre">Dataset.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.__getitem__"><code class="docutils literal notranslate"><span class="pre">Dataset.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.index_select"><code class="docutils literal notranslate"><span class="pre">Dataset.index_select()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dataset.shuffle"><code class="docutils literal notranslate"><span class="pre">Dataset.shuffle()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.raw_file_names"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.processed_file_names"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.download"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.process"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.__init__"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.num_classes"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.num_classes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.len"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.get"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.collate"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.collate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.InMemoryDataset.copy"><code class="docutils literal notranslate"><span class="pre">InMemoryDataset.copy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.download_url"><code class="docutils literal notranslate"><span class="pre">download_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.decide_download"><code class="docutils literal notranslate"><span class="pre">decide_download()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.extract_zip"><code class="docutils literal notranslate"><span class="pre">extract_zip()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.extract_gz"><code class="docutils literal notranslate"><span class="pre">extract_gz()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.extract_tar"><code class="docutils literal notranslate"><span class="pre">extract_tar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.CSC"><code class="docutils literal notranslate"><span class="pre">CSC</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.CSC.__init__"><code class="docutils literal notranslate"><span class="pre">CSC.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.CSR"><code class="docutils literal notranslate"><span class="pre">CSR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.CSR.__init__"><code class="docutils literal notranslate"><span class="pre">CSR.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.GraphChunk"><code class="docutils literal notranslate"><span class="pre">GraphChunk</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.GraphChunk.__init__"><code class="docutils literal notranslate"><span class="pre">GraphChunk.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.GraphChunk.set_csr"><code class="docutils literal notranslate"><span class="pre">GraphChunk.set_csr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.GraphChunk.save"><code class="docutils literal notranslate"><span class="pre">GraphChunk.save()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.GraphChunk.load"><code class="docutils literal notranslate"><span class="pre">GraphChunk.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData"><code class="docutils literal notranslate"><span class="pre">TemporalData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.__init__"><code class="docutils literal notranslate"><span class="pre">TemporalData.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.__setitem__"><code class="docutils literal notranslate"><span class="pre">TemporalData.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.keys"><code class="docutils literal notranslate"><span class="pre">TemporalData.keys</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.num_nodes"><code class="docutils literal notranslate"><span class="pre">TemporalData.num_nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.max_node_id"><code class="docutils literal notranslate"><span class="pre">TemporalData.max_node_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.src_size"><code class="docutils literal notranslate"><span class="pre">TemporalData.src_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.dst_size"><code class="docutils literal notranslate"><span class="pre">TemporalData.dst_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.num_events"><code class="docutils literal notranslate"><span class="pre">TemporalData.num_events</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.num_edges"><code class="docutils literal notranslate"><span class="pre">TemporalData.num_edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.apply"><code class="docutils literal notranslate"><span class="pre">TemporalData.apply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.to"><code class="docutils literal notranslate"><span class="pre">TemporalData.to()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.train_val_test_split"><code class="docutils literal notranslate"><span class="pre">TemporalData.train_val_test_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.train_val_test_split_w_mask"><code class="docutils literal notranslate"><span class="pre">TemporalData.train_val_test_split_w_mask()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.TemporalData.seq_batches"><code class="docutils literal notranslate"><span class="pre">TemporalData.seq_batches()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Batch"><code class="docutils literal notranslate"><span class="pre">Batch</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Batch.from_data_list"><code class="docutils literal notranslate"><span class="pre">Batch.from_data_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Batch.get_example"><code class="docutils literal notranslate"><span class="pre">Batch.get_example()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Batch.to_data_list"><code class="docutils literal notranslate"><span class="pre">Batch.to_data_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Batch.num_graphs"><code class="docutils literal notranslate"><span class="pre">Batch.num_graphs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Batch.batch_size"><code class="docutils literal notranslate"><span class="pre">Batch.batch_size</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary"><code class="docutils literal notranslate"><span class="pre">Dictionary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.__init__"><code class="docutils literal notranslate"><span class="pre">Dictionary.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.__len__"><code class="docutils literal notranslate"><span class="pre">Dictionary.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.vec_index"><code class="docutils literal notranslate"><span class="pre">Dictionary.vec_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.index"><code class="docutils literal notranslate"><span class="pre">Dictionary.index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.special_index"><code class="docutils literal notranslate"><span class="pre">Dictionary.special_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.add_symbol"><code class="docutils literal notranslate"><span class="pre">Dictionary.add_symbol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.bos"><code class="docutils literal notranslate"><span class="pre">Dictionary.bos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.pad"><code class="docutils literal notranslate"><span class="pre">Dictionary.pad()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.eos"><code class="docutils literal notranslate"><span class="pre">Dictionary.eos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.unk"><code class="docutils literal notranslate"><span class="pre">Dictionary.unk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.load"><code class="docutils literal notranslate"><span class="pre">Dictionary.load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.Dictionary.add_from_file"><code class="docutils literal notranslate"><span class="pre">Dictionary.add_from_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.ConformerGen"><code class="docutils literal notranslate"><span class="pre">ConformerGen</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.ConformerGen.__init__"><code class="docutils literal notranslate"><span class="pre">ConformerGen.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../data/data.html#jittor_geometric.data.ConformerGen.transform_raw"><code class="docutils literal notranslate"><span class="pre">ConformerGen.transform_raw()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../datasets/datasets.html">jittor_geometric.datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid"><code class="docutils literal notranslate"><span class="pre">Planetoid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.url"><code class="docutils literal notranslate"><span class="pre">Planetoid.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.__init__"><code class="docutils literal notranslate"><span class="pre">Planetoid.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.raw_dir"><code class="docutils literal notranslate"><span class="pre">Planetoid.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.processed_dir"><code class="docutils literal notranslate"><span class="pre">Planetoid.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.raw_file_names"><code class="docutils literal notranslate"><span class="pre">Planetoid.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.processed_file_names"><code class="docutils literal notranslate"><span class="pre">Planetoid.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.download"><code class="docutils literal notranslate"><span class="pre">Planetoid.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.process"><code class="docutils literal notranslate"><span class="pre">Planetoid.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Planetoid.make_link_split"><code class="docutils literal notranslate"><span class="pre">Planetoid.make_link_split()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon"><code class="docutils literal notranslate"><span class="pre">Amazon</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.url"><code class="docutils literal notranslate"><span class="pre">Amazon.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.__init__"><code class="docutils literal notranslate"><span class="pre">Amazon.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.raw_dir"><code class="docutils literal notranslate"><span class="pre">Amazon.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.processed_dir"><code class="docutils literal notranslate"><span class="pre">Amazon.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.raw_file_names"><code class="docutils literal notranslate"><span class="pre">Amazon.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.processed_file_names"><code class="docutils literal notranslate"><span class="pre">Amazon.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.download"><code class="docutils literal notranslate"><span class="pre">Amazon.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.process"><code class="docutils literal notranslate"><span class="pre">Amazon.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Amazon.make_link_split"><code class="docutils literal notranslate"><span class="pre">Amazon.make_link_split()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.url"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.__init__"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.raw_dir"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.processed_dir"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.raw_file_names"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.processed_file_names"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.download"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.WikipediaNetwork.process"><code class="docutils literal notranslate"><span class="pre">WikipediaNetwork.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN"><code class="docutils literal notranslate"><span class="pre">GeomGCN</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.url"><code class="docutils literal notranslate"><span class="pre">GeomGCN.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.__init__"><code class="docutils literal notranslate"><span class="pre">GeomGCN.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.raw_dir"><code class="docutils literal notranslate"><span class="pre">GeomGCN.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.processed_dir"><code class="docutils literal notranslate"><span class="pre">GeomGCN.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.raw_file_names"><code class="docutils literal notranslate"><span class="pre">GeomGCN.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.processed_file_names"><code class="docutils literal notranslate"><span class="pre">GeomGCN.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.download"><code class="docutils literal notranslate"><span class="pre">GeomGCN.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.GeomGCN.process"><code class="docutils literal notranslate"><span class="pre">GeomGCN.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset"><code class="docutils literal notranslate"><span class="pre">LINKXDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.__init__"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.raw_dir"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.processed_dir"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.raw_file_names"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.processed_file_names"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.download"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.LINKXDataset.process"><code class="docutils literal notranslate"><span class="pre">LINKXDataset.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.__init__"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.get_idx_split"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.get_idx_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.num_classes"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.num_classes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.raw_file_names"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.processed_file_names"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.download"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.OGBNodePropPredDataset.process"><code class="docutils literal notranslate"><span class="pre">OGBNodePropPredDataset.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset"><code class="docutils literal notranslate"><span class="pre">HeteroDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.url"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.__init__"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.raw_dir"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.processed_dir"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.raw_file_names"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.processed_file_names"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.download"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.HeteroDataset.process"><code class="docutils literal notranslate"><span class="pre">HeteroDataset.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset"><code class="docutils literal notranslate"><span class="pre">JODIEDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.url"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.names"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.__init__"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.raw_dir"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.processed_dir"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.raw_file_names"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.processed_file_names"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.download"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.JODIEDataset.process"><code class="docutils literal notranslate"><span class="pre">JODIEDataset.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit"><code class="docutils literal notranslate"><span class="pre">Reddit</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit.url"><code class="docutils literal notranslate"><span class="pre">Reddit.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit.__init__"><code class="docutils literal notranslate"><span class="pre">Reddit.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit.raw_file_names"><code class="docutils literal notranslate"><span class="pre">Reddit.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit.processed_file_names"><code class="docutils literal notranslate"><span class="pre">Reddit.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit.download"><code class="docutils literal notranslate"><span class="pre">Reddit.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Reddit.process"><code class="docutils literal notranslate"><span class="pre">Reddit.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.TemporalDataLoader"><code class="docutils literal notranslate"><span class="pre">TemporalDataLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.TemporalDataLoader.__init__"><code class="docutils literal notranslate"><span class="pre">TemporalDataLoader.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9"><code class="docutils literal notranslate"><span class="pre">QM9</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.raw_url"><code class="docutils literal notranslate"><span class="pre">QM9.raw_url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.raw_url2"><code class="docutils literal notranslate"><span class="pre">QM9.raw_url2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.__init__"><code class="docutils literal notranslate"><span class="pre">QM9.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.mean"><code class="docutils literal notranslate"><span class="pre">QM9.mean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.std"><code class="docutils literal notranslate"><span class="pre">QM9.std()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.atomref"><code class="docutils literal notranslate"><span class="pre">QM9.atomref()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.raw_file_names"><code class="docutils literal notranslate"><span class="pre">QM9.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.processed_file_names"><code class="docutils literal notranslate"><span class="pre">QM9.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.download"><code class="docutils literal notranslate"><span class="pre">QM9.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.process"><code class="docutils literal notranslate"><span class="pre">QM9.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.QM9.get_idx_split"><code class="docutils literal notranslate"><span class="pre">QM9.get_idx_split()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet"><code class="docutils literal notranslate"><span class="pre">MoleculeNet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.url"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.names"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.__init__"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.raw_dir"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.processed_dir"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.raw_file_names"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.processed_file_names"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.download"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MoleculeNet.process"><code class="docutils literal notranslate"><span class="pre">MoleculeNet.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17"><code class="docutils literal notranslate"><span class="pre">MD17</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.gdml_url"><code class="docutils literal notranslate"><span class="pre">MD17.gdml_url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.revised_url"><code class="docutils literal notranslate"><span class="pre">MD17.revised_url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.file_names"><code class="docutils literal notranslate"><span class="pre">MD17.file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.__init__"><code class="docutils literal notranslate"><span class="pre">MD17.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.mean"><code class="docutils literal notranslate"><span class="pre">MD17.mean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.raw_dir"><code class="docutils literal notranslate"><span class="pre">MD17.raw_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.processed_dir"><code class="docutils literal notranslate"><span class="pre">MD17.processed_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.raw_file_names"><code class="docutils literal notranslate"><span class="pre">MD17.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.processed_file_names"><code class="docutils literal notranslate"><span class="pre">MD17.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.download"><code class="docutils literal notranslate"><span class="pre">MD17.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MD17.process"><code class="docutils literal notranslate"><span class="pre">MD17.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.url"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.split_mapping"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.split_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.__init__"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.raw_file_names"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.processed_file_names"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.processed_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.download"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.PCQM4Mv2.process"><code class="docutils literal notranslate"><span class="pre">PCQM4Mv2.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens1M"><code class="docutils literal notranslate"><span class="pre">MovieLens1M</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens1M.url"><code class="docutils literal notranslate"><span class="pre">MovieLens1M.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens1M.__init__"><code class="docutils literal notranslate"><span class="pre">MovieLens1M.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens1M.raw_file_names"><code class="docutils literal notranslate"><span class="pre">MovieLens1M.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens1M.download"><code class="docutils literal notranslate"><span class="pre">MovieLens1M.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens1M.read_raw"><code class="docutils literal notranslate"><span class="pre">MovieLens1M.read_raw()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens100K"><code class="docutils literal notranslate"><span class="pre">MovieLens100K</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens100K.url"><code class="docutils literal notranslate"><span class="pre">MovieLens100K.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens100K.__init__"><code class="docutils literal notranslate"><span class="pre">MovieLens100K.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens100K.raw_file_names"><code class="docutils literal notranslate"><span class="pre">MovieLens100K.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens100K.download"><code class="docutils literal notranslate"><span class="pre">MovieLens100K.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.MovieLens100K.read_raw"><code class="docutils literal notranslate"><span class="pre">MovieLens100K.read_raw()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Yelp2018"><code class="docutils literal notranslate"><span class="pre">Yelp2018</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Yelp2018.url"><code class="docutils literal notranslate"><span class="pre">Yelp2018.url</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Yelp2018.raw_file_names"><code class="docutils literal notranslate"><span class="pre">Yelp2018.raw_file_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Yelp2018.__init__"><code class="docutils literal notranslate"><span class="pre">Yelp2018.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Yelp2018.download"><code class="docutils literal notranslate"><span class="pre">Yelp2018.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../datasets/datasets.html#jittor_geometric.datasets.Yelp2018.read_raw"><code class="docutils literal notranslate"><span class="pre">Yelp2018.read_raw()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dataloader/dataloader.html">jittor_geometric.dataloader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.GeneralLoader"><code class="docutils literal notranslate"><span class="pre">GeneralLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.GeneralLoader.itermax"><code class="docutils literal notranslate"><span class="pre">GeneralLoader.itermax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.GeneralLoader.__init__"><code class="docutils literal notranslate"><span class="pre">GeneralLoader.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.GeneralLoader.itercnt"><code class="docutils literal notranslate"><span class="pre">GeneralLoader.itercnt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.GeneralLoader.dataset"><code class="docutils literal notranslate"><span class="pre">GeneralLoader.dataset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.RandomNodeLoader"><code class="docutils literal notranslate"><span class="pre">RandomNodeLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.RandomNodeLoader.__init__"><code class="docutils literal notranslate"><span class="pre">RandomNodeLoader.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.RandomNodeLoader.get_node_indices"><code class="docutils literal notranslate"><span class="pre">RandomNodeLoader.get_node_indices()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.NeighborLoader"><code class="docutils literal notranslate"><span class="pre">NeighborLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.NeighborLoader.__init__"><code class="docutils literal notranslate"><span class="pre">NeighborLoader.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.NeighborLoader.get_node_indices"><code class="docutils literal notranslate"><span class="pre">NeighborLoader.get_node_indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.NeighborLoader.neighbor_sampling"><code class="docutils literal notranslate"><span class="pre">NeighborLoader.neighbor_sampling()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.NeighborLoader.unique"><code class="docutils literal notranslate"><span class="pre">NeighborLoader.unique()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.ClusterLoader"><code class="docutils literal notranslate"><span class="pre">ClusterLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.ClusterLoader.__init__"><code class="docutils literal notranslate"><span class="pre">ClusterLoader.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.ClusterLoader.partition"><code class="docutils literal notranslate"><span class="pre">ClusterLoader.partition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.ClusterLoader.get_node_indices"><code class="docutils literal notranslate"><span class="pre">ClusterLoader.get_node_indices()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.DataLoader"><code class="docutils literal notranslate"><span class="pre">DataLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dataloader/dataloader.html#jittor_geometric.dataloader.DataLoader.__init__"><code class="docutils literal notranslate"><span class="pre">DataLoader.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../partition/partition.html">jittor_geometric.partition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../partition/partition.html#jittor_geometric.partition.ChunkManager"><code class="docutils literal notranslate"><span class="pre">ChunkManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../partition/partition.html#jittor_geometric.partition.ChunkManager.__init__"><code class="docutils literal notranslate"><span class="pre">ChunkManager.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../partition/partition.html#jittor_geometric.partition.ChunkManager.metis_partition"><code class="docutils literal notranslate"><span class="pre">ChunkManager.metis_partition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../partition/partition.html#jittor_geometric.partition.ChunkManager.partition_to_chunk"><code class="docutils literal notranslate"><span class="pre">ChunkManager.partition_to_chunk()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../transforms/transforms.html">jittor_geometric.transforms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../transforms/transforms.html#jittor_geometric.transforms.NormalizeFeatures"><code class="docutils literal notranslate"><span class="pre">NormalizeFeatures</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ops/ops.html">jittor_geometric.ops</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../utils/utils.html">jittor_geometric.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example/dist_gcn.html">分布式训练</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../example/dist_gcn.html#id2">第 0 步：设置分布式文件系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../example/dist_gcn.html#ip">第 1 步：设置 IP 配置文件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../example/dist_gcn.html#id3">第 2 步：对图进行分区</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../example/dist_gcn.html#id4">第 3 步：启动分布式作业</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../example/dist_gcn.html#id5">单机多卡训练</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utilities &amp; I/O</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../io/io.html">jittor_geometric.io</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.parse_txt_array"><code class="docutils literal notranslate"><span class="pre">parse_txt_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_txt_array"><code class="docutils literal notranslate"><span class="pre">read_txt_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_planetoid_data"><code class="docutils literal notranslate"><span class="pre">read_planetoid_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_npz"><code class="docutils literal notranslate"><span class="pre">read_npz()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_graph"><code class="docutils literal notranslate"><span class="pre">read_graph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_heterograph"><code class="docutils literal notranslate"><span class="pre">read_heterograph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_node_label_hetero"><code class="docutils literal notranslate"><span class="pre">read_node_label_hetero()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../io/io.html#jittor_geometric.io.read_nodesplitidx_split_hetero"><code class="docutils literal notranslate"><span class="pre">read_nodesplitidx_split_hetero()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utils/utils.html">jittor_geometric.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.coalesce"><code class="docutils literal notranslate"><span class="pre">coalesce()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.degree"><code class="docutils literal notranslate"><span class="pre">degree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.contains_self_loops"><code class="docutils literal notranslate"><span class="pre">contains_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.remove_self_loops"><code class="docutils literal notranslate"><span class="pre">remove_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.segregate_self_loops"><code class="docutils literal notranslate"><span class="pre">segregate_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.add_self_loops"><code class="docutils literal notranslate"><span class="pre">add_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.add_remaining_self_loops"><code class="docutils literal notranslate"><span class="pre">add_remaining_self_loops()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.contains_isolated_nodes"><code class="docutils literal notranslate"><span class="pre">contains_isolated_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.remove_isolated_nodes"><code class="docutils literal notranslate"><span class="pre">remove_isolated_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.get_laplacian"><code class="docutils literal notranslate"><span class="pre">get_laplacian()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.is_jittor_sparse_tensor"><code class="docutils literal notranslate"><span class="pre">is_jittor_sparse_tensor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.scatter"><code class="docutils literal notranslate"><span class="pre">scatter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.induced_graph"><code class="docutils literal notranslate"><span class="pre">induced_graph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.unique"><code class="docutils literal notranslate"><span class="pre">unique()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.neighbor_sampler"><code class="docutils literal notranslate"><span class="pre">neighbor_sampler()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.randomwalk_sampler"><code class="docutils literal notranslate"><span class="pre">randomwalk_sampler()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.one_hot"><code class="docutils literal notranslate"><span class="pre">one_hot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.maybe_num_nodes"><code class="docutils literal notranslate"><span class="pre">maybe_num_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.from_rdmol"><code class="docutils literal notranslate"><span class="pre">from_rdmol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.to_rdmol"><code class="docutils literal notranslate"><span class="pre">to_rdmol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.from_smiles"><code class="docutils literal notranslate"><span class="pre">from_smiles()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.to_smiles"><code class="docutils literal notranslate"><span class="pre">to_smiles()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.set_seed"><code class="docutils literal notranslate"><span class="pre">set_seed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.cheby"><code class="docutils literal notranslate"><span class="pre">cheby()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.random_splits"><code class="docutils literal notranslate"><span class="pre">random_splits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.drop_feature"><code class="docutils literal notranslate"><span class="pre">drop_feature()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.mask_edge"><code class="docutils literal notranslate"><span class="pre">mask_edge()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.preprocess_features"><code class="docutils literal notranslate"><span class="pre">preprocess_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../utils/utils.html#jittor_geometric.utils.compute_ppr"><code class="docutils literal notranslate"><span class="pre">compute_ppr()</span></code></a></li>
+</ul>
+</li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">Jittor_Geometric</a>
+          <a href="../../../../index.html">JittorGeometric</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -107,6 +740,8 @@
         <span class="s1">&#39;size_i&#39;</span><span class="p">,</span> <span class="s1">&#39;size_j&#39;</span><span class="p">,</span> <span class="s1">&#39;ptr&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="s1">&#39;dim_size&#39;</span>
     <span class="p">}</span>
 
+<div class="viewcode-block" id="MessagePassing.__init__">
+<a class="viewcode-back" href="../../../../modules/nn/conv.html#jittor_geometric.nn.conv.MessagePassing.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aggr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span>
                  <span class="n">flow</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;source_to_target&quot;</span><span class="p">,</span> <span class="n">node_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="p">):</span>
 
@@ -125,7 +760,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inspector</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">,</span> <span class="n">pop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inspector</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">pop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__user_args__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspector</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span>
-            <span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;aggregate&#39;</span><span class="p">,</span> <span class="s1">&#39;update&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">special_args</span><span class="p">)</span> 
+            <span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;aggregate&#39;</span><span class="p">,</span> <span class="s1">&#39;update&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">special_args</span><span class="p">)</span> </div>
+
 
     <span class="k">def</span> <span class="nf">__check_input__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
         <span class="n">the_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
@@ -262,7 +898,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Jittor_Geometric_Team.</p>
+    <p>&#169; Copyright 2025, JittorGeometric Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

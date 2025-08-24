@@ -1,0 +1,53 @@
+/* Custom CSS for JittorGeometric v2.0 Documentation */
+
+/* Main content styling */
+.rst-content .document {
+    max-width: none;
+}
+
+/* Logo styling */
+.rst-content img[alt*="JittorGeometric"] {
+    margin: 20px auto;
+    display: block;
+}
+
+/* Code blocks */
+.rst-content pre.literal-block, 
+.rst-content div[class^='highlight'] {
+    border-radius: 4px;
+    border: 1px solid #e1e4e5;
+}
+
+/* Navigation improvements */
+.wy-nav-content {
+    max-width: none;
+}
+
+/* Table styling */
+.rst-content table.docutils {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rst-content table.docutils th {
+    background-color: #f8f9fa;
+}
+
+/* API documentation styling */
+.rst-content dl.py.method dt,
+.rst-content dl.py.function dt,
+.rst-content dl.py.class dt {
+    background-color: #f8f9fa;
+    border-left: 3px solid #2980b9;
+    padding: 6px;
+}
+
+/* Improve readability of parameter lists */
+.rst-content dl.field-list dd {
+    margin-left: 140px;
+}
+
+/* Version info styling */
+.rst-versions {
+    border-top: solid 2px #2980b9;
+}
