@@ -86,12 +86,6 @@ Quick Start
    io/io
    utils/utils
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Examples & Tutorials
-   :hidden:
-
-   examples/README
 
 Community & Support
 -------------------
