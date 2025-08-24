@@ -24,10 +24,10 @@ class SGConv(MessagePassing):
         \mathbf{\hat{D}}^{-1/2} \right)}^K \mathbf{X} \mathbf{\Theta},
 
     where:
-    - :math:`\mathbf{\hat{A}} = \mathbf{A} + \mathbf{I}` denotes the adjacency matrix with added self-loops.
-    - :math:`\hat{D}_{ii} = \sum_{j=0} \hat{A}_{ij}` is its diagonal degree matrix.
-    - :math:`K` controls the number of propagation steps.
-    - The adjacency matrix can include other values than :obj:`1`, representing edge weights via the optional `edge_weight` variable.
+        - :math:`\mathbf{\hat{A}} = \mathbf{A} + \mathbf{I}` denotes the adjacency matrix with added self-loops.
+        - :math:`\hat{D}_{ii} = \sum_{j=0} \hat{A}_{ij}` is its diagonal degree matrix.
+        - :math:`K` controls the number of propagation steps.
+        - The adjacency matrix can include other values than :obj:`1`, representing edge weights via the optional `edge_weight` variable.
 
     Args:
         in_channels (int): Number of input features per node.

@@ -23,7 +23,8 @@ class GPRGNN(Module):
     Mathematical Formulation:
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathbf{P}^{k} \mathbf{X}.
-    where:  
+
+    where:
         :math:`\mathbf{X}` is the input node feature matrix.
         :math:`\mathbf{Z}` is the output node feature matrix.
         :math:`\mathbf{P}` is the normalized adjacency matrix of the graph.
@@ -35,6 +36,7 @@ class GPRGNN(Module):
         Init (str): Initialization method for the propagation weights. Possible values are 'SGC', 'PPR', 'NPPR', 'Random', 'WS'.
         spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
     """
+
 
     def __init__(self, K: int, alpha: float, Init: str, spmm:bool=True, **kwargs):
         kwargs.setdefault('aggr', 'add')
@@ -70,7 +72,7 @@ class GPRGNN(Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-    	pass
+        pass
 
     def execute(self, x: Var, csc: OptVar, csr: OptVar) -> Var:
         out = x*(self.temp[0])

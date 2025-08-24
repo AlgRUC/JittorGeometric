@@ -258,17 +258,21 @@ class EGNNConv(MessagePassing):
         """Message function."""
         return self.edge_mlp(jt.concat([x_i, x_j, edge_attr], dim=-1))
 
-
-    def propagate(self, edge_index: Adj, size = None, **kwargs):
+    def propagate(self, edge_index: Adj, size=None, **kwargs):
         """The initial call to start propagating messages.
-            Args:
-            `edge_index` holds the indices of a general (sparse)
-                assignment matrix of shape :obj:`[N, M]`.
-            size (tuple, optional) if none, the size will be inferred
-                and assumed to be quadratic.
-            **kwargs: Any additional data which is needed to construct and
-                aggregate messages, and to update node embeddings.
+
+        Args:
+            edge_index: Holds the indices of a general (sparse) assignment matrix of shape :obj:`[N, M]`.
+            size (tuple, optional): If none, the size will be inferred and assumed to be quadratic.
+            **kwargs: Any additional data which is needed to construct and aggregate messages, and to update node embeddings.
+        
+        Returns:
+            The updated node embeddings and coordinates.
+
+        Notes:
+            This method performs the propagation of messages across the graph and updates both the node features and coordinates based on the provided edge indices.
         """
+
         size = self.__check_input__(edge_index, size)
         coll_dict = self.__collect__(self.__user_args__,
                                      edge_index, size, kwargs)

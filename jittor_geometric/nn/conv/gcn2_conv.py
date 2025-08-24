@@ -27,11 +27,11 @@ class GCN2Conv(MessagePassing):
         \beta \big( \mathbf{\Theta}_1 \mathbf{H}^{(l-1)} + \mathbf{\Theta}_2 \mathbf{H}^{(0)} \big)
 
     where:
-    - :math:`\mathbf{H}^{(l)}` is the node feature matrix at layer :math:`l`.
-    - :math:`\mathbf{H}^{(0)}` is the initial node feature matrix.
-    - :math:`\mathbf{\Theta}_1` and :math:`\mathbf{\Theta}_2` are learnable weight matrices.
-    - :math:`\alpha` controls the strength of the initial residual connection.
-    - :math:`\beta` balances feature aggregation and transformation.
+        :math:`\mathbf{H}^{(l)}` is the node feature matrix at layer :math:`l`.
+        :math:`\mathbf{H}^{(0)}` is the initial node feature matrix.
+        :math:`\mathbf{\Theta}_1` and :math:`\mathbf{\Theta}_2` are learnable weight matrices.
+        :math:`\alpha` controls the strength of the initial residual connection.
+        :math:`\beta` balances feature aggregation and transformation.
 
     Args:
         in_channels (int): Number of input features per node.

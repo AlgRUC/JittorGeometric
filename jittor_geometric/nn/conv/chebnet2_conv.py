@@ -31,20 +31,20 @@ def cheby(i,x):
 
 class ChebNetII(Module):
     r"""The graph propagation operator from the `"Convolutional Neural Networks
-     on Graphs with Chebyshev Approximation, Revisited"
+    on Graphs with Chebyshev Approximation, Revisited"
     <https://arxiv.org/abs/2202.03580>`_ paper
-    
 
     Mathematical Formulation:
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathrm{cheb}_{k}(\tilde{\mathbf{L}}) \mathbf{X}.
+
     where:
         :math:`\mathbf{X}` is the input node feature matrix.
         :math:`\mathbf{Z}` is the output node feature matrix.
         :math:`\mathrm{cheb}_{k}` is the Chebyshev polynomial of order :math:`k`.
-        :math:`\alpha_k` is the parameter for the :math:`k`-th order Chebyshev polynomial, they are further derived via learnable values on the Chebyshev nodes.
-        :math:`\tilde{L}` is the normalized Laplacian matrix of the graph, translated to the interval :math:`[-1,1]`.
-    
+        :math:`\alpha_k` is the parameter for the :math:`k`-th order Chebyshev polynomial, derived via learnable values on the Chebyshev nodes.
+        :math:`\tilde{\mathbf{L}}` is the normalized Laplacian matrix of the graph, translated to the interval :math:`[-1,1]`.
+
     Args:
         K (int): Order of polynomial, or maximum number of hops considered for message passing. 
         spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.

@@ -18,8 +18,7 @@ from jittor_geometric.ops import ScatterToEdge,EdgeSoftmax,aggregateWithWeight,S
 
 
 class GATConv(MessagePassingNts):
-    r"""The graph convolutional operator from the `"Graph Attention Networks"
-    2018 ICLR _ paper
+    r"""The graph convolutional operator from the `"Graph Attention Networks" <https://arxiv.org/abs/1710.10903>`_ paper.
     """
 
     _cached_edge_index: Optional[Tuple[Var, Var]]

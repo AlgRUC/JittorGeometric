@@ -19,22 +19,24 @@ class BernNet(Module):
     r"""The graph propagation operator from the `"BernNet: Learning Arbitrary 
     Graph Spectral Filters via Bernstein Approximation"
     <https://arxiv.org/abs/2106.10994>`_ paper
-    
+
     Mathematical Formulation:
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathrm{Bern}_{k}(\tilde{L}) \mathbf{X}.
+
     where:
         :math:`\mathbf{X}` is the input node feature matrix.
         :math:`\mathbf{Z}` is the output node feature matrix.
         :math:`\mathrm{Bern}_{k}` is the Bernstein polynomial of order :math:`k`.
         :math:`\tilde{\mathbf{L}}` is the normalized Laplacian matrix of the graph, translated to the interval :math:`[-1,1]`.
-        :math:`\alpha_k` is the parameter for the :math:`k`-th order Bernstein polynomial. 
+        :math:`\alpha_k` is the parameter for the :math:`k`-th order Bernstein polynomial.
 
     Args:
         K (int): Order of polynomial, or maximum number of hops considered for message passing. 
         spmm (bool, optional): If set to `True`, uses sparse matrix multiplication (SPMM) for propagation. Default is `True`.
         **kwargs (optional): Additional arguments for the `MessagePassing` class.
     """
+
 
     def __init__(self, K: int, spmm:bool=True, **kwargs):
         kwargs.setdefault('aggr', 'add')
