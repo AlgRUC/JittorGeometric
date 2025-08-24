@@ -19,6 +19,7 @@ class SGConv(MessagePassing):
     matrices across layers to achieve a simplified and computationally efficient graph convolution.
 
     Mathematical Formulation:
+
     .. math::
         \mathbf{X}^{\prime} = {\left(\mathbf{\hat{D}}^{-1/2} \mathbf{\hat{A}}
         \mathbf{\hat{D}}^{-1/2} \right)}^K \mathbf{X} \mathbf{\Theta},

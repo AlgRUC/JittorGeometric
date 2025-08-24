@@ -22,6 +22,7 @@ class GCN2Conv(MessagePassing):
     and sparse matrix multiplication (SPMM) for efficient propagation.
 
     Mathematical Formulation:
+
     .. math::
         \mathbf{H}^{(l)} = (1 - \beta) \big( (1 - \alpha) \mathbf{H}^{(l-1)} + \alpha \mathbf{H}^{(0)} \big) +
         \beta \big( \mathbf{\Theta}_1 \mathbf{H}^{(l-1)} + \mathbf{\Theta}_2 \mathbf{H}^{(0)} \big)

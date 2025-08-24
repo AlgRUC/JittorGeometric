@@ -64,6 +64,7 @@ def maybe_log(path, log=True):
 
 def extract_zip(path, folder, log=True):
     r"""Extracts a zip archive to a specific folder.
+
     Args:
         path (string): The path to the tar archive.
         folder (string): The folder.

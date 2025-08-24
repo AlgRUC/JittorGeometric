@@ -441,8 +441,8 @@ class MovieLens1M(RecSysBase):
         return interactions, {"items": items, "users": users}
 
 class MovieLens100K(RecSysBase):
-    """
-    MovieLens-100K (RecBole processed)
+    """MovieLens-100K (RecBole processed).
+
     Downloads: https://recbole.s3-accelerate.amazonaws.com/ProcessedDatasets/MovieLens/ml-100k.zip
     Expected in raw_dir after extraction:
       - ml-100k.item
@@ -535,8 +535,8 @@ class MovieLens100K(RecSysBase):
         return interactions, {"items": items, "users": users}
 
 class Yelp2018(RecSysBase):
-    """
-    Yelp-2018 (RecBole processed)
+    """Yelp-2018 (RecBole processed).
+
     Downloads: https://recbole.s3-accelerate.amazonaws.com/ProcessedDatasets/Yelp/yelp2018.zip
     Accepts either file naming variant inside the zip:
       - yelp2018.item/.user/.inter  (common)

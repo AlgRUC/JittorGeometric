@@ -35,6 +35,7 @@ class ChebNetII(Module):
     <https://arxiv.org/abs/2202.03580>`_ paper
 
     Mathematical Formulation:
+
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathrm{cheb}_{k}(\tilde{\mathbf{L}}) \mathbf{X}.
 

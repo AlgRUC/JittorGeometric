@@ -21,6 +21,7 @@ class BernNet(Module):
     <https://arxiv.org/abs/2106.10994>`_ paper
 
     Mathematical Formulation:
+
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathrm{Bern}_{k}(\tilde{L}) \mathbf{X}.
 

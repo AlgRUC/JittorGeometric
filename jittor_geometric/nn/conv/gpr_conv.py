@@ -21,6 +21,7 @@ class GPRGNN(Module):
     <https://arxiv.org/abs/2006.07988>`_ paper
 
     Mathematical Formulation:
+
     .. math::
         \mathbf{Z} = \sum_{k=0}^{K} \alpha_k \mathbf{P}^{k} \mathbf{X}.
 
