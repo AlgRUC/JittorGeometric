@@ -14,7 +14,7 @@
 
 **A Comprehensive Graph Machine Learning Library Built on Jittor**
 
-[Documentation](https://jittor.github.io/JittorGeometric/) • [Examples](./examples) • [Installation](#installation) • [Quick Start](#quick-tour) • [Models](#supported-models)
+[Documentation](https://algruc.github.io/JittorGeometric/index.html) • [Examples](./examples) • [Installation](#installation) • [Quick Start](#quick-tour) • [Models](#supported-models)
 
 </div>
 
