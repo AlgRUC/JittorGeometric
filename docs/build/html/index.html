@@ -740,23 +740,56 @@
 </section>
 <section id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">jittor</span> <span class="k">as</span> <span class="nn">jt</span>
-<span class="kn">import</span> <span class="nn">jittor_geometric</span> <span class="k">as</span> <span class="nn">jg</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Dataset Selection</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">osp</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.datasets</span> <span class="kn">import</span> <span class="n">Planetoid</span>
+<span class="kn">import</span> <span class="nn">jittor_geometric.transforms</span> <span class="k">as</span> <span class="nn">T</span>
+<span class="kn">import</span> <span class="nn">jittor</span> <span class="k">as</span> <span class="nn">jt</span>
 
-<span class="c1"># Load a dataset</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">jg</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">Cora</span><span class="p">()</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cora&#39;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Planetoid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">T</span><span class="o">.</span><span class="n">NormalizeFeatures</span><span class="p">())</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">v_num</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="c1"># Create a GCN model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">jg</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GCN</span><span class="p">(</span>
-    <span class="n">in_channels</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">num_features</span><span class="p">,</span>
-    <span class="n">hidden_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-    <span class="n">out_channels</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
-    <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span>
-<span class="p">)</span>
+<span class="c1">### Data Preprocess</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.ops</span> <span class="kn">import</span> <span class="n">cootocsr</span><span class="p">,</span><span class="n">cootocsc</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.nn.conv.gcn_conv</span> <span class="kn">import</span> <span class="n">gcn_norm</span>
+<span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span>
+<span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span> <span class="o">=</span> <span class="n">gcn_norm</span><span class="p">(</span>
+                        <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span><span class="n">v_num</span><span class="p">,</span>
+                        <span class="n">improved</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_self_loops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">jt</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+   <span class="n">data</span><span class="o">.</span><span class="n">csc</span> <span class="o">=</span> <span class="n">cootocsc</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">v_num</span><span class="p">)</span>
+   <span class="n">data</span><span class="o">.</span><span class="n">csr</span> <span class="o">=</span> <span class="n">cootocsr</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">v_num</span><span class="p">)</span>
 
-<span class="c1"># Train the model</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">jt</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-<span class="c1"># ... training loop</span>
+<span class="c1">### Model Definition</span>
+<span class="kn">from</span> <span class="nn">jittor</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">jittor_geometric.nn</span> <span class="kn">import</span> <span class="n">GCNConv</span>
+
+<span class="k">class</span> <span class="nc">GCN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+   <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">GCN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GCNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">num_features</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GCNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">num_classes</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+
+   <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="n">x</span><span class="p">,</span> <span class="n">csc</span><span class="p">,</span> <span class="n">csr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">csc</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">csr</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">csc</span><span class="p">,</span> <span class="n">csr</span><span class="p">))</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">is_train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">)</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">csc</span><span class="p">,</span> <span class="n">csr</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">### Training</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">GCN</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">):</span>
+   <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+   <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">()[</span><span class="n">data</span><span class="o">.</span><span class="n">train_mask</span><span class="p">]</span>
+   <span class="n">label</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">train_mask</span><span class="p">]</span>
+   <span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">nll_loss</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+   <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">
@@ -774,7 +807,6 @@
 <li><p><strong>GitHub</strong>: <a class="reference external" href="https://github.com/Jittor/JittorGeometric">JittorGeometric Repository</a></p></li>
 <li><p><strong>Issues</strong>: Report bugs and request features</p></li>
 <li><p><strong>Discussions</strong>: Join our community discussions</p></li>
-<li><p><strong>Citation</strong>: How to cite JittorGeometric in your research</p></li>
 </ul>
 </section>
 <section id="changelog">
@@ -782,9 +814,8 @@
 <p><strong>v2.0.0</strong> brings major improvements:</p>
 <ul class="simple">
 <li><p>🆕 <strong>New Models</strong>: Added 15+ new GNN architectures</p></li>
-<li><p>🚀 <strong>Performance</strong>: 2-3x speedup over v1.0</p></li>
-<li><p>📚 <strong>Documentation</strong>: Comprehensive API documentation and tutorials</p></li>
-<li><p>🔧 <strong>API Changes</strong>: Simplified and more intuitive API design</p></li>
+<li><p>🚀 <strong>Performance</strong>: Speedup over v1.0 in dynamic graphs</p></li>
+<li><p>🔧 <strong>NPU Implementation</strong>: Allow JittorGeoemtric to run on NPU</p></li>
 <li><p>🌐 <strong>Distributed</strong>: Enhanced distributed training capabilities</p></li>
 </ul>
 </section>

@@ -32,23 +32,56 @@ Quick Start
 
 .. code-block:: python
 
+   ### Dataset Selection
+   import os.path as osp
+   from jittor_geometric.datasets import Planetoid
+   import jittor_geometric.transforms as T
    import jittor as jt
-   import jittor_geometric as jg
-   
-   # Load a dataset
-   data = jg.datasets.Cora()
-   
-   # Create a GCN model
-   model = jg.nn.models.GCN(
-       in_channels=data.num_features,
-       hidden_channels=64,
-       out_channels=data.num_classes,
-       num_layers=2
-   )
-   
-   # Train the model
-   optimizer = jt.optim.Adam(model.parameters())
-   # ... training loop
+
+   dataset = 'cora'
+   path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'data', dataset)
+   dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+   data = dataset[0]
+   v_num = data.x.shape[0]
+
+   ### Data Preprocess
+   from jittor_geometric.ops import cootocsr,cootocsc
+   from jittor_geometric.nn.conv.gcn_conv import gcn_norm
+   edge_index, edge_weight = data.edge_index, data.edge_attr
+   edge_index, edge_weight = gcn_norm(
+                           edge_index, edge_weight,v_num,
+                           improved=False, add_self_loops=True)
+   with jt.no_grad():
+      data.csc = cootocsc(edge_index, edge_weight, v_num)
+      data.csr = cootocsr(edge_index, edge_weight, v_num)
+
+   ### Model Definition
+   from jittor import nn
+   from jittor_geometric.nn import GCNConv
+
+   class GCN(nn.Module):
+      def __init__(self, dataset, dropout=0.8):
+         super(GCN, self).__init__()
+         self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256)
+         self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes)
+         self.dropout = dropout
+
+      def execute(self):
+         x, csc, csr = data.x, data.csc, data.csr
+         x = nn.relu(self.conv1(x, csc, csr))
+         x = nn.dropout(x, self.dropout, is_train=self.training)
+         x = self.conv2(x, csc, csr)
+         return nn.log_softmax(x, dim=1)
+
+   ### Training
+   model = GCN(dataset)
+   optimizer = nn.Adam(params=model.parameters(), lr=0.001, weight_decay=5e-4) 
+   for epoch in range(200):
+      model.train()
+      pred = model()[data.train_mask]
+      label = data.y[data.train_mask]
+      loss = nn.nll_loss(pred, label)
+      optimizer.step(loss)
 
 .. toctree::
    :maxdepth: 2
@@ -93,7 +126,6 @@ Community & Support
 - **GitHub**: `JittorGeometric Repository <https://github.com/Jittor/JittorGeometric>`_
 - **Issues**: Report bugs and request features
 - **Discussions**: Join our community discussions
-- **Citation**: How to cite JittorGeometric in your research
 
 Changelog
 ---------
@@ -101,9 +133,8 @@ Changelog
 **v2.0.0** brings major improvements:
 
 - 🆕 **New Models**: Added 15+ new GNN architectures
-- 🚀 **Performance**: 2-3x speedup over v1.0
-- 📚 **Documentation**: Comprehensive API documentation and tutorials
-- 🔧 **API Changes**: Simplified and more intuitive API design
+- 🚀 **Performance**: Speedup over v1.0 in dynamic graphs
+- 🔧 **NPU Implementation**: Allow JittorGeoemtric to run on NPU
 - 🌐 **Distributed**: Enhanced distributed training capabilities
 
 Indices and Tables
