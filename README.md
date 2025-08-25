@@ -36,7 +36,7 @@
 - **🔄 Distributed Training**: Multi-GPU and multi-node training support with MPI
 - **🌊 Dynamic Graph Processing**: Event-based dynamic graph support with parallel processing
 - **📦 Mini-batch Support**: Efficient mini-batch training for large-scale graphs
-- **🔧 ACL-GNN**: GNN for NPU
+- **🔧 Ascend-GNN**: GNN for NPU
 - **🎛️ Extended Model Categories**: Graph transformers, self-supervised learning, and recommendation systems
 
 ## Quick Tour
