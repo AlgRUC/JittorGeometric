@@ -266,12 +266,6 @@ python dist_gcn.py --num_parts 2 --dataset reddit
 For detailed distributed training setup, see [examples/README.md](./examples/README.md).
 
 ## 🧪 Testing
-
-Run the test suite:
-```bash
-python -m pytest jittor_geometric/tests/
-```
-
 Run a specific example:
 ```bash
 python examples/gcn_example.py
@@ -285,22 +279,9 @@ Comprehensive documentation is available at [https://algruc.github.io/JittorGeom
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-## 📝 Citation
-
-If you use JittorGeometric in your research, please cite:
-
-```bibtex
-@software{jittorgeometric2024,
-  title = {JittorGeometric: A Comprehensive Graph Machine Learning Library},
-  author = {JittorGeometric Team},
-  year = {2024},
-  url = {https://github.com/AlgRUC/JittorGeometric}
-}
-```
-
 ## 👥 Contributors
 
-This project is actively maintained by the **JittorGeometric Team** at Renmin University of China.
+This project is actively maintained by the **JittorGeometric Team** at Renmin University of China and Northeastern University‌.
 
 ### Core Team
 - Project Lead: [runlin_lei@ruc.edu.cn](mailto:runlin_lei@ruc.edu.cn)
