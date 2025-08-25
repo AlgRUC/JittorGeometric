@@ -275,10 +275,6 @@ python examples/gcn_example.py
 
 Comprehensive documentation is available at [https://algruc.github.io/JittorGeometric/index.html](https://algruc.github.io/JittorGeometric/index.html)
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
 ## 👥 Contributors
 
 This project is actively maintained by the **JittorGeometric Team** at Renmin University of China and Northeastern University‌.
