@@ -75,7 +75,7 @@ void SpmmcsrOp::jit_run() {
     const auto& xs = x->shape; // 密集矩阵维度
     const auto& vs = value->shape; 
     const auto& os = outputVar->shape;
-    ASSERT(xs==os)<<"matrix A and matrix C size not match";
+    // ASSERT(xs==os)<<"matrix A and matrix C size not match";
     ASSERT(A_col==xs[0])<<"matrix A and matrix B size not match";
     auto dtype_A = get_dtype(value->dtype());
     auto dtype_B = get_dtype(x->dtype());
