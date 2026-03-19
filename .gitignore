@@ -19,6 +19,8 @@ venv/
 !README.cn.md
 !CHANGELOG.md
 python/jittor.egg-info
+jittor_geometric.egg-info/
+docs/build/
 dist/
 !doc/source/*
 core
