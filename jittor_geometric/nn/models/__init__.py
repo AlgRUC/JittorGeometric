@@ -10,8 +10,6 @@ from .unimol import UniMolModel
 from .dimenet import DimeNet
 from .graphormer import Graphormer
 from .transformerM import TransformerM
-from .graphormer import Graphormer
-from .transformerM import TransformerM
 from .craft import CRAFT
 from .polyformer import PolyFormerModel, get_data_load
 from .sgformer import SGFormerModel

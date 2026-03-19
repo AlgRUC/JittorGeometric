@@ -9,3 +9,5 @@ Neural network modules for JittorGeometric.
    nn/aggr
    nn/conv
    nn/dense
+   nn/models
+   nn/pool
