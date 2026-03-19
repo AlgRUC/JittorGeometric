@@ -160,7 +160,6 @@ class CRAFT(jt.nn.Module):
         src_neighb_seq = src_neighb_seq - self.dst_min_idx + 1
         test_dst = test_dst - self.dst_min_idx + 1
         src_neighb_seq[src_neighb_seq < 0] = 0
-        src_neighb_interact_times = src_neighb_interact_times
         src_neighb_seq_len = src_neighb_seq_len
         logits = self.forward(src_neighb_seq, src_neighb_seq_len, src_neighb_interact_times, cur_pred_times, test_dst=test_dst, dst_last_update_times=dst_last_update_times)
         if self.loss_type == 'BPR':

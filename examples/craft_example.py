@@ -14,7 +14,7 @@ from jittor_geometric.nn.models.craft import CRAFT
 from jittor_geometric.datasets import JODIEDataset
 from jittor_geometric.dataloader.temporal_dataloader import TemporalDataLoader, get_neighbor_sampler
 from jittor_geometric.evaluate.evaluators import MRR_Evaluator
-from jittor_geometric.nn.models.craft import BPRLoss
+from jittor_geometric.utils.bprloss import BPRLoss
 
     
 # Test function for CRAFT model
@@ -110,13 +110,12 @@ dropout = 0.1
 save_model_path = osp.join(osp.dirname(osp.realpath(__file__)), 'data', 'saved_models')
 if not osp.exists(save_model_path):
     os.makedirs(save_model_path)
-criterion = BPRLoss()
 dataset_name = 'wikipedia'
 path = osp.join(osp.dirname(osp.realpath(__file__)), 'data')
 if not osp.exists(path):
     os.makedirs(path)
 # Load dataset based on type
-if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M' 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
+if dataset_name in ['GoogleLocal', 'Yelp', 'Taobao', 'ML-20M', 'Flickr', 'YouTube', 'WikiLink']: # for TGBSeqDataset
     dataset = TGBSeqDataset(root=path, name=dataset_name)
     train_idx=np.nonzero(dataset.train_mask)[0]
     val_idx=np.nonzero(dataset.val_mask)[0]

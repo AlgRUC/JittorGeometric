@@ -158,7 +158,7 @@ JittorGeometric 2.0 includes implementations of 40+ state-of-the-art GNN models:
 |------------------------------------------|------|-------|-------------|
 | [SASREC](./examples/sasrec_example.py)   | 2018 | ICDM  | Self-attentive sequential recommendation |
 | [SGNNHN](./examples/sgnnhn_example.py)   | 2020 | CIKM  | Set-based GNN for heterogeneous networks |
-| [CRAFT](./examples/craft_example.py)     | 2025 | ArXiv | Cross-attention recommendation |
+| [CRAFT](./examples/craft_example.py)     | 2025 | NeurIPS | Cross-attention recommendation |
 
 ### Graph Embedding
 
