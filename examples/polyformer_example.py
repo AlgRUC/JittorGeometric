@@ -95,10 +95,8 @@ def test():
     logits, accs = model(), []
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         if args.dataset.lower() in ["minesweeper", "tolokers", "questions"]:
-            pred = (logits[mask].squeeze(-1) > 0)
             acc = roc_auc_score(y_true=data.y[mask].cpu().numpy(), y_score=logits[mask].squeeze(-1).cpu().numpy())
-            loss = nn.binary_cross_entropy_with_logits(logits[mask].squeeze(-1), data.y[mask])
-            acc = accs.append(acc)
+            accs.append(acc)
         else:
             y_ = data.y[mask] 
             logits_=logits[mask]
