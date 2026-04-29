@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>JittorGeometric Web Frontend</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="number"], button {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status.running {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        .status.completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .chart-container {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="/assets/JittorGeometric_logo.png" alt="JittorGeometric Logo">
+            <h1>JittorGeometric Web Frontend</h1>
+        </div>
+        
+        <div class="form-group">
+            <label for="model_name">Model:</label>
+            <select id="model_name" onchange="updateDatasets()">
+                <option value="GCN">GCN</option>
+                <option value="GAT">GAT</option>
+                <option value="GraphSAGE">GraphSAGE</option>
+                <option value="APPNP">APPNP</option>
+                <option value="BernNet">BernNet</option>
+                <option value="ChebNet">ChebNet</option>
+                <option value="ChebNet2">ChebNet2</option>
+                <option value="ClusterGCN">ClusterGCN</option>
+                <option value="Craft">Craft</option>
+                <option value="DGI">DGI</option>
+                <option value="DimeNet">DimeNet</option>
+                <option value="DyGFormer">DyGFormer</option>
+                <option value="DyRep">DyRep</option>
+                <option value="DyRep_v2">DyRep_v2</option>
+                <option value="EGNN">EGNN</option>
+                <option value="EvenNet">EvenNet</option>
+                <option value="GCN2">GCN2</option>
+                <option value="GCN_ACL">GCN_ACL</option>
+                <option value="GPRGNN">GPRGNN</option>
+                <option value="GRACE">GRACE</option>
+                <option value="GraphMixer">GraphMixer</option>
+                <option value="Graphormer">Graphormer</option>
+                <option value="Jodie">Jodie</option>
+                <option value="LinkPred">LinkPred</option>
+                <option value="MVGRL">MVGRL</option>
+                <option value="NAGPhormer">NAGPhormer</option>
+                <option value="OptBasisGNN">OptBasisGNN</option>
+                <option value="PolyFormer">PolyFormer</option>
+                <option value="PolyGCL">PolyGCL</option>
+                <option value="RecSys">RecSys</option>
+                <option value="SASRec">SASRec</option>
+                <option value="SchNet">SchNet</option>
+                <option value="SGC">SGC</option>
+                <option value="SGFormer">SGFormer</option>
+                <option value="SGNHN">SGNHN</option>
+                <option value="SphereNet">SphereNet</option>
+                <option value="TGN">TGN</option>
+                <option value="TGN_v2">TGN_v2</option>
+                <option value="Transformer-M">Transformer-M</option>
+                <option value="UniMol">UniMol</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="dataset_name">Dataset:</label>
+            <select id="dataset_name">
+                <option value="Cora">Cora</option>
+                <option value="Citeseer">Citeseer</option>
+                <option value="Pubmed">Pubmed</option>
+                <option value="Reddit">Reddit</option>
+                <option value="Amazon">Amazon</option>
+                <option value="QM9">QM9</option>
+                <option value="MD17">MD17</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="hidden_dim">Hidden Dimension:</label>
+            <input type="number" id="hidden_dim" value="16" min="1" max="256">
+        </div>
+        
+        <div class="form-group">
+            <label for="num_layers">Number of Layers:</label>
+            <input type="number" id="num_layers" value="2" min="1" max="10">
+        </div>
+        
+        <div class="form-group" id="heads_group" style="display: none;">
+            <label for="heads">Heads (for GAT only):</label>
+            <input type="number" id="heads" value="8" min="1" max="16">
+        </div>
+        
+        <div class="form-group">
+            <label for="dropout">Dropout:</label>
+            <input type="number" id="dropout" value="0.5" min="0.0" max="1.0" step="0.1">
+        </div>
+        
+        <div class="form-group">
+            <label for="epochs">Epochs:</label>
+            <input type="number" id="epochs" value="200" min="1" max="1000">
+        </div>
+        
+        <button id="train_btn">Start Training</button>
+        
+        <div id="status" class="status"></div>
+        
+        <div id="progress" class="progress">
+            <div id="progress_bar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        
+        <div class="charts">
+            <div class="chart-container">
+                <canvas id="lossChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="accChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const modelDatasets = {
+            'GCN': ['Cora', 'Citeseer', 'Pubmed', 'Reddit', 'Amazon', 'Computers', 'Photo', 'Chameleon', 'Squirrel', 'ogbn-arxiv', 'ogbn-products'],
+            'GAT': ['Cora', 'Citeseer', 'Pubmed'],
+            'GraphSAGE': ['Cora', 'Citeseer', 'Pubmed', 'Reddit', 'Amazon', 'Computers', 'Photo', 'Chameleon', 'Squirrel', 'ogbn-arxiv', 'ogbn-products'],
+            'ChebNet': ['Cora', 'Citeseer', 'Pubmed'],
+            'ChebNet2': ['Cora', 'Citeseer', 'Pubmed'],
+            'GCN2': ['Cora', 'Citeseer', 'Pubmed'],
+            'GPRGNN': ['Cora', 'Citeseer', 'Pubmed'],
+            'SGC': ['Cora', 'Citeseer', 'Pubmed'],
+            'BernNet': ['Cora', 'Citeseer', 'Pubmed'],
+            'EvenNet': ['Cora', 'Citeseer', 'Pubmed'],
+            'APPNP': ['Cora', 'Citeseer', 'Pubmed', 'Reddit', 'Amazon', 'Computers', 'Photo', 'Chameleon', 'Squirrel', 'ogbn-arxiv', 'ogbn-products'],
+            'ClusterGCN': ['Cora', 'Citeseer', 'Pubmed', 'Reddit'],
+            'DGI': ['Cora', 'Citeseer', 'Pubmed'],
+            'GRACE': ['Cora', 'Citeseer', 'Pubmed'],
+            'MVGRL': ['Cora', 'Citeseer', 'Pubmed'],
+            'RecSys': ['ml-100k', 'ml-1m', 'yelp2018'],
+            'SASRec': ['Wikipedia', 'Reddit', 'mooc', 'lastfm'],
+            'SchNet': ['QM9'],
+            'SphereNet': ['QM9'],
+            'DimeNet': ['QM9'],
+            'UniMol': ['bace'],
+            'Transformer-M': ['QM9'],
+            'OptBasisGNN': ['QM9'],
+            'EGNN': ['QM9'],
+            'SGFormer': ['Cora', 'Citeseer', 'Pubmed'],
+            'Craft': ['Cora', 'Citeseer', 'Pubmed'],
+            'Graphormer': ['Cora', 'Citeseer', 'Pubmed'],
+            'GraphMixer': ['Cora', 'Citeseer', 'Pubmed'],
+            'PolyFormer': ['Cora', 'Citeseer', 'Pubmed'],
+            'PolyGCL': ['Cora', 'Citeseer', 'Pubmed'],
+            'SGNHN': ['Cora', 'Citeseer', 'Pubmed'],
+            'DyGFormer': ['Cora', 'Citeseer', 'Pubmed'],
+            'DyRep': ['Cora', 'Citeseer', 'Pubmed'],
+            'DyRep_v2': ['Cora', 'Citeseer', 'Pubmed'],
+            'Jodie': ['Cora', 'Citeseer', 'Pubmed'],
+            'LinkPred': ['Cora', 'Citeseer', 'Pubmed'],
+            'NAGPhormer': ['Cora', 'Citeseer', 'Pubmed'],
+            'TGN': ['Cora', 'Citeseer', 'Pubmed'],
+            'TGN_v2': ['Cora', 'Citeseer', 'Pubmed'],
+            'GCN_ACL': ['Cora', 'Citeseer', 'Pubmed'],
+        };
+        
+        function updateDatasets() {
+            const modelSelect = document.getElementById('model_name');
+            const datasetSelect = document.getElementById('dataset_name');
+            const selectedModel = modelSelect.value;
+            
+            const datasets = modelDatasets[selectedModel] || ['Cora', 'Citeseer', 'Pubmed'];
+            datasetSelect.innerHTML = datasets.map(ds => `<option value="${ds}">${ds}</option>`).join('');
+            
+            const headsGroup = document.getElementById('heads_group');
+            if (selectedModel === 'GAT') {
+                headsGroup.style.display = 'block';
+            } else {
+                headsGroup.style.display = 'none';
+            }
+        }
+        
+        const trainBtn = document.getElementById('train_btn');
+        const statusDiv = document.getElementById('status');
+        const progressBar = document.getElementById('progress_bar');
+        
+        const lossCtx = document.getElementById('lossChart').getContext('2d');
+        const accCtx = document.getElementById('accChart').getContext('2d');
+        
+        const lossChart = new Chart(lossCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{ label: 'Loss', data: [], borderColor: '#ff6384', tension: 0.3 }]
+            },
+            options: { 
+                responsive: true, 
+                scales: { 
+                    y: { beginAtZero: true },
+                    x: { 
+                        beginAtZero: true, 
+                        max: 200,
+                        title: {
+                            display: true,
+                            text: 'Epoch',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        const accChart = new Chart(accCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{ label: 'Accuracy', data: [], borderColor: '#4bc0c0', tension: 0.3 }]
+            },
+            options: { 
+                responsive: true, 
+                scales: { 
+                    y: { beginAtZero: true, max: 1 },
+                    x: { 
+                        beginAtZero: true, 
+                        max: 200,
+                        title: {
+                            display: true,
+                            text: 'Epoch',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        function updateChartsFromStatus(status) {
+            console.log('[DEBUG] updateChartsFromStatus called with status:', status);
+            if (status.history && status.history.loss && status.history.acc) {
+                console.log(`[DEBUG] Updating charts: loss history length=${status.history.loss.length}, acc history length=${status.history.acc.length}`);
+                
+                lossChart.data.labels = status.history.loss.map((_, i) => i + 1);
+                lossChart.data.datasets[0].data = [...status.history.loss];
+                accChart.data.labels = status.history.acc.map((_, i) => i + 1);
+                accChart.data.datasets[0].data = [...status.history.acc];
+                
+                lossChart.update('none');
+                accChart.update('none');
+                
+                console.log('[DEBUG] Charts updated successfully');
+            } else {
+                console.log('[DEBUG] No history data to update charts');
+            }
+        }
+
+        window.onload = async function() {
+            updateDatasets();
+            try {
+                const statusResponse = await fetch('/api/status?' + new Date().getTime(), { cache: 'no-store' });
+                const status = await statusResponse.json();
+                console.log('[DEBUG] Initial load status:', status);
+                
+                if (status.history && (status.history.loss.length > 0 || status.history.acc.length > 0)) {
+                    updateChartsFromStatus(status);
+                    if (status.running) {
+                        statusDiv.innerHTML = `Training running... Epoch ${status.epoch}/${status.total_epochs}, Loss: ${status.loss.toFixed(4)}, Acc: ${status.acc.toFixed(4)}`;
+                        statusDiv.className = 'status running';
+                        const progress = (status.epoch / status.total_epochs) * 100;
+                        progressBar.style.width = `${progress}%`;
+                    } else if (status.finished || !status.running) {
+                        statusDiv.innerHTML = `Previous training completed. Test accuracy: ${status.acc.toFixed(4)}`;
+                        statusDiv.className = 'status completed';
+                        progressBar.style.width = '100%';
+                    }
+                }
+            } catch (e) {
+                console.log('No previous training data or error:', e);
+            }
+        };
+        
+        trainBtn.addEventListener('click', async () => {
+            trainBtn.disabled = true;
+            statusDiv.innerHTML = 'Starting training...';
+            statusDiv.className = 'status running';
+            
+            lossChart.data.labels = [];
+            lossChart.data.datasets[0].data = [];
+            accChart.data.labels = [];
+            accChart.data.datasets[0].data = [];
+            lossChart.update();
+            accChart.update();
+            
+            const data = {
+                model_name: document.getElementById('model_name').value,
+                dataset_name: document.getElementById('dataset_name').value,
+                hidden_dim: parseInt(document.getElementById('hidden_dim').value),
+                num_layers: parseInt(document.getElementById('num_layers').value),
+                heads: parseInt(document.getElementById('heads').value),
+                dropout: parseFloat(document.getElementById('dropout').value),
+                epochs: parseInt(document.getElementById('epochs').value)
+            };
+            
+            try {
+                const response = await fetch('/api/train', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Training failed to start');
+                }
+                
+                let checkCount = 0;
+                const maxChecksAfterFinish = 5;
+                const interval = setInterval(async () => {
+                    const statusResponse = await fetch('/api/status?' + new Date().getTime(), { cache: 'no-store' });
+                    const status = await statusResponse.json();
+                    console.log('[DEBUG] Poll status:', status);
+                    
+                    updateChartsFromStatus(status);
+                    
+                    if (status.running) {
+                        statusDiv.innerHTML = `Training running... Epoch ${status.epoch}/${status.total_epochs}, Loss: ${status.loss.toFixed(4)}, Acc: ${status.acc.toFixed(4)}`;
+                        const progress = (status.epoch / status.total_epochs) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        checkCount = 0;
+                    } else {
+                        const isFinished = status.finished !== undefined ? status.finished : (status.epoch >= status.total_epochs);
+                        
+                        checkCount++;
+                        
+                        if (checkCount > maxChecksAfterFinish) {
+                            clearInterval(interval);
+                            trainBtn.disabled = false;
+                            
+                            if (status.error) {
+                                statusDiv.innerHTML = `Error: ${status.error}`;
+                                statusDiv.className = 'status error';
+                            } else {
+                                statusDiv.innerHTML = `Training completed. Test accuracy: ${status.acc.toFixed(4)}`;
+                                statusDiv.className = 'status completed';
+                                progressBar.style.width = '100%';
+                            }
+                        } else {
+                            console.log(`[DEBUG] Training finished, checking ${checkCount}/${maxChecksAfterFinish} more times...`);
+                        }
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                trainBtn.disabled = false;
+                statusDiv.innerHTML = `Error: ${error.message}`;
+                statusDiv.className = 'status error';
+            }
+        });
+    </script>
+</body>
+</html>
