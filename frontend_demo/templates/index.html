@@ -122,43 +122,7 @@
                 <option value="GCN">GCN</option>
                 <option value="GAT">GAT</option>
                 <option value="GraphSAGE">GraphSAGE</option>
-                <option value="APPNP">APPNP</option>
-                <option value="BernNet">BernNet</option>
-                <option value="ChebNet">ChebNet</option>
                 <option value="ChebNet2">ChebNet2</option>
-                <option value="ClusterGCN">ClusterGCN</option>
-                <option value="Craft">Craft</option>
-                <option value="DGI">DGI</option>
-                <option value="DimeNet">DimeNet</option>
-                <option value="DyGFormer">DyGFormer</option>
-                <option value="DyRep">DyRep</option>
-                <option value="DyRep_v2">DyRep_v2</option>
-                <option value="EGNN">EGNN</option>
-                <option value="EvenNet">EvenNet</option>
-                <option value="GCN2">GCN2</option>
-                <option value="GCN_ACL">GCN_ACL</option>
-                <option value="GPRGNN">GPRGNN</option>
-                <option value="GRACE">GRACE</option>
-                <option value="GraphMixer">GraphMixer</option>
-                <option value="Graphormer">Graphormer</option>
-                <option value="Jodie">Jodie</option>
-                <option value="LinkPred">LinkPred</option>
-                <option value="MVGRL">MVGRL</option>
-                <option value="NAGPhormer">NAGPhormer</option>
-                <option value="OptBasisGNN">OptBasisGNN</option>
-                <option value="PolyFormer">PolyFormer</option>
-                <option value="PolyGCL">PolyGCL</option>
-                <option value="RecSys">RecSys</option>
-                <option value="SASRec">SASRec</option>
-                <option value="SchNet">SchNet</option>
-                <option value="SGC">SGC</option>
-                <option value="SGFormer">SGFormer</option>
-                <option value="SGNHN">SGNHN</option>
-                <option value="SphereNet">SphereNet</option>
-                <option value="TGN">TGN</option>
-                <option value="TGN_v2">TGN_v2</option>
-                <option value="Transformer-M">Transformer-M</option>
-                <option value="UniMol">UniMol</option>
             </select>
         </div>
         
@@ -168,10 +132,6 @@
                 <option value="Cora">Cora</option>
                 <option value="Citeseer">Citeseer</option>
                 <option value="Pubmed">Pubmed</option>
-                <option value="Reddit">Reddit</option>
-                <option value="Amazon">Amazon</option>
-                <option value="QM9">QM9</option>
-                <option value="MD17">MD17</option>
             </select>
         </div>
         
@@ -220,46 +180,10 @@
     
     <script>
         const modelDatasets = {
-            'GCN': ['Cora', 'Citeseer', 'Pubmed', 'Reddit', 'Amazon', 'Computers', 'Photo', 'Chameleon', 'Squirrel', 'ogbn-arxiv', 'ogbn-products'],
+            'GCN': ['Cora', 'Citeseer', 'Pubmed'],
             'GAT': ['Cora', 'Citeseer', 'Pubmed'],
-            'GraphSAGE': ['Cora', 'Citeseer', 'Pubmed', 'Reddit', 'Amazon', 'Computers', 'Photo', 'Chameleon', 'Squirrel', 'ogbn-arxiv', 'ogbn-products'],
-            'ChebNet': ['Cora', 'Citeseer', 'Pubmed'],
+            'GraphSAGE': ['Cora', 'Citeseer', 'Pubmed'],
             'ChebNet2': ['Cora', 'Citeseer', 'Pubmed'],
-            'GCN2': ['Cora', 'Citeseer', 'Pubmed'],
-            'GPRGNN': ['Cora', 'Citeseer', 'Pubmed'],
-            'SGC': ['Cora', 'Citeseer', 'Pubmed'],
-            'BernNet': ['Cora', 'Citeseer', 'Pubmed'],
-            'EvenNet': ['Cora', 'Citeseer', 'Pubmed'],
-            'APPNP': ['Cora', 'Citeseer', 'Pubmed', 'Reddit', 'Amazon', 'Computers', 'Photo', 'Chameleon', 'Squirrel', 'ogbn-arxiv', 'ogbn-products'],
-            'ClusterGCN': ['Cora', 'Citeseer', 'Pubmed', 'Reddit'],
-            'DGI': ['Cora', 'Citeseer', 'Pubmed'],
-            'GRACE': ['Cora', 'Citeseer', 'Pubmed'],
-            'MVGRL': ['Cora', 'Citeseer', 'Pubmed'],
-            'RecSys': ['ml-100k', 'ml-1m', 'yelp2018'],
-            'SASRec': ['Wikipedia', 'Reddit', 'mooc', 'lastfm'],
-            'SchNet': ['QM9'],
-            'SphereNet': ['QM9'],
-            'DimeNet': ['QM9'],
-            'UniMol': ['bace'],
-            'Transformer-M': ['QM9'],
-            'OptBasisGNN': ['QM9'],
-            'EGNN': ['QM9'],
-            'SGFormer': ['Cora', 'Citeseer', 'Pubmed'],
-            'Craft': ['Cora', 'Citeseer', 'Pubmed'],
-            'Graphormer': ['Cora', 'Citeseer', 'Pubmed'],
-            'GraphMixer': ['Cora', 'Citeseer', 'Pubmed'],
-            'PolyFormer': ['Cora', 'Citeseer', 'Pubmed'],
-            'PolyGCL': ['Cora', 'Citeseer', 'Pubmed'],
-            'SGNHN': ['Cora', 'Citeseer', 'Pubmed'],
-            'DyGFormer': ['Cora', 'Citeseer', 'Pubmed'],
-            'DyRep': ['Cora', 'Citeseer', 'Pubmed'],
-            'DyRep_v2': ['Cora', 'Citeseer', 'Pubmed'],
-            'Jodie': ['Cora', 'Citeseer', 'Pubmed'],
-            'LinkPred': ['Cora', 'Citeseer', 'Pubmed'],
-            'NAGPhormer': ['Cora', 'Citeseer', 'Pubmed'],
-            'TGN': ['Cora', 'Citeseer', 'Pubmed'],
-            'TGN_v2': ['Cora', 'Citeseer', 'Pubmed'],
-            'GCN_ACL': ['Cora', 'Citeseer', 'Pubmed'],
         };
         
         function updateDatasets() {

@@ -5,16 +5,10 @@ A web-based frontend for visualizing training flows in JittorGeometric.
 ## Features
 
 ### Models Supported
-- **Graph Neural Networks**: GCN, GAT, GraphSAGE, ChebNet, ChebNet2, GCN2, SGC
-- **More Models**: Can be extended following examples in examples directory
+- **Graph Neural Networks**: GCN, GAT, GraphSAGE, ChebNet2
 
 ### Datasets Supported
 - Cora, Citeseer, Pubmed (Planetoid datasets)
-- Reddit
-- Amazon (Computers, Photo)
-- Wikipedia, LastFM
-- Chameleon, Squirrel
-- Ogb-Arxiv, Ogb-Products
 
 ### Training Visualization
 - Real-time progress bar

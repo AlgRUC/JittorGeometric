@@ -53,10 +53,14 @@ def main():
     try:
         print(f"[DEBUG] Starting real training for {args.model} on {args.dataset}")
 
+        supported_models = ['GCN', 'GAT', 'GraphSAGE', 'ChebNet2']
+        if args.model not in supported_models:
+            raise ValueError(f"Model {args.model} not supported. Supported models: {supported_models}")
+
         import jittor as jt
         from jittor import nn
         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from jittor_geometric.datasets import Planetoid, Reddit, Amazon
+        from jittor_geometric.datasets import Planetoid
         from jittor_geometric.nn import GCNConv, GATConv, SAGEConv, ChebNetII
         from jittor_geometric.ops import cootocsr, cootocsc
         from jittor_geometric.nn.conv.gcn_conv import gcn_norm
@@ -77,12 +81,8 @@ def main():
         
         if dataset_name_lower in ['cora', 'citeseer', 'pubmed']:
             dataset = Planetoid(root=data_root, name=args.dataset, transform=T.NormalizeFeatures())
-        elif dataset_name_lower in ['reddit']:
-            dataset = Reddit(root=os.path.join(data_root, 'Reddit'))
-        elif dataset_name_lower in ['computers', 'photo']:
-            dataset = Amazon(root=os.path.join(data_root, 'Amazon'), name=dataset_name_lower)
         else:
-            dataset = Planetoid(root=data_root, name='Cora', transform=T.NormalizeFeatures())
+            raise ValueError(f"Dataset {args.dataset} not supported. Supported datasets: Cora, Citeseer, Pubmed")
 
         data = dataset[0]
         print(f"[DEBUG] Dataset loaded: num_nodes={data.num_nodes}, num_features={dataset.num_features}, num_classes={dataset.num_classes}")
@@ -323,51 +323,7 @@ def main():
                 return accs
 
         else:
-            class Net(nn.Module):
-                def __init__(self, dataset, dropout=0.8):
-                    super(Net, self).__init__()
-                    self.conv1 = GCNConv(in_channels=dataset.num_features, out_channels=256)
-                    self.conv2 = GCNConv(in_channels=256, out_channels=dataset.num_classes)
-                    self.dropout = dropout
-
-                def execute(self):
-                    x, csc, csr = data.x, data.csc, data.csr
-                    x = nn.relu(self.conv1(x, csc, csr))
-                    x = nn.dropout(x, self.dropout, is_train=self.training)
-                    x = self.conv2(x, csc, csr)
-                    return x
-
-            model = Net(dataset)
-            optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=0)
-
-            def train():
-                model.train()
-                train_mask = data.train_mask
-                if len(train_mask.shape) > 1:
-                    train_mask = train_mask[0]
-                
-                pred = model()[train_mask]
-                label = data.y[train_mask]
-                loss = nn.cross_entropy_loss(pred, label)
-                optimizer.step(loss)
-                return loss
-
-            def test():
-                model.eval()
-                logits = model()
-                accs = []
-                
-                masks = [data.train_mask, data.val_mask, data.test_mask]
-                for mask in masks:            
-                    current_mask = mask[0] if len(mask.shape) > 1 else mask
-                    y_true = data.y[current_mask]
-                    logits_masked = logits[current_mask]
-                    
-                    pred, _ = jt.argmax(logits_masked, dim=1)
-                    acc = pred.equal(y_true).sum().item() / current_mask.sum().item()
-                    accs.append(acc)
-                
-                return accs
+            raise ValueError(f"Model {args.model} not supported")
 
         print(f"[DEBUG] Model created")
 
