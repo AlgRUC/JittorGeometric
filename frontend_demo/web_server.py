@@ -18,6 +18,11 @@ MODEL_DATASETS = {
     'GAT': ['Cora', 'Citeseer', 'Pubmed'],
     'GraphSAGE': ['Cora', 'Citeseer', 'Pubmed'],
     'ChebNet2': ['Cora', 'Citeseer', 'Pubmed'],
+    'SGC': ['Cora', 'Citeseer', 'Pubmed'],
+    'APPNP': ['Cora', 'Citeseer', 'Pubmed'],
+    'GPRGNN': ['Cora', 'Citeseer', 'Pubmed'],
+    'EvenNet': ['Cora', 'Citeseer', 'Pubmed'],
+    'BernNet': ['Cora', 'Citeseer', 'Pubmed'],
 }
 
 def init_status_file():

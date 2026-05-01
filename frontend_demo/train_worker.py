@@ -53,15 +53,16 @@ def main():
     try:
         print(f"[DEBUG] Starting real training for {args.model} on {args.dataset}")
 
-        supported_models = ['GCN', 'GAT', 'GraphSAGE', 'ChebNet2']
+        supported_models = ['GCN', 'GAT', 'GraphSAGE', 'ChebNet2', 'SGC', 'APPNP', 'GPRGNN', 'EvenNet', 'BernNet']
         if args.model not in supported_models:
             raise ValueError(f"Model {args.model} not supported. Supported models: {supported_models}")
 
         import jittor as jt
         from jittor import nn
+        from math import log
         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from jittor_geometric.datasets import Planetoid
-        from jittor_geometric.nn import GCNConv, GATConv, SAGEConv, ChebNetII
+        from jittor_geometric.nn import GCNConv, GATConv, SAGEConv, ChebNetII, SGConv, APPNP, GPRGNN, EvenNet, BernNet
         from jittor_geometric.ops import cootocsr, cootocsc
         from jittor_geometric.nn.conv.gcn_conv import gcn_norm
         from jittor_geometric.nn.conv.sage_conv import sage_norm
@@ -116,18 +117,39 @@ def main():
         if args.model == 'ChebNet2':
             edge_index, edge_weight = get_laplacian(edge_index, edge_weight, normalization='sym', dtype=data.x.dtype, num_nodes=v_num)
             edge_index, edge_weight = add_self_loops(edge_index, edge_weight, fill_value=-1.0, num_nodes=v_num)
+            with jt.no_grad():
+                data.csc = cootocsc(edge_index, edge_weight, v_num)
+                data.csr = cootocsr(edge_index, edge_weight, v_num)
         elif args.model == 'GraphSAGE':
             edge_index, edge_weight = sage_norm(
                 edge_index, edge_weight, v_num,
                 improved=False, add_self_loops=True)
+            with jt.no_grad():
+                data.csc = cootocsc(edge_index, edge_weight, v_num)
+                data.csr = cootocsr(edge_index, edge_weight, v_num)
+        elif args.model == 'BernNet':
+            # Compute Laplacian matrices for BernNet
+            edge_index1, edge_weight1 = get_laplacian(edge_index, edge_weight, normalization='sym', dtype=data.x.dtype, num_nodes=v_num)
+            edge_index2, edge_weight2 = add_self_loops(edge_index1, -edge_weight1, fill_value=2., num_nodes=v_num)
+            with jt.no_grad():
+                data.csc1 = cootocsc(edge_index1, edge_weight1, v_num)
+                data.csr1 = cootocsr(edge_index1, edge_weight1, v_num)
+                data.csc2 = cootocsc(edge_index2, edge_weight2, v_num)
+                data.csr2 = cootocsr(edge_index2, edge_weight2, v_num)
+        elif args.model == 'EvenNet':
+            edge_index, edge_weight = gcn_norm_func(
+                edge_index, edge_weight, v_num,
+                improved=False, add_self_loops=False)
+            with jt.no_grad():
+                data.csc = cootocsc(edge_index, edge_weight, v_num)
+                data.csr = cootocsr(edge_index, edge_weight, v_num)
         else:
             edge_index, edge_weight = gcn_norm_func(
                 edge_index, edge_weight, v_num,
                 improved=False, add_self_loops=True)
-
-        with jt.no_grad():
-            data.csc = cootocsc(edge_index, edge_weight, v_num)
-            data.csr = cootocsr(edge_index, edge_weight, v_num)
+            with jt.no_grad():
+                data.csc = cootocsc(edge_index, edge_weight, v_num)
+                data.csr = cootocsr(edge_index, edge_weight, v_num)
 
         print(f"[DEBUG] Data converted to sparse format")
 
@@ -320,6 +342,209 @@ def main():
                     acc = pred.equal(y_true).sum().item() / current_mask.sum().item()
                     accs.append(acc)
                 
+                return accs
+
+        elif args.model == 'SGC':
+            class Net(nn.Module):
+                def __init__(self, dataset, dropout=0.8):
+                    super(Net, self).__init__()
+                    self.conv1 = SGConv(in_channels=dataset.num_features, out_channels=64, K=2)
+                    self.conv2 = SGConv(in_channels=64, out_channels=dataset.num_classes, K=2)
+                    self.dropout = dropout
+
+                def execute(self):
+                    x, csc, csr = data.x, data.csc, data.csr
+                    x = nn.relu(self.conv1(x, csc, csr))
+                    x = nn.dropout(x, self.dropout, is_train=self.training)
+                    x = self.conv2(x, csc, csr)
+                    return nn.log_softmax(x, dim=1)
+
+            model = Net(dataset)
+            optimizer = nn.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
+
+            def train():
+                model.train()
+                pred = model()[data.train_mask]
+                label = data.y[data.train_mask]
+                loss = nn.nll_loss(pred, label)
+                optimizer.step(loss)
+                return loss
+
+            def test():
+                model.eval()
+                logits, accs = model(), []
+                for _, mask in data('train_mask', 'val_mask', 'test_mask'):
+                    y_ = data.y[mask]
+                    logits_ = logits[mask]
+                    pred, _ = jt.argmax(logits_, dim=1)
+                    acc = pred.equal(y_).sum().item() / mask.sum().item()
+                    accs.append(acc)
+                return accs
+
+        elif args.model == 'APPNP':
+            class Net(nn.Module):
+                def __init__(self, dataset, dropout=0.5):
+                    super(Net, self).__init__()
+                    hidden = 64
+                    self.lin1 = nn.Linear(dataset.num_features, hidden)
+                    self.lin2 = nn.Linear(hidden, dataset.num_classes)
+                    self.prop = APPNP(K=10, alpha=0.1)
+                    self.dropout = dropout
+
+                def execute(self):
+                    x, csc, csr = data.x, data.csc, data.csr
+                    x = nn.dropout(x, self.dropout, is_train=self.training)
+                    x = nn.relu(self.lin1(x))
+                    x = nn.dropout(x, self.dropout, is_train=self.training)
+                    x = self.lin2(x)
+                    x = self.prop(x, csc, csr)
+                    return nn.log_softmax(x, dim=1)
+
+            model = Net(dataset)
+            optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4)
+
+            def train():
+                model.train()
+                pred = model()[data.train_mask]
+                label = data.y[data.train_mask]
+                loss = nn.nll_loss(pred, label)
+                optimizer.step(loss)
+                return loss
+
+            def test():
+                model.eval()
+                logits, accs = model(), []
+                for _, mask in data('train_mask', 'val_mask', 'test_mask'):
+                    y_ = data.y[mask] 
+                    logits_ = logits[mask]
+                    pred, _ = jt.argmax(logits_, dim=1)
+                    acc = pred.equal(y_).sum().item() / mask.sum().item()
+                    accs.append(acc)
+                return accs
+
+        elif args.model == 'GPRGNN':
+            class Net(nn.Module):
+                def __init__(self, dataset, dropout=0.5):
+                    super(Net, self).__init__()
+                    hidden = 64
+                    self.lin1 = nn.Linear(dataset.num_features, hidden)
+                    self.lin2 = nn.Linear(hidden, dataset.num_classes)
+                    self.prop = GPRGNN(K=10, alpha=0.2, Init="PPR")
+                    self.dropout = dropout
+
+                def execute(self):
+                    x, csc, csr = data.x, data.csc, data.csr
+                    x = nn.dropout(x, self.dropout)
+                    x = nn.relu(self.lin1(x))
+                    x = nn.dropout(x, self.dropout)
+                    x = self.lin2(x)
+                    x = self.prop(x, csc, csr)
+                    return nn.log_softmax(x, dim=1)
+
+            model = Net(dataset)
+            optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4)
+
+            def train():
+                model.train()
+                pred = model()[data.train_mask]
+                label = data.y[data.train_mask]
+                loss = nn.nll_loss(pred, label)
+                optimizer.step(loss)
+                return loss
+
+            def test():
+                model.eval()
+                logits, accs = model(), []
+                for _, mask in data('train_mask', 'val_mask', 'test_mask'):
+                    y_ = data.y[mask] 
+                    logits_ = logits[mask]
+                    pred, _ = jt.argmax(logits_, dim=1)
+                    acc = pred.equal(y_).sum().item() / mask.sum().item()
+                    accs.append(acc)
+                return accs
+
+        elif args.model == 'EvenNet':
+            class Net(nn.Module):
+                def __init__(self, dataset, dropout=0.5):
+                    super(Net, self).__init__()
+                    hidden = 64
+                    self.lin1 = nn.Linear(dataset.num_features, hidden)
+                    self.lin2 = nn.Linear(hidden, dataset.num_classes)
+                    self.prop = EvenNet(K=10, alpha=0.2)
+                    self.dropout = dropout
+
+                def execute(self):
+                    x, csc, csr = data.x, data.csc, data.csr
+                    x = nn.dropout(x, self.dropout)
+                    x = nn.relu(self.lin1(x))
+                    x = nn.dropout(x, self.dropout)
+                    x = self.lin2(x)
+                    x = self.prop(x, csc, csr)
+                    return nn.log_softmax(x, dim=1)
+
+            model = Net(dataset)
+            optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4)
+
+            def train():
+                model.train()
+                pred = model()[data.train_mask]
+                label = data.y[data.train_mask]
+                loss = nn.nll_loss(pred, label)
+                optimizer.step(loss)
+                return loss
+
+            def test():
+                model.eval()
+                logits, accs = model(), []
+                for _, mask in data('train_mask', 'val_mask', 'test_mask'):
+                    y_ = data.y[mask] 
+                    logits_ = logits[mask]
+                    pred, _ = jt.argmax(logits_, dim=1)
+                    acc = pred.equal(y_).sum().item() / mask.sum().item()
+                    accs.append(acc)
+                return accs
+
+        elif args.model == 'BernNet':
+            class Net(nn.Module):
+                def __init__(self, dataset, dropout=0.5):
+                    super(Net, self).__init__()
+                    hidden = 64
+                    self.lin1 = nn.Linear(dataset.num_features, hidden)
+                    self.lin2 = nn.Linear(hidden, dataset.num_classes)
+                    self.prop = BernNet(K=5)
+                    self.dropout = dropout
+
+                def execute(self):
+                    x = data.x
+                    csc1, csr1 = data.csc1, data.csr1
+                    csc2, csr2 = data.csc2, data.csr2
+                    x = nn.dropout(x, self.dropout, is_train=self.training)
+                    x = nn.relu(self.lin1(x))
+                    x = nn.dropout(x, self.dropout, is_train=self.training)
+                    x = self.lin2(x)
+                    x = self.prop(x, csc1, csr1, csc2, csr2)
+                    return nn.log_softmax(x, dim=1)
+
+            model = Net(dataset)
+            optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4)
+
+            def train():
+                model.train()
+                pred = model()[data.train_mask]
+                label = data.y[data.train_mask]
+                loss = nn.nll_loss(pred, label)
+                optimizer.step(loss)
+                return loss
+
+            def test():
+                model.eval()
+                logits, accs = model(), []
+                for _, mask in data('train_mask', 'val_mask', 'test_mask'):
+                    y_ = data.y[mask] 
+                    logits_ = logits[mask]
+                    pred, _ = jt.argmax(logits_, dim=1)
+                    acc = pred.equal(y_).sum().item() / mask.sum().item()
+                    accs.append(acc)
                 return accs
 
         else:
