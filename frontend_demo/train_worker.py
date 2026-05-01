@@ -53,7 +53,7 @@ def main():
     try:
         print(f"[DEBUG] Starting real training for {args.model} on {args.dataset}")
 
-        supported_models = ['GCN', 'GAT', 'GraphSAGE', 'ChebNet2', 'SGC', 'APPNP', 'GPRGNN', 'EvenNet', 'BernNet']
+        supported_models = ['GCN', 'GAT', 'GraphSAGE', 'ChebNet2', 'SGC', 'APPNP', 'GPRGNN', 'BernNet']
         if args.model not in supported_models:
             raise ValueError(f"Model {args.model} not supported. Supported models: {supported_models}")
 
@@ -62,7 +62,7 @@ def main():
         from math import log
         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from jittor_geometric.datasets import Planetoid
-        from jittor_geometric.nn import GCNConv, GATConv, SAGEConv, ChebNetII, SGConv, APPNP, GPRGNN, EvenNet, BernNet
+        from jittor_geometric.nn import GCNConv, GATConv, SAGEConv, ChebNetII, SGConv, APPNP, GPRGNN, BernNet
         from jittor_geometric.ops import cootocsr, cootocsc
         from jittor_geometric.nn.conv.gcn_conv import gcn_norm
         from jittor_geometric.nn.conv.sage_conv import sage_norm
@@ -136,13 +136,6 @@ def main():
                 data.csr1 = cootocsr(edge_index1, edge_weight1, v_num)
                 data.csc2 = cootocsc(edge_index2, edge_weight2, v_num)
                 data.csr2 = cootocsr(edge_index2, edge_weight2, v_num)
-        elif args.model == 'EvenNet':
-            edge_index, edge_weight = gcn_norm_func(
-                edge_index, edge_weight, v_num,
-                improved=False, add_self_loops=False)
-            with jt.no_grad():
-                data.csc = cootocsc(edge_index, edge_weight, v_num)
-                data.csr = cootocsr(edge_index, edge_weight, v_num)
         else:
             edge_index, edge_weight = gcn_norm_func(
                 edge_index, edge_weight, v_num,
@@ -430,47 +423,6 @@ def main():
                     self.lin1 = nn.Linear(dataset.num_features, hidden)
                     self.lin2 = nn.Linear(hidden, dataset.num_classes)
                     self.prop = GPRGNN(K=10, alpha=0.2, Init="PPR")
-                    self.dropout = dropout
-
-                def execute(self):
-                    x, csc, csr = data.x, data.csc, data.csr
-                    x = nn.dropout(x, self.dropout)
-                    x = nn.relu(self.lin1(x))
-                    x = nn.dropout(x, self.dropout)
-                    x = self.lin2(x)
-                    x = self.prop(x, csc, csr)
-                    return nn.log_softmax(x, dim=1)
-
-            model = Net(dataset)
-            optimizer = nn.Adam(params=model.parameters(), lr=0.01, weight_decay=5e-4)
-
-            def train():
-                model.train()
-                pred = model()[data.train_mask]
-                label = data.y[data.train_mask]
-                loss = nn.nll_loss(pred, label)
-                optimizer.step(loss)
-                return loss
-
-            def test():
-                model.eval()
-                logits, accs = model(), []
-                for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-                    y_ = data.y[mask] 
-                    logits_ = logits[mask]
-                    pred, _ = jt.argmax(logits_, dim=1)
-                    acc = pred.equal(y_).sum().item() / mask.sum().item()
-                    accs.append(acc)
-                return accs
-
-        elif args.model == 'EvenNet':
-            class Net(nn.Module):
-                def __init__(self, dataset, dropout=0.5):
-                    super(Net, self).__init__()
-                    hidden = 64
-                    self.lin1 = nn.Linear(dataset.num_features, hidden)
-                    self.lin2 = nn.Linear(hidden, dataset.num_classes)
-                    self.prop = EvenNet(K=10, alpha=0.2)
                     self.dropout = dropout
 
                 def execute(self):

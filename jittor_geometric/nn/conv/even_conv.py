@@ -35,6 +35,7 @@ class EvenNet(Module):
         kwargs.setdefault('aggr', 'add')
         super(EvenNet, self).__init__(**kwargs)
         self.K = K
+        self.Init = Init
         self.alpha = alpha
 
         TEMP = alpha*(1-alpha)**np.arange(K+1)

@@ -21,7 +21,6 @@ MODEL_DATASETS = {
     'SGC': ['Cora', 'Citeseer', 'Pubmed'],
     'APPNP': ['Cora', 'Citeseer', 'Pubmed'],
     'GPRGNN': ['Cora', 'Citeseer', 'Pubmed'],
-    'EvenNet': ['Cora', 'Citeseer', 'Pubmed'],
     'BernNet': ['Cora', 'Citeseer', 'Pubmed'],
 }
 
