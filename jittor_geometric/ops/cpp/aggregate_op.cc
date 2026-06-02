@@ -11,7 +11,9 @@ namespace jittor {
     AggregateOp::AggregateOp(Var* outputVar_, Var* x_, Var* indices_,Var* offset_,Var* weight_,bool forward_) :
     outputVar(outputVar_),x(x_),indices(indices_), offset(offset_),weight(weight_),forward(forward_){
         flags.set(NodeFlags::_cpu, 1);
+#ifdef IS_CUDA
         flags.set(NodeFlags::_cuda, 1);
+#endif
         output = create_output(nullptr,x->dtype());
     }
 

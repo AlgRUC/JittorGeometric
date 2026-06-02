@@ -5,7 +5,9 @@
  */
 
 #include  "var.h"
+#ifdef JIT_cuda
 #include  <cuda.h>
+#endif
 #include  "edgesoftmax_op.h"
 #ifdef JIT_cuda
 // #include <cub/device/device_segmented_radix_sort.cuh>

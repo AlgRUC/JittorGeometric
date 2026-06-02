@@ -13,11 +13,12 @@ module_path = os.path.dirname(__file__)
 # src = os.path.join(module_path, "cpp/spmmcoo_op.cc")
 # header = os.path.join(module_path, "cpp/spmmcoo_op.h")
 # spmmcoo_op = jt.compile_custom_ops((src, header)) 
-from jittor.compile_extern import cusparse_ops # latest jittor
+# moved to lazy import inside SpmmCooFunc.execute/grad (cusparse unavailable on Ascend)
 # Run the test
 jt.flags.use_cuda=1
 class SpmmCooFunc(Function):
     def execute(self,x,edge_index,edge_weight,trans_A,trans_B):
+        from jittor.compile_extern import cusparse_ops
         self.edge_index=edge_index
         row_indices=edge_index[0,:]
         col_indices=edge_index[1,:]
@@ -35,6 +36,7 @@ class SpmmCooFunc(Function):
         return output
 
     def grad(self, grad_output):
+        from jittor.compile_extern import cusparse_ops
         output_grad=jt.zeros(self.v_num,self.feature_dim)
         cusparse_ops.cusparse_spmmcoo(output_grad,grad_output,self.row_indices,self.col_indices,self.edge_weight,self.v_num,self.v_num).fetch_sync()
         return output_grad,None,None

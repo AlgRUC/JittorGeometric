@@ -4,8 +4,10 @@
  */
 #include "var.h"
 #include "sampleprocessing_op.h"
+#ifdef JIT_cuda
 #include "helper_cuda.h"
 #include <curand_kernel.h>
+#endif
 #include <stdint.h>
 
 #include <algorithm>
