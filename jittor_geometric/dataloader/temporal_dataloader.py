@@ -288,7 +288,10 @@ def get_neighbor_sampler(data, sample_neighbor_strategy: str = 'uniform', time_s
     :param seed: int, random seed
     :return:
     """
-    max_node_id = max(data.src.max(), data.dst.max())
+    # NOTE: reduce on numpy, not jittor Var. On Ascend/ACL, Var.max() over
+    # integer node-id tensors hits aclnnAmax ERROR 161002 (param invalid) and
+    # returns a wrong (too small) value, making adj_list too short -> IndexError.
+    max_node_id = int(max(np.array(data.src).max(), np.array(data.dst).max()))
     # the adjacency vector stores edges for each node (source or destination), undirected
     # adj_list, list of list, where each element is a list of triple tuple (node_id, edge_id, timestamp)
     # the list at the first position in adj_list is empty
@@ -356,5 +359,9 @@ class TemporalDataLoader:
                 batch.neg_dst = neg_dst
                 n_ids += [batch.neg_dst]
 
-            batch.n_id = jt.concat(n_ids).unique()
+            # NOTE: do unique on numpy. jt.Var.unique() lowers to a jt.code
+            # custom op flagged _cuda, which on Ascend/ACL hits "op code not
+            # supported". n_ids are integer node ids (no grad), so numpy is fine.
+            _n_id_np = np.unique(np.concatenate([np.array(t).reshape(-1) for t in n_ids]))
+            batch.n_id = jt.array(_n_id_np)
             yield batch
