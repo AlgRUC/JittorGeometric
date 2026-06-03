@@ -11,7 +11,7 @@ from jittor import Function
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from jittor_geometric.data import CSR
 module_path = os.path.dirname(__file__)
-from jittor.compile_extern import cusparse_ops
+# moved to lazy import inside SpmmCsrFunc.execute/grad (cusparse unavailable on Ascend)
 # src = os.path.join(module_path, "cpp/spmmcsr_op.cc")
 # header = os.path.join(module_path, "cpp/spmmcsr_op.h")
 # spmmcsr_op = jt.compile_custom_ops((src, header))
@@ -20,6 +20,7 @@ from jittor.compile_extern import cusparse_ops
 jt.flags.use_cuda=1
 class SpmmCsrFunc(Function):
     def execute(self,x,csr,trans_A,trans_B):
+        from jittor.compile_extern import cusparse_ops
         self.csr=csr
         feature_dim=jt.size(x,1)        
         v_num=jt.size(csr.row_offset,0)-1
@@ -33,6 +34,7 @@ class SpmmCsrFunc(Function):
         return output
 
     def grad(self, grad_output):
+        from jittor.compile_extern import cusparse_ops
         output_grad=jt.zeros(self.v_num,self.feature_dim)
         cusparse_ops.cusparse_spmmcsr(output_grad,grad_output,self.csr.column_indices,self.csr.edge_weight,self.csr.row_offset,self.v_num,self.v_num,self.trans_A,self.trans_B).fetch_sync()
         # spmmcsr_op.spmmcsr(output_grad,grad_output,self.csr.column_indices,self.csr.edge_weight,self.csr.row_offset,self.v_num,self.v_num).fetch_sync()

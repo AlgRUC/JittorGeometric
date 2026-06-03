@@ -6,6 +6,31 @@ from .num_nodes import maybe_num_nodes
 from jittor import Var, init
 
 
+def _select_columns_by_mask(edge_index, mask):
+    # Equivalent to a 2-D masked column select on dim 1 (edge_index[:, mask]).
+    # The (slice, bool-Var) mixed indexing form is unsupported on the Jittor
+    # ACL (Ascend) backend, and the native bool-Var index is also rejected on
+    # the CPU backend. edge_index here is a small host-side (2, E) tensor, so we
+    # resolve the selection on the host via NumPy: this is fully device-agnostic
+    # and works identically on CPU and NPU.
+    import numpy as np
+    idx = np.nonzero(np.asarray(mask).reshape(-1))[0]
+    return jt.array(np.asarray(edge_index)[:, idx])
+
+
+def _mask_select_1d(x, mask):
+    # Equivalent to x[mask] for a 1-D boolean mask. The native bool-Var index
+    # is rejected on the Jittor CPU backend ("convert bool slice into
+    # jt.array"); the ACL backend accepts a bool-Var index but rejects an
+    # integer-index Var here (GetItemACL -> jt.Var(int_idx) raises a device
+    # memcpy param error). These are small host-side weight/index tensors, so
+    # resolve the selection on the host via NumPy: fully device-agnostic and
+    # identical on CPU and NPU.
+    import numpy as np
+    idx = np.nonzero(np.asarray(mask).reshape(-1))[0]
+    return jt.array(np.asarray(x)[idx])
+
+
 def contains_self_loops(edge_index):
     r"""Returns :obj:`True` if the graph given by :attr:`edge_index` contains
     self-loops.
@@ -31,7 +56,7 @@ def remove_self_loops(edge_index, edge_attr: Optional[Var] = None):
     :rtype: (:class:`Var int32`, :class:`Var`)
     """
     mask = edge_index[0] != edge_index[1]
-    edge_index = edge_index[:, mask]
+    edge_index = _select_columns_by_mask(edge_index, mask)
     if edge_attr is None:
         return edge_index, None
     else:
@@ -53,9 +78,9 @@ def segregate_self_loops(edge_index, edge_attr: Optional[Var] = None):
     mask = edge_index[0] != edge_index[1]
     inv_mask = jt.logical_not(mask)
 
-    loop_edge_index = edge_index[:, inv_mask]
+    loop_edge_index = _select_columns_by_mask(edge_index, inv_mask)
     loop_edge_attr = None if edge_attr is None else edge_attr[inv_mask]
-    edge_index = edge_index[:, mask]
+    edge_index = _select_columns_by_mask(edge_index, mask)
     edge_attr = None if edge_attr is None else edge_attr[mask]
 
     return edge_index, edge_attr, loop_edge_index, loop_edge_attr
@@ -123,14 +148,14 @@ def add_remaining_self_loops(edge_index,
 
     loop_index = jt.arange(0, N, dtype=row.dtype)
     loop_index = loop_index.unsqueeze(0).repeat(2, 1)
-    edge_index = jt.concat([edge_index[:, mask], loop_index], dim=1)
+    edge_index = jt.concat([_select_columns_by_mask(edge_index, mask), loop_index], dim=1)
 
     if edge_weight is not None:
         inv_mask = jt.logical_not(mask)
         loop_weight = init.constant((N, ), edge_weight.dtype, fill_value)
-        remaining_edge_weight = edge_weight[inv_mask]
+        remaining_edge_weight = _mask_select_1d(edge_weight, inv_mask)
         if remaining_edge_weight.numel() > 0:
-            loop_weight[row[inv_mask]] = remaining_edge_weight
-        edge_weight = jt.concat([edge_weight[mask], loop_weight], dim=0)
+            loop_weight[_mask_select_1d(row, inv_mask)] = remaining_edge_weight
+        edge_weight = jt.concat([_mask_select_1d(edge_weight, mask), loop_weight], dim=0)
 
     return edge_index, edge_weight
